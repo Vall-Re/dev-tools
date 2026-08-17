@@ -102,4 +102,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'md5-hash-generator',
+    name: 'MD5 Hash Generator',
+    description: 'Generate 128-bit MD5 hashes from any text input instantly.',
+    category: 'Generators',
+    aboutText: 'The MD5 message-digest algorithm is a widely used hash function producing a 128-bit hash value. It is commonly used to verify data integrity.',
+    faqs: [
+      {
+        question: 'Is MD5 secure for password hashing?',
+        answer: 'No, MD5 is cryptographically broken and vulnerable to collision attacks. It should not be used for secure password storage or sensitive cryptography.',
+      },
+      {
+        question: 'Can MD5 hashes be decrypted?',
+        answer: 'MD5 is a one-way hashing function, not encryption. It cannot be mathematically decrypted, though simple hashes can be looked up via rainbow tables.',
+      },
+    ],
+  },
 ];

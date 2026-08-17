@@ -7,6 +7,7 @@ import UrlConverter from '@/components/UrlConverter';
 import HtmlEntityConverter from '@/components/HtmlEntityConverter';
 import UuidGenerator from '@/components/UuidGenerator';
 import CssMinifier from '@/components/CssMinifier';
+import Md5Generator from '@/components/Md5Generator';
 
 interface Props {
   params: Promise<{
@@ -63,6 +64,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'html-entity-encoder-decoder' && <HtmlEntityConverter/>}
         {slug === 'uuid-generator' && <UuidGenerator/>}
         {slug === 'css-minifier' && <CssMinifier/>}
+        {slug === 'md5-hash-generator' && <Md5Generator/>}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
