@@ -24,6 +24,7 @@ import XmlFormatter from '@/components/XmlFormatter';
 import UrlSlugGenerator from '@/components/UrlSlugGenerator';
 import LoremIpsumGenerator from '@/components/LoremIpsumGenerator';
 import WordCounter from '@/components/WordCounter';
+import MultiHashGenerator from '@/components/MultiHashGenerator';
 
 interface Props {
   params: Promise<{
@@ -97,6 +98,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'url-slug-generator' && <UrlSlugGenerator />}
         {slug === 'lorem-ipsum-generator' && <LoremIpsumGenerator />}
         {slug === 'word-counter' && <WordCounter />}
+        {slug === 'multi-hash-generator' && <MultiHashGenerator />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">

@@ -387,4 +387,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'multi-hash-generator',
+    name: 'SHA-1 & SHA-512 Hash Generator',
+    description: 'Generate secure SHA-1 and SHA-512 cryptographic hashes online.',
+    category: 'Utilities',
+    aboutText: 'SHA-1 & SHA-512 Hash Generator computes secure message digests locally using standard Web Cryptography APIs.',
+    faqs: [
+      {
+        question: 'Are cryptographic hashes reversible?',
+        answer: 'No, SHA cryptographic hash functions are strictly one-way mathematical transformations.',
+      },
+      {
+        question: 'Is input data processed on a server?',
+        answer: 'No, all hashing executes in your browser via the Web Crypto API.',
+      },
+    ],
+  },
 ];
