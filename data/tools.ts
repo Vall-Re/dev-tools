@@ -217,4 +217,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'json-to-csv-converter',
+    name: 'JSON to CSV Converter',
+    description: 'Convert JSON arrays into downloadable or copyable CSV spreadsheet format.',
+    category: 'Converters',
+    aboutText: 'JSON to CSV Converter effortlessly transforms JSON objects into comma-separated values (CSV) suitable for Excel, Google Sheets, or data export tasks.',
+    faqs: [
+      {
+        question: 'What JSON format is required?',
+        answer: 'The input must be a JSON array containing key-value objects.',
+      },
+      {
+        question: 'Is my data secure?',
+        answer: 'Yes, conversion is performed locally in your browser without uploading data anywhere.',
+      },
+    ],
+  },
 ];

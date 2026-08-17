@@ -14,6 +14,8 @@ import Sha256Generator from '@/components/Sha256Generator';
 import RegexTester from '@/components/RegexTester';
 import SqlFormatter from '@/components/SqlFormatter';
 import CsvToJsonConverter from '@/components/CsvToJsonConverter';
+import JsonToCsvConverter from '@/components/JsonToCsvConverter';
+
 
 interface Props {
   params: Promise<{
@@ -77,6 +79,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'regex-tester' && <RegexTester/>}
         {slug === 'sql-formatter' && <SqlFormatter/>}
         {slug === 'csv-to-json-converter' && <CsvToJsonConverter/>}
+        {slug === 'json-to-csv-converter' && <JsonToCsvConverter />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
