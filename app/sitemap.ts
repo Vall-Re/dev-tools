@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { tools } from '@/data/tools';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://your-domain.com';
+  const baseUrl = 'https://100devtoolshub.com';
 
   const toolEntries: MetadataRoute.Sitemap = tools.map((tool) => ({
     url: `${baseUrl}/${tool.slug}`,
