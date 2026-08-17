@@ -268,4 +268,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'color-code-converter',
+    name: 'Color Code Converter',
+    description: 'Convert color codes between HEX, RGB, and HSL formats with live color preview.',
+    category: 'Utilities',
+    aboutText: 'Color Code Converter allows developers and designers to seamlessly convert color values between HEX, RGB, and HSL spaces with visual color feedback.',
+    faqs: [
+      {
+        question: 'Which color formats are supported?',
+        answer: 'The converter supports standard HEX strings, RGB tuples, and HSL color space values.',
+      },
+      {
+        question: 'Is conversion done client-side?',
+        answer: 'Yes, all mathematical transformations run locally inside your browser.',
+      },
+    ],
+  },
 ];

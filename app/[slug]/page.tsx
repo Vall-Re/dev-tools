@@ -17,7 +17,7 @@ import CsvToJsonConverter from '@/components/CsvToJsonConverter';
 import JsonToCsvConverter from '@/components/JsonToCsvConverter';
 import MarkdownToHtmlConverter from '@/components/MarkdownToHtmlConverter';
 import UrlParser from '@/components/UrlParser';
-
+import ColorCodeConverter from '@/components/ColorCodeConverter';
 
 interface Props {
   params: Promise<{
@@ -84,6 +84,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'json-to-csv-converter' && <JsonToCsvConverter />}
         {slug === 'markdown-to-html-converter' && <MarkdownToHtmlConverter />}
         {slug === 'url-parser' && <UrlParser />}
+        {slug === 'color-code-converter' && <ColorCodeConverter />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
