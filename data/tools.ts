@@ -132,4 +132,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'jwt-decoder',
+    name: 'JWT Decoder',
+    description: 'Decode and inspect JSON Web Token (JWT) headers and payloads instantly.',
+    category: 'Encoders',
+    aboutText: 'JSON Web Token (JWT) is an open standard (RFC 7519) that defines a compact and self-contained way for securely transmitting information between parties as a JSON object. Our online JWT Decoder parses token header and payload claims directly in your browser without sending tokens to any remote server.',
+    faqs: [
+      {
+        question: 'Is it safe to paste my JWT token here?',
+        answer: 'Yes, all decoding is performed locally inside your browser using client-side JavaScript. Tokens are never uploaded or stored anywhere.',
+      },
+      {
+        question: 'Can this tool verify the JWT signature?',
+        answer: 'This tool decodes and displays the header and payload data. Signature verification requires validating secret keys or public certs on your server or authentication provider.',
+      },
+    ],
+  },
 ];
