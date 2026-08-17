@@ -8,6 +8,7 @@ import HtmlEntityConverter from '@/components/HtmlEntityConverter';
 import UuidGenerator from '@/components/UuidGenerator';
 import CssMinifier from '@/components/CssMinifier';
 import Md5Generator from '@/components/Md5Generator';
+import JsMinifier from '@/components/JsMinifier';
 
 interface Props {
   params: Promise<{
@@ -65,6 +66,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'uuid-generator' && <UuidGenerator/>}
         {slug === 'css-minifier' && <CssMinifier/>}
         {slug === 'md5-hash-generator' && <Md5Generator/>}
+        {slug === 'js-minifier' && <JsMinifier/>}
       </div>
 
       <section className="space-y-4 pt-6 border-t">

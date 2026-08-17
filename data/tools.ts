@@ -119,4 +119,17 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'js-minifier',
+    name: 'JS Minifier & Formatter',
+    description: 'Minify JavaScript code to reduce file size or apply basic formatting.',
+    category: 'Formatters',
+    aboutText: 'JavaScript minification removes comments, extra whitespace, and unnecessary formatting to decrease script sizes and speed up website execution.',
+    faqs: [
+      {
+        question: 'Does minification change JavaScript logic?',
+        answer: 'No, minification only removes unnecessary characters such as white spaces and comments without altering code execution behavior.',
+      },
+    ],
+  },
 ];
