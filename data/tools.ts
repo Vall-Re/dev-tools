@@ -353,4 +353,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'lorem-ipsum-generator',
+    name: 'Lorem Ipsum Generator',
+    description: 'Generate standard dummy placeholder text by paragraphs or words for design layouts.',
+    category: 'Generators',
+    aboutText: 'Lorem Ipsum Generator creates clean placeholder text for web designers, developers, and graphic artists prototyping layout mockups.',
+    faqs: [
+      {
+        question: 'Can I generate text by word count instead of paragraphs?',
+        answer: 'Yes, you can toggle between paragraph-based and word-based generation.',
+      },
+      {
+        question: 'Is my input tracked or stored?',
+        answer: 'No, generation runs completely client-side inside your web browser.',
+      },
+    ],
+  },
 ];

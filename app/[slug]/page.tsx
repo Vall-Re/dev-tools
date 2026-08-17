@@ -22,6 +22,7 @@ import TextCaseConverter from '@/components/TextCaseConverter';
 import HtmlFormatter from '@/components/HtmlFormatter';
 import XmlFormatter from '@/components/XmlFormatter';
 import UrlSlugGenerator from '@/components/UrlSlugGenerator';
+import LoremIpsumGenerator from '@/components/LoremIpsumGenerator';
 
 
 interface Props {
@@ -94,6 +95,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'html-formatter' && <HtmlFormatter />}
         {slug === 'xml-formatter' && <XmlFormatter />}
         {slug === 'url-slug-generator' && <UrlSlugGenerator />}
+        {slug === 'lorem-ipsum-generator' && <LoremIpsumGenerator />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
