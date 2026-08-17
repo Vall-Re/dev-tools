@@ -319,4 +319,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'xml-formatter',
+    name: 'XML Formatter',
+    description: 'Format and beautify XML code with proper indentation and syntax validation.',
+    category: 'Formatters',
+    aboutText: 'XML Formatter parses raw or unformatted XML strings and formats them into a clean, human-readable hierarchy with consistent line indentation.',
+    faqs: [
+      {
+        question: 'Does it validate XML syntax before formatting?',
+        answer: 'Yes, it checks for malformed tags and reports structural parsing errors.',
+      },
+      {
+        question: 'Is XML processing private?',
+        answer: 'Yes, parsing is executed entirely inside your browser using the DOMParser API.',
+      },
+    ],
+  },
 ];

@@ -20,6 +20,7 @@ import UrlParser from '@/components/UrlParser';
 import ColorCodeConverter from '@/components/ColorCodeConverter';
 import TextCaseConverter from '@/components/TextCaseConverter';
 import HtmlFormatter from '@/components/HtmlFormatter';
+import XmlFormatter from '@/components/XmlFormatter';
 
 
 
@@ -91,6 +92,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'color-code-converter' && <ColorCodeConverter />}
         {slug === 'text-case-converter' && <TextCaseConverter />}
         {slug === 'html-formatter' && <HtmlFormatter />}
+        {slug === 'xml-formatter' && <XmlFormatter />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
