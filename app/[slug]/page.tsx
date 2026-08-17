@@ -1,5 +1,6 @@
 import { tools } from '@/data/tools';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import JsonFormatter from '@/components/JsonFormatter';
 import Base64Converter from '@/components/Base64Converter';
 import UrlConverter from '@/components/UrlConverter';
@@ -8,6 +9,27 @@ interface Props {
   params: Promise<{
     slug: string;
   }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const tool = tools.find((t) => t.slug === slug);
+
+  if (!tool) {
+    return {
+      title: 'Tool Not Found',
+    };
+  }
+
+  return {
+    title: `${tool.name} - Free Online Tool`,
+    description: tool.description,
+    openGraph: {
+      title: `${tool.name} - Free Online Tool`,
+      description: tool.description,
+      type: 'website',
+    },
+  };
 }
 
 export async function generateStaticParams() {
