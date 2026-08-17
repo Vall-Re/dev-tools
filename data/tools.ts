@@ -183,4 +183,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'sql-formatter',
+    name: 'SQL Formatter',
+    description: 'Format and clean up messy SQL queries with standardized keywords and line breaks.',
+    category: 'Formatters',
+    aboutText: 'SQL Formatter takes raw or minified SQL statements and formats them into readable, structured code with capitalized keywords and organized line breaks.',
+    faqs: [
+      {
+        question: 'Does this tool support all SQL dialects?',
+        answer: 'Yes, it formats standard SQL syntax compatible with MySQL, PostgreSQL, SQLite, SQL Server, and Oracle databases.',
+      },
+      {
+        question: 'Is my database query data sent to any server?',
+        answer: 'No, all SQL string manipulations happen entirely inside your web browser for complete privacy.',
+      },
+    ],
+  },
 ];
