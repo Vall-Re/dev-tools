@@ -89,4 +89,17 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'css-minifier',
+    name: 'CSS Minifier & Formatter',
+    description: 'Minify CSS code to reduce file size or format it for readability.',
+    category: 'Formatters',
+    aboutText: 'CSS minification removes unnecessary whitespace, comments, and formatting characters to make stylesheets smaller and speed up page load times.',
+    faqs: [
+      {
+        question: 'How does CSS minification improve performance?',
+        answer: 'By removing comments, extra spaces, and unused characters, minified CSS files are smaller in size, which decreases network download times.',
+      },
+    ],
+  },
 ];

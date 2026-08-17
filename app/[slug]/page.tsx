@@ -6,6 +6,7 @@ import Base64Converter from '@/components/Base64Converter';
 import UrlConverter from '@/components/UrlConverter';
 import HtmlEntityConverter from '@/components/HtmlEntityConverter';
 import UuidGenerator from '@/components/UuidGenerator';
+import CssMinifier from '@/components/CssMinifier';
 
 interface Props {
   params: Promise<{
@@ -61,6 +62,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'url-encoder-decoder' && <UrlConverter />}
         {slug === 'html-entity-encoder-decoder' && <HtmlEntityConverter/>}
         {slug === 'uuid-generator' && <UuidGenerator/>}
+        {slug === 'css-minifier' && <CssMinifier/>}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
