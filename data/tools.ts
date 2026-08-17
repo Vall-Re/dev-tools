@@ -370,4 +370,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'word-counter',
+    name: 'String Length & Word Counter',
+    description: 'Count characters, words, lines, paragraphs, and UTF-8 byte size in real-time.',
+    category: 'Utilities',
+    aboutText: 'String Length & Word Counter provides immediate text metrics including total character length, word counts, paragraph statistics, and payload byte sizes.',
+    faqs: [
+      {
+        question: 'Does byte size calculation support multi-byte Unicode characters?',
+        answer: 'Yes, byte sizes are accurately computed based on standard UTF-8 encoding.',
+      },
+      {
+        question: 'Is my text transmitted to external servers?',
+        answer: 'No, all character and word calculations take place entirely inside your web browser.',
+      },
+    ],
+  },
 ];
