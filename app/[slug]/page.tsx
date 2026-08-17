@@ -47,15 +47,36 @@ export default async function ToolPage({ params }: Props) {
   }
 
   return (
-    <main className="min-h-screen p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">{tool.name}</h1>
-      <p className="text-gray-600 mb-8">{tool.description}</p>
-      
+    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-12">
+      <div>
+        <h1 className="text-3xl font-bold mb-2">{tool.name}</h1>
+        <p className="text-gray-600">{tool.description}</p>
+      </div>
+
       <div className="p-6 border rounded-lg bg-white shadow-sm">
         {slug === 'json-formatter' && <JsonFormatter />}
         {slug === 'base64-encoder-decoder' && <Base64Converter />}
         {slug === 'url-encoder-decoder' && <UrlConverter />}
       </div>
+
+      <section className="space-y-4 pt-6 border-t">
+        <h2 className="text-2xl font-semibold">About {tool.name}</h2>
+        <p className="text-gray-700 leading-relaxed">{tool.aboutText}</p>
+      </section>
+
+      {tool.faqs && tool.faqs.length > 0 && (
+        <section className="space-y-6 pt-6 border-t">
+          <h2 className="text-2xl font-semibold">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {tool.faqs.map((faq, index) => (
+              <div key={index} className="p-4 border rounded-lg bg-gray-50">
+                <h3 className="font-semibold text-lg mb-1">{faq.question}</h3>
+                <p className="text-gray-600 text-sm">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
