@@ -21,7 +21,7 @@ import ColorCodeConverter from '@/components/ColorCodeConverter';
 import TextCaseConverter from '@/components/TextCaseConverter';
 import HtmlFormatter from '@/components/HtmlFormatter';
 import XmlFormatter from '@/components/XmlFormatter';
-
+import UrlSlugGenerator from '@/components/UrlSlugGenerator';
 
 
 interface Props {
@@ -93,6 +93,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'text-case-converter' && <TextCaseConverter />}
         {slug === 'html-formatter' && <HtmlFormatter />}
         {slug === 'xml-formatter' && <XmlFormatter />}
+        {slug === 'url-slug-generator' && <UrlSlugGenerator />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">

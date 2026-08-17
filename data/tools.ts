@@ -336,4 +336,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'url-slug-generator',
+    name: 'URL Slug Generator',
+    description: 'Convert article titles and strings into clean, SEO-friendly URL slugs.',
+    category: 'Generators',
+    aboutText: 'URL Slug Generator converts plain text into lowercase, hyphen-separated string slugs suitable for blog posts, product pages, and dynamic web routing.',
+    faqs: [
+      {
+        question: 'What characters are removed during slug generation?',
+        answer: 'Special characters, punctuation marks, and accents are stripped out, replacing spaces with single hyphens.',
+      },
+      {
+        question: 'Is my text sent to a server?',
+        answer: 'No, all slug generation happens locally inside your browser.',
+      },
+    ],
+  },
 ];
