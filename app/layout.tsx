@@ -26,12 +26,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <Script
-          async
+        <script 
+          async 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7938500556034307"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
+          >
+        </script>
       </head>
       <body className="min-h-full flex flex-col bg-gray-50 text-gray-900">
         <main className="flex-1">{children}</main>
