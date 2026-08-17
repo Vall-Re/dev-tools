@@ -200,4 +200,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'csv-to-json-converter',
+    name: 'CSV to JSON Converter',
+    description: 'Convert CSV table data into a clean, structured JSON array of objects instantly.',
+    category: 'Converters',
+    aboutText: 'CSV to JSON Converter transforms comma-separated text data into JSON structures, making it simple to process spreadsheet or database exports inside web applications.',
+    faqs: [
+      {
+        question: 'How are headers handled during conversion?',
+        answer: 'The first line of the CSV input is treated as the key names for each JSON object generated in the output array.',
+      },
+      {
+        question: 'Is my CSV data kept private?',
+        answer: 'Yes, all data parsing is handled directly in your browser without uploading files to external servers.',
+      },
+    ],
+  },
 ];
