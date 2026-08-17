@@ -166,4 +166,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'regex-tester',
+    name: 'Regex Tester',
+    description: 'Test and debug regular expressions online with live pattern matching.',
+    category: 'Utilities',
+    aboutText: 'Regular expressions (regex) are patterns used to match character combinations in strings. Our free online Regex Tester helps developers quickly build, validate, and test regular expressions in real-time.',
+    faqs: [
+      {
+        question: 'What do common Regex flags mean?',
+        answer: 'The "g" flag stands for global search (find all matches), "i" for case-insensitive search, and "m" for multi-line search.',
+      },
+      {
+        question: 'Is my input string processed on a server?',
+        answer: 'No, all regular expression evaluations run client-side in your browser using standard JavaScript RegExp engines.',
+      },
+    ],
+  },
 ];

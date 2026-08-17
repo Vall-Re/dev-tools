@@ -11,6 +11,8 @@ import Md5Generator from '@/components/Md5Generator';
 import JsMinifier from '@/components/JsMinifier';
 import JwtDecoder from '@/components/JwtDecoder';
 import Sha256Generator from '@/components/Sha256Generator';
+import RegexTester from '@/components/RegexTester';
+
 
 interface Props {
   params: Promise<{
@@ -71,6 +73,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'js-minifier' && <JsMinifier/>}
         {slug === 'jwt-decoder' && <JwtDecoder />}
         {slug === 'sha256-hash-generator' && <Sha256Generator/>}
+        {slug === 'regex-tester' && <RegexTester/>}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
