@@ -10,6 +10,7 @@ import CssMinifier from '@/components/CssMinifier';
 import Md5Generator from '@/components/Md5Generator';
 import JsMinifier from '@/components/JsMinifier';
 import JwtDecoder from '@/components/JwtDecoder';
+import Sha256Generator from '@/components/Sha256Generator';
 
 interface Props {
   params: Promise<{
@@ -69,6 +70,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'md5-hash-generator' && <Md5Generator/>}
         {slug === 'js-minifier' && <JsMinifier/>}
         {slug === 'jwt-decoder' && <JwtDecoder />}
+        {slug === 'sha256-hash-generator' && <Sha256Generator/>}
       </div>
 
       <section className="space-y-4 pt-6 border-t">

@@ -149,4 +149,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'sha256-hash-generator',
+    name: 'SHA-256 Hash Generator',
+    description: 'Generate secure 256-bit SHA-2 cryptographic hashes from string data.',
+    category: 'Generators',
+    aboutText: 'SHA-256 is a cryptographic hash function that produces a unique 256-bit (32-byte) message digest. It is widely used in digital signatures, blockchain consensus mechanisms, and data verification.',
+    faqs: [
+      {
+        question: 'Is SHA-256 secure?',
+        answer: 'Yes, SHA-256 is currently considered collision-resistant and cryptographically secure for data integrity verification.',
+      },
+      {
+        question: 'Can SHA-256 hashes be reversed?',
+        answer: 'No, SHA-256 is a one-way hashing function. It is mathematically impossible to retrieve the original input directly from the hash digest.',
+      },
+    ],
+  },
 ];
