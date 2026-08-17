@@ -234,4 +234,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'markdown-to-html-converter',
+    name: 'Markdown to HTML Converter',
+    description: 'Convert raw Markdown text into clean HTML code with live preview.',
+    category: 'Converters',
+    aboutText: 'Markdown to HTML Converter turns headings, bold/italic text, links, code tags, and lists into semantic HTML markup instantly inside your browser.',
+    faqs: [
+      {
+        question: 'Can I see how the converted HTML looks?',
+        answer: 'Yes, the tool displays both the raw HTML code output and a live rendered HTML preview side-by-side.',
+      },
+      {
+        question: 'Is my text processed securely?',
+        answer: 'All Markdown parsing happens locally in your web browser without sending data to external servers.',
+      },
+    ],
+  },
 ];
