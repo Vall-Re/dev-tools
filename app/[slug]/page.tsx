@@ -1,5 +1,6 @@
 import { tools } from '@/data/tools';
 import { notFound } from 'next/navigation';
+import JsonFormatter from '@/components/JsonFormatter';
 
 interface Props {
   params: Promise<{
@@ -26,10 +27,14 @@ export default async function ToolPage({ params }: Props) {
       <h1 className="text-3xl font-bold mb-2">{tool.name}</h1>
       <p className="text-gray-600 mb-8">{tool.description}</p>
       
-      <div className="p-6 border rounded-lg bg-gray-50">
-        <p className="text-sm text-gray-500">
-          Component for <strong className="font-semibold text-gray-800">{tool.name}</strong> will be loaded here.
-        </p>
+      <div className="p-6 border rounded-lg bg-white shadow-sm">
+        {slug === 'json-formatter' ? (
+          <JsonFormatter />
+        ) : (
+          <p className="text-sm text-gray-500">
+            Component for <strong className="font-semibold text-gray-800">{tool.name}</strong> will be loaded here soon.
+          </p>
+        )}
       </div>
     </main>
   );
