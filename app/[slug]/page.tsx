@@ -25,6 +25,7 @@ import UrlSlugGenerator from '@/components/UrlSlugGenerator';
 import LoremIpsumGenerator from '@/components/LoremIpsumGenerator';
 import WordCounter from '@/components/WordCounter';
 import MultiHashGenerator from '@/components/MultiHashGenerator';
+import JsonMinifier from '@/components/JsonMinifier';
 
 interface Props {
   params: Promise<{
@@ -99,6 +100,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'lorem-ipsum-generator' && <LoremIpsumGenerator />}
         {slug === 'word-counter' && <WordCounter />}
         {slug === 'multi-hash-generator' && <MultiHashGenerator />}
+        {slug === 'json-minifier' && <JsonMinifier />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">

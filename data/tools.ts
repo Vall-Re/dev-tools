@@ -404,4 +404,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'json-minifier',
+    name: 'JSON Minifier',
+    description: 'Compress and minify JSON data by removing whitespace and line breaks.',
+    category: 'Formatters',
+    aboutText: 'JSON Minifier helps reduce payload size by removing unnecessary whitespaces, newlines, and indentation from JSON strings.',
+    faqs: [
+      {
+        question: 'Will minifying JSON alter data structures?',
+        answer: 'No, minification only alters formatting while keeping data structures completely identical.',
+      },
+      {
+        question: 'Is my JSON processed on external servers?',
+        answer: 'No, all JSON compression occurs entirely within your web browser.',
+      },
+    ],
+  },
 ];
