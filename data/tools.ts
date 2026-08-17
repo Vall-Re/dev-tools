@@ -59,4 +59,17 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'html-entity-encoder-decoder',
+    name: 'HTML Entity Encoder / Decoder',
+    description: 'Convert special characters to HTML entities or decode them back to plain text.',
+    category: 'Encoders',
+    aboutText: 'HTML entities are used to display reserved HTML characters (like <, >, &) or special symbols safely in web browsers without breaking the page layout.',
+    faqs: [
+      {
+        question: 'Why should I encode HTML entities?',
+        answer: 'Encoding special characters prevents XSS (Cross-Site Scripting) vulnerabilities and ensures browsers render symbols correctly.',
+      },
+    ],
+  },
 ];

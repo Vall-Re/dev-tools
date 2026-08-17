@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import JsonFormatter from '@/components/JsonFormatter';
 import Base64Converter from '@/components/Base64Converter';
 import UrlConverter from '@/components/UrlConverter';
+import HtmlEntityConverter from '@/components/HtmlEntityConverter';
 
 interface Props {
   params: Promise<{
@@ -57,6 +58,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'json-formatter' && <JsonFormatter />}
         {slug === 'base64-encoder-decoder' && <Base64Converter />}
         {slug === 'url-encoder-decoder' && <UrlConverter />}
+        {slug === 'html-entity-encoder-decoder' && <HtmlEntityConverter/>}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
