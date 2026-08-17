@@ -251,4 +251,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'url-parser',
+    name: 'URL Parser',
+    description: 'Parse and extract protocol, hostname, path, port, and query string parameters from URLs.',
+    category: 'Utilities',
+    aboutText: 'URL Parser breaks down complex web addresses into individual components including host, protocol, path, fragment hash, and formatted query string parameter key-value pairs.',
+    faqs: [
+      {
+        question: 'Do I need to include http:// or https://?',
+        answer: 'Yes, full valid URLs with a protocol schema (such as https:// or http://) are required for accurate parsing.',
+      },
+      {
+        question: 'Is my URL input processed on a server?',
+        answer: 'No, URL parsing uses the browser standard URL API client-side, ensuring complete privacy.',
+      },
+    ],
+  },
 ];

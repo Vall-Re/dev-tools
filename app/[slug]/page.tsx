@@ -16,6 +16,7 @@ import SqlFormatter from '@/components/SqlFormatter';
 import CsvToJsonConverter from '@/components/CsvToJsonConverter';
 import JsonToCsvConverter from '@/components/JsonToCsvConverter';
 import MarkdownToHtmlConverter from '@/components/MarkdownToHtmlConverter';
+import UrlParser from '@/components/UrlParser';
 
 
 interface Props {
@@ -82,6 +83,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'csv-to-json-converter' && <CsvToJsonConverter/>}
         {slug === 'json-to-csv-converter' && <JsonToCsvConverter />}
         {slug === 'markdown-to-html-converter' && <MarkdownToHtmlConverter />}
+        {slug === 'url-parser' && <UrlParser />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
