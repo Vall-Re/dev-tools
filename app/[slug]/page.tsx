@@ -18,6 +18,8 @@ import JsonToCsvConverter from '@/components/JsonToCsvConverter';
 import MarkdownToHtmlConverter from '@/components/MarkdownToHtmlConverter';
 import UrlParser from '@/components/UrlParser';
 import ColorCodeConverter from '@/components/ColorCodeConverter';
+import TextCaseConverter from '@/components/TextCaseConverter';
+
 
 interface Props {
   params: Promise<{
@@ -85,6 +87,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'markdown-to-html-converter' && <MarkdownToHtmlConverter />}
         {slug === 'url-parser' && <UrlParser />}
         {slug === 'color-code-converter' && <ColorCodeConverter />}
+        {slug === 'text-case-converter' && <TextCaseConverter />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">

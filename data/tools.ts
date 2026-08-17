@@ -285,4 +285,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'text-case-converter',
+    name: 'Text Case Converter',
+    description: 'Convert text between uppercase, lowercase, title case, camelCase, snake_case, and kebab-case.',
+    category: 'Utilities',
+    aboutText: 'Text Case Converter allows developers and content writers to easily transform string cases for variables, titles, and text formatting in one click.',
+    faqs: [
+      {
+        question: 'Which cases are supported?',
+        answer: 'The converter supports lowercase, UPPERCASE, Title Case, camelCase, snake_case, and kebab-case.',
+      },
+      {
+        question: 'Is text processing secure?',
+        answer: 'Yes, all transformations are performed locally inside your browser.',
+      },
+    ],
+  },
 ];
