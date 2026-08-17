@@ -72,4 +72,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+    {
+    slug: 'uuid-generator',
+    name: 'UUID / GUID Generator',
+    description: 'Generate random Version-4 UUIDs (Universally Unique Identifiers) instantly.',
+    category: 'Generators',
+    aboutText: 'A UUID (Universally Unique Identifier) is a 128-bit label used for information in computer systems. Version 4 UUIDs are generated using cryptographically secure random numbers.',
+    faqs: [
+      {
+        question: 'Are generated UUIDs unique?',
+        answer: 'Yes, UUID v4 uses 122 random bits. The probability of generating duplicate UUIDs is so low that it is practically impossible.',
+      },
+      {
+        question: 'Is there a difference between UUID and GUID?',
+        answer: 'GUID (Globally Unique Identifier) is Microsoft implementation of the RFC 4122 UUID standard. Functionally, they are identical.',
+      },
+    ],
+  },
 ];
