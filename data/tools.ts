@@ -302,4 +302,21 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: 'html-formatter',
+    name: 'HTML Formatter',
+    description: 'Format, beautify, and clean up messy or minified HTML code with proper indentation.',
+    category: 'Formatters',
+    aboutText: 'HTML Formatter helps web developers clean up minified HTML markup by automatically organizing tags with consistent indentation.',
+    faqs: [
+      {
+        question: 'Does this tool support HTML5 self-closing tags?',
+        answer: 'Yes, elements such as img, input, br, and meta tags are properly recognized and handled.',
+      },
+      {
+        question: 'Is my HTML content processed on a server?',
+        answer: 'No, all code beautification is performed client-side inside your browser.',
+      },
+    ],
+  },
 ];

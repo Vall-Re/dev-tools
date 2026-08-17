@@ -19,6 +19,8 @@ import MarkdownToHtmlConverter from '@/components/MarkdownToHtmlConverter';
 import UrlParser from '@/components/UrlParser';
 import ColorCodeConverter from '@/components/ColorCodeConverter';
 import TextCaseConverter from '@/components/TextCaseConverter';
+import HtmlFormatter from '@/components/HtmlFormatter';
+
 
 
 interface Props {
@@ -88,6 +90,7 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'url-parser' && <UrlParser />}
         {slug === 'color-code-converter' && <ColorCodeConverter />}
         {slug === 'text-case-converter' && <TextCaseConverter />}
+        {slug === 'html-formatter' && <HtmlFormatter />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
