@@ -11,19 +11,19 @@ export const metadata: Metadata = {
 };
 
 export default function ToolsIndexPage() {
-  // Групуємо інструменти за категоріями
-  const categories = Array.from(new Set(tools.map((t) => t.category)));
+  // Нормалізуємо категорії до нижнього регістру та прибираємо дублікати безпечно
+  const categories = Array.from(new Set(tools.map((t) => t.category.toLowerCase())));
 
   return (
-    <main className="min-h-screen p-8 max-w-6xl mx-auto space-y-12">
+    <main className="min-h-screen p-8 max-w-6xl mx-auto space-y-12 text-gray-100">
       {/* Breadcrumbs & Header */}
       <div className="space-y-4">
-        <nav className="text-sm text-gray-500">
-          <Link href="/" className="hover:underline">Home</Link> &gt;{' '}
-          <span className="text-gray-900 font-medium">Tools Hub</span>
+        <nav className="text-sm text-gray-400">
+          <Link href="/" className="hover:text-blue-400 transition-colors">Home</Link> &gt;{' '}
+          <span className="text-gray-200 font-medium">Tools Hub</span>
         </nav>
         <h1 className="text-4xl font-extrabold tracking-tight">Developer Tools Ecosystem</h1>
-        <p className="text-gray-600 text-lg max-w-2xl">
+        <p className="text-gray-400 text-lg max-w-2xl">
           A comprehensive suite of fast, secure, and privacy-focused utilities running entirely in your browser.
         </p>
       </div>
@@ -31,22 +31,25 @@ export default function ToolsIndexPage() {
       {/* Categories & Tool Cards */}
       <div className="space-y-12">
         {categories.map((category) => {
-          const categoryTools = tools.filter((t) => t.category === category);
+          const categoryTools = tools.filter((t) => t.category.toLowerCase() === category);
+          // Робимо першу літеру великою для красивого заголовка секції
+          const formattedCategoryName = category.charAt(0).toUpperCase() + category.slice(1);
+
           return (
-            <section key={category} className="space-y-4">
-              <h2 className="text-2xl font-bold border-b pb-2">{category}</h2>
+            <section key={category} id={category} className="space-y-4">
+              <h2 className="text-2xl font-bold border-b border-gray-800 pb-2 capitalize">{formattedCategoryName}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryTools.map((tool) => (
                   <Link
                     key={tool.slug}
                     href={`/tools/${tool.slug}`}
-                    className="p-6 border rounded-xl hover:border-blue-500 hover:shadow-md transition-all bg-white flex flex-col justify-between"
+                    className="p-6 border border-gray-800 rounded-xl hover:border-blue-500 hover:shadow-lg transition-all bg-gray-900/60 flex flex-col justify-between group"
                   >
                     <div>
-                      <h3 className="text-xl font-semibold text-blue-600 mb-2">{tool.name}</h3>
-                      <p className="text-gray-600 text-sm line-clamp-2">{tool.description}</p>
+                      <h3 className="text-xl font-semibold text-blue-400 group-hover:text-blue-300 transition-colors mb-2">{tool.name}</h3>
+                      <p className="text-gray-400 text-sm line-clamp-2">{tool.description}</p>
                     </div>
-                    <span className="text-xs text-gray-400 mt-4 font-mono uppercase tracking-wider">
+                    <span className="text-xs text-gray-500 mt-4 font-mono uppercase tracking-wider">
                       {tool.category}
                     </span>
                   </Link>

@@ -39,6 +39,7 @@ export default function Header() {
       animationDelay: `${Math.random() * 2}s`,
     }));
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setParticles(generated);
   }, []);
 
@@ -87,17 +88,16 @@ export default function Header() {
         
         {/* Логотип із повним скиданням фільтра на All */}
         <div className="flex items-center">
-          <a href="/" onClick={handleLogoClick} className="flex items-center gap-3 group cursor-pointer">
-            <div className="relative w-36 h-12 flex items-center">
-              <Image
-                src="/logo.webp"
-                alt="100DevToolsHub Logo"
-                fill
-                className="object-contain object-left group-hover:opacity-90 transition"
-                priority
-              />
-            </div>
-          </a>
+          <Link href="/" onClick={handleLogoClick} className="flex items-center gap-3 group cursor-pointer">
+            <Image
+              src="/logo.webp"
+              alt="100DevToolsHub Logo"
+              width={144}
+              height={48}
+              className="object-contain group-hover:opacity-90 transition"
+              priority
+            />
+          </Link>
         </div>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
