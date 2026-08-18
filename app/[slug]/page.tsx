@@ -28,14 +28,13 @@ import MultiHashGenerator from '@/components/MultiHashGenerator';
 import JsonMinifier from '@/components/JsonMinifier';
 
 interface Props {
-  params: Promise<{
+  params: {
     slug: string;
-  }>;
+  };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const tool = tools.find((t) => t.slug === slug);
+  const tool = tools.find((t) => t.slug === params.slug);
 
   if (!tool) {
     return {
@@ -64,9 +63,8 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function ToolPage({ params }: Props) {
-  const { slug } = await params;
-  const tool = tools.find((t) => t.slug === slug);
+export default function ToolPage({ params }: Props) {
+  const tool = tools.find((t) => t.slug === params.slug);
 
   if (!tool) {
     notFound();
@@ -100,31 +98,31 @@ export default async function ToolPage({ params }: Props) {
       </div>
 
       <div className="p-6 border rounded-lg bg-white shadow-sm">
-        {slug === 'json-formatter' && <JsonFormatter />}
-        {slug === 'base64-encoder-decoder' && <Base64Converter />}
-        {slug === 'url-encoder-decoder' && <UrlConverter />}
-        {slug === 'html-entity-encoder-decoder' && <HtmlEntityConverter/>}
-        {slug === 'uuid-generator' && <UuidGenerator/>}
-        {slug === 'css-minifier' && <CssMinifier/>}
-        {slug === 'md5-hash-generator' && <Md5Generator/>}
-        {slug === 'js-minifier' && <JsMinifier/>}
-        {slug === 'jwt-decoder' && <JwtDecoder />}
-        {slug === 'sha256-hash-generator' && <Sha256Generator/>}
-        {slug === 'regex-tester' && <RegexTester/>}
-        {slug === 'sql-formatter' && <SqlFormatter/>}
-        {slug === 'csv-to-json-converter' && <CsvToJsonConverter/>}
-        {slug === 'json-to-csv-converter' && <JsonToCsvConverter />}
-        {slug === 'markdown-to-html-converter' && <MarkdownToHtmlConverter />}
-        {slug === 'url-parser' && <UrlParser />}
-        {slug === 'color-code-converter' && <ColorCodeConverter />}
-        {slug === 'text-case-converter' && <TextCaseConverter />}
-        {slug === 'html-formatter' && <HtmlFormatter />}
-        {slug === 'xml-formatter' && <XmlFormatter />}
-        {slug === 'url-slug-generator' && <UrlSlugGenerator />}
-        {slug === 'lorem-ipsum-generator' && <LoremIpsumGenerator />}
-        {slug === 'word-counter' && <WordCounter />}
-        {slug === 'multi-hash-generator' && <MultiHashGenerator />}
-        {slug === 'json-minifier' && <JsonMinifier />}
+        {params.slug === 'json-formatter' && <JsonFormatter />}
+        {params.slug === 'base64-encoder-decoder' && <Base64Converter />}
+        {params.slug === 'url-encoder-decoder' && <UrlConverter />}
+        {params.slug === 'html-entity-encoder-decoder' && <HtmlEntityConverter />}
+        {params.slug === 'uuid-generator' && <UuidGenerator />}
+        {params.slug === 'css-minifier' && <CssMinifier />}
+        {params.slug === 'md5-hash-generator' && <Md5Generator />}
+        {params.slug === 'js-minifier' && <JsMinifier />}
+        {params.slug === 'jwt-decoder' && <JwtDecoder />}
+        {params.slug === 'sha256-hash-generator' && <Sha256Generator />}
+        {params.slug === 'regex-tester' && <RegexTester />}
+        {params.slug === 'sql-formatter' && <SqlFormatter />}
+        {params.slug === 'csv-to-json-converter' && <CsvToJsonConverter />}
+        {params.slug === 'json-to-csv-converter' && <JsonToCsvConverter />}
+        {params.slug === 'markdown-to-html-converter' && <MarkdownToHtmlConverter />}
+        {params.slug === 'url-parser' && <UrlParser />}
+        {params.slug === 'color-code-converter' && <ColorCodeConverter />}
+        {params.slug === 'text-case-converter' && <TextCaseConverter />}
+        {params.slug === 'html-formatter' && <HtmlFormatter />}
+        {params.slug === 'xml-formatter' && <XmlFormatter />}
+        {params.slug === 'url-slug-generator' && <UrlSlugGenerator />}
+        {params.slug === 'lorem-ipsum-generator' && <LoremIpsumGenerator />}
+        {params.slug === 'word-counter' && <WordCounter />}
+        {params.slug === 'multi-hash-generator' && <MultiHashGenerator />}
+        {params.slug === 'json-minifier' && <JsonMinifier />}
       </div>
 
       <section className="space-y-4 pt-6 border-t">
