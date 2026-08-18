@@ -46,13 +46,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${tool.name} - Free Online Developer Tool`,
-    description: tool.description,
+    // Покращений SEO Title з ключовим словом Online
+    title: `${tool.name} Online – Free Developer Tool`,
+    description: `${tool.description} Fast, secure, and runs entirely in your browser with no data saved.`,
     alternates: {
       canonical: `https://100devtoolshub.com/tools/${tool.slug}`,
     },
     openGraph: {
-      title: `${tool.name} - Free Online Developer Tool`,
+      title: `${tool.name} Online – 100 DevTools Hub`,
       description: tool.description,
       url: `https://100devtoolshub.com/tools/${tool.slug}`,
       type: 'website',
@@ -74,12 +75,10 @@ export default async function ToolPage({ params }: Props) {
     notFound();
   }
 
-  // Схожі інструменти для перелінковки
   const relatedTools = tool.relatedSlugs
     ? tools.filter((t) => tool.relatedSlugs?.includes(t.slug))
     : [];
 
-  // JSON-LD Schema: FAQPage + SoftwareApplication
   const faqSchema = tool.faqs && tool.faqs.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -93,12 +92,14 @@ export default async function ToolPage({ params }: Props) {
     })),
   } : null;
 
+  // Покращена SoftwareApplication Schema з категоріями
   const appSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: tool.name,
     operatingSystem: 'All',
     applicationCategory: 'DeveloperApplication',
+    browser: 'Requires JavaScript. Runs client-side.',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -120,17 +121,16 @@ export default async function ToolPage({ params }: Props) {
         />
       )}
 
-      {/* Header & Breadcrumbs */}
       <div>
         <nav className="text-sm text-gray-500 mb-4">
           <Link href="/" className="hover:underline">Home</Link> &gt;{' '}
+          <Link href="/tools" className="hover:underline">Tools</Link> &gt;{' '}
           <span className="text-gray-900 font-medium">{tool.name}</span>
         </nav>
         <h1 className="text-3xl font-bold mb-2">{tool.name}</h1>
         <p className="text-gray-600 text-lg">{tool.description}</p>
       </div>
 
-      {/* Tool Component */}
       <div className="p-6 border rounded-lg bg-white shadow-sm">
         {slug === 'json-formatter' && <JsonFormatter />}
         {slug === 'base64-encoder-decoder' && <Base64Converter />}
@@ -159,7 +159,6 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'json-minifier' && <JsonMinifier />}
       </div>
 
-      {/* How to Use Section */}
       {tool.howToUse && tool.howToUse.length > 0 && (
         <section className="space-y-4 pt-6 border-t">
           <h2 className="text-2xl font-semibold">How to Use {tool.name}</h2>
@@ -171,7 +170,6 @@ export default async function ToolPage({ params }: Props) {
         </section>
       )}
 
-      {/* Key Features */}
       {tool.features && tool.features.length > 0 && (
         <section className="space-y-4 pt-6 border-t">
           <h2 className="text-2xl font-semibold">Key Features</h2>
@@ -183,13 +181,11 @@ export default async function ToolPage({ params }: Props) {
         </section>
       )}
 
-      {/* About Section */}
       <section className="space-y-4 pt-6 border-t">
         <h2 className="text-2xl font-semibold">About {tool.name}</h2>
         <p className="text-gray-700 leading-relaxed whitespace-pre-line">{tool.aboutText}</p>
       </section>
 
-      {/* Use Cases */}
       {tool.useCases && tool.useCases.length > 0 && (
         <section className="space-y-4 pt-6 border-t">
           <h2 className="text-2xl font-semibold">Common Use Cases</h2>
@@ -201,7 +197,6 @@ export default async function ToolPage({ params }: Props) {
         </section>
       )}
 
-      {/* FAQ Section */}
       {tool.faqs && tool.faqs.length > 0 && (
         <section className="space-y-6 pt-6 border-t">
           <h2 className="text-2xl font-semibold">Frequently Asked Questions</h2>
@@ -216,7 +211,6 @@ export default async function ToolPage({ params }: Props) {
         </section>
       )}
 
-      {/* Related Tools (Internal Links) */}
       {relatedTools.length > 0 && (
         <section className="space-y-4 pt-6 border-t">
           <h2 className="text-2xl font-semibold">Related Tools</h2>
