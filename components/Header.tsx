@@ -90,7 +90,7 @@ export default function Header() {
           <a href="/" onClick={handleLogoClick} className="flex items-center gap-3 group cursor-pointer">
             <div className="relative w-36 h-12 flex items-center">
               <Image
-                src="/logo.png"
+                src="/logo.webp"
                 alt="100DevToolsHub Logo"
                 fill
                 className="object-contain object-left group-hover:opacity-90 transition"
