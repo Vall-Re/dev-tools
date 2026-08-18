@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { tools } from '@/data/tools';
 
@@ -15,6 +15,26 @@ export default function ToolSearch() {
     return ['All', ...uniqueCategories];
   }, []);
 
+  // Зчитуємо хеш з URL (наприклад, #formatters -> Formatters) при завантаженні або зміні хешу
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        // Шукаємо категорію, яка збігається з хешем (ігноруючи регістр)
+        const matchedCategory = categories.find(
+          (cat) => cat.toLowerCase() === hash.toLowerCase()
+        );
+        if (matchedCategory) {
+          setSelectedCategory(matchedCategory);
+        }
+      }
+    };
+
+    handleHashChange(); // Перевірити при першому завантаженні
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [categories]);
+
   const filteredTools = useMemo(() => {
     return tools.filter((tool) => {
       const matchesSearch =
@@ -22,7 +42,7 @@ export default function ToolSearch() {
         tool.description.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesCategory =
-        selectedCategory === 'All' || tool.category === selectedCategory;
+        selectedCategory === 'All' || tool.category.toLowerCase() === selectedCategory.toLowerCase();
 
       return matchesSearch && matchesCategory;
     });
@@ -36,7 +56,7 @@ export default function ToolSearch() {
           placeholder="Search 25+ dev tools (e.g. JSON, Base64, UUID, SHA)..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 placeholder-gray-400"
+          className="w-full px-4 py-3 border border-gray-700 rounded-lg shadow-sm bg-gray-900 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-500"
         />
 
         <div className="flex flex-wrap gap-2">
@@ -45,9 +65,9 @@ export default function ToolSearch() {
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === cat
+                selectedCategory.toLowerCase() === cat.toLowerCase()
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
+                  : 'bg-gray-900 border border-gray-800 text-gray-300 hover:bg-gray-800'
               }`}
             >
               {cat}
@@ -61,16 +81,16 @@ export default function ToolSearch() {
           <Link
             key={tool.slug}
             href={`/tools/${tool.slug}`}
-            className="block p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-blue-500 transition-all flex flex-col justify-between"
+            className="block p-6 bg-gray-900/80 border border-gray-800 rounded-xl shadow-sm hover:shadow-md hover:border-blue-500 transition-all flex flex-col justify-between"
           >
             <div>
-              <span className="inline-block text-xs font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-1 rounded mb-3">
+              <span className="inline-block text-xs font-semibold uppercase tracking-wider text-blue-400 bg-blue-950/60 px-2 py-1 rounded mb-3">
                 {tool.category}
               </span>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-100 mb-2">
                 {tool.name}
               </h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-gray-400 leading-relaxed">
                 {tool.description}
               </p>
             </div>
