@@ -147,14 +147,14 @@ export default function XmlFormatter() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-2">
         <div className="flex justify-between items-center flex-wrap gap-2">
           <label className="block text-sm font-medium">Input Raw XML</label>
           <div className="flex gap-2">
             <button
               onClick={handleLoadSample}
-              className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1 rounded transition"
+              className="text-xs bg-gray-900 border border-gray-700 hover:bg-gray-800 text-gray-300 px-3 py-1 rounded transition"
             >
               Load Sample
             </button>
@@ -165,7 +165,7 @@ export default function XmlFormatter() {
                   setOutput('');
                   setError('');
                 }}
-                className="text-xs text-red-500 hover:underline px-2 py-1"
+                className="text-xs text-red-400 hover:underline px-2 py-1"
               >
                 Clear
               </button>
@@ -177,11 +177,11 @@ export default function XmlFormatter() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="<note><to>User</to><from>Dev</from><heading>Reminder</heading><body>Don't forget!</body></note>"
-          className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 border dark:border-gray-700 rounded-lg text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-3 bg-gray-900 border border-gray-700 rounded-lg text-sm">
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleFormat}
@@ -191,20 +191,20 @@ export default function XmlFormatter() {
           </button>
           <button
             onClick={handleMinify}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition font-medium text-sm"
+            className="px-4 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg hover:bg-gray-700 transition font-medium text-sm"
           >
             Minify XML
           </button>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-gray-600 dark:text-gray-400 font-medium text-xs">Indent:</span>
+          <span className="text-gray-400 font-medium text-xs">Indent:</span>
           <button
             onClick={() => setIndentSize(2)}
             className={`px-2.5 py-1 text-xs rounded border transition font-mono ${
               indentSize === 2
                 ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
             }`}
           >
             2 spaces
@@ -214,7 +214,7 @@ export default function XmlFormatter() {
             className={`px-2.5 py-1 text-xs rounded border transition font-mono ${
               indentSize === 4
                 ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
             }`}
           >
             4 spaces
@@ -223,7 +223,7 @@ export default function XmlFormatter() {
       </div>
 
       {error && (
-        <div className="p-3 border border-red-300 bg-red-50 dark:bg-red-950/30 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg text-sm font-mono break-all">
+        <div className="p-3 border border-red-800 bg-red-950/30 text-red-400 rounded-lg text-sm font-mono break-all">
           <strong>Error:</strong> {error}
         </div>
       )}
@@ -241,14 +241,14 @@ export default function XmlFormatter() {
               </button>
               <button
                 onClick={handleDownload}
-                className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition"
+                className="px-3 py-1 text-xs bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800 rounded transition"
               >
                 Download .XML
               </button>
             </div>
           </div>
 
-          <pre className="w-full p-4 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
+          <pre className="w-full p-4 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
             {output}
           </pre>
         </div>

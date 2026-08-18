@@ -128,20 +128,20 @@ export default function JwtDecoder() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-gray-100">
       <div className="flex justify-between items-center">
         <label className="block text-sm font-medium">Encoded JWT Token</label>
         <div className="flex items-center gap-3 text-xs">
           <button
             onClick={handleLoadSample}
-            className="text-blue-600 hover:underline dark:text-blue-400"
+            className="text-blue-400 hover:underline"
           >
             Load Sample
           </button>
           <span>|</span>
           <button
             onClick={handleClear}
-            className="text-gray-500 hover:underline dark:text-gray-400"
+            className="text-gray-400 hover:underline"
           >
             Clear
           </button>
@@ -152,11 +152,11 @@ export default function JwtDecoder() {
         value={token}
         onChange={(e) => setToken(e.target.value)}
         placeholder="Paste JWT token here (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...)"
-        className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+        className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
       />
 
       {error && (
-        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono dark:bg-red-950 dark:border-red-800 dark:text-red-300">
+        <div className="p-3 border border-red-800 bg-red-950 text-red-300 rounded-lg text-sm font-mono">
           <strong>Error:</strong> {error}
         </div>
       )}
@@ -164,8 +164,8 @@ export default function JwtDecoder() {
       {status && (
         <div className={`p-3 border rounded-lg text-xs font-mono grid grid-cols-1 sm:grid-cols-3 gap-3 ${
           status.isExpired 
-            ? 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-200' 
-            : 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-200'
+            ? 'bg-red-950 border-red-800 text-red-200' 
+            : 'bg-emerald-950 border-emerald-800 text-emerald-200'
         }`}>
           <div>
             <span className="opacity-70 block">Token Status</span>
@@ -193,12 +193,12 @@ export default function JwtDecoder() {
               <label className="block text-sm font-medium">Header (Algorithm & Token Type)</label>
               <button
                 onClick={handleCopyHeader}
-                className="px-2 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-800 transition font-medium dark:bg-gray-600 dark:hover:bg-gray-500"
+                className="px-2 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-600 transition font-medium"
               >
                 {copiedHeader ? 'Copied!' : 'Copy Header'}
               </button>
             </div>
-            <pre className="w-full p-3 border rounded-lg bg-gray-900 text-red-400 font-mono text-sm overflow-x-auto max-h-96">
+            <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-red-400 font-mono text-sm overflow-x-auto max-h-96">
               {header}
             </pre>
           </div>
@@ -215,7 +215,7 @@ export default function JwtDecoder() {
                 {copiedPayload ? 'Copied!' : 'Copy Payload'}
               </button>
             </div>
-            <pre className="w-full p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto max-h-96">
+            <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto max-h-96">
               {payload}
             </pre>
           </div>

@@ -75,14 +75,14 @@ export default function JsonToCsvConverter() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-gray-100">
       <div>
         <label className="block text-sm font-medium mb-2">Input JSON</label>
         <textarea
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           placeholder='[{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]'
-          className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
       </div>
 
@@ -94,7 +94,7 @@ export default function JsonToCsvConverter() {
       </button>
 
       {error && (
-        <div className="p-3 border border-red-300 bg-red-50 dark:bg-red-950/30 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg text-sm font-mono break-all">
+        <div className="p-3 border border-red-800 bg-red-950 text-red-300 rounded-lg text-sm font-mono break-all">
           <strong>Error:</strong> {error}
         </div>
       )}
@@ -110,7 +110,7 @@ export default function JsonToCsvConverter() {
               {copied ? 'Copied!' : 'Copy CSV'}
             </button>
           </div>
-          <pre className="w-full p-4 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
+          <pre className="w-full p-4 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
             {csvOutput}
           </pre>
         </div>

@@ -57,25 +57,25 @@ export default function UrlSlugGenerator() {
   };
 
   const handleLoadSample = () => {
-    setInput('10 Кращих інструментів розробника для Next.js у 2026 році!');
+    setInput('10 Best Developer Tools for Next.js in 2026!');
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-2">
         <div className="flex justify-between items-center flex-wrap gap-2">
           <label className="block text-sm font-medium">Input Title / Text</label>
           <div className="flex gap-2">
             <button
               onClick={handleLoadSample}
-              className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1 rounded transition"
+              className="text-xs bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 px-3 py-1 rounded transition"
             >
               Load Sample
             </button>
             {input && (
               <button
                 onClick={() => setInput('')}
-                className="text-xs text-red-500 hover:underline px-2 py-1"
+                className="text-xs text-red-400 hover:underline px-2 py-1"
               >
                 Clear
               </button>
@@ -88,19 +88,19 @@ export default function UrlSlugGenerator() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="e.g. 10 Best Developer Tools for Next.js in 2026!"
-          className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
       </div>
 
-      <div className="flex flex-wrap gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 border dark:border-gray-700 rounded-lg text-sm">
+      <div className="flex flex-wrap gap-4 p-3 bg-gray-900 border border-gray-700 rounded-lg text-sm">
         <div className="flex items-center gap-2">
-          <span className="text-gray-600 dark:text-gray-400 font-medium">Separator:</span>
+          <span className="text-gray-300 font-medium">Separator:</span>
           <button
             onClick={() => setSeparator('-')}
             className={`px-2.5 py-1 text-xs rounded border transition font-mono ${
               separator === '-'
                 ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
             }`}
           >
             Dash (-)
@@ -110,7 +110,7 @@ export default function UrlSlugGenerator() {
             className={`px-2.5 py-1 text-xs rounded border transition font-mono ${
               separator === '_'
                 ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
             }`}
           >
             Underscore (_)
@@ -123,9 +123,9 @@ export default function UrlSlugGenerator() {
               type="checkbox"
               checked={lowercase}
               onChange={(e) => setLowercase(e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-700 text-blue-600 focus:ring-blue-500 bg-gray-900"
             />
-            <span className="text-gray-700 dark:text-gray-300">Lowercase only</span>
+            <span className="text-gray-300">Lowercase only</span>
           </label>
         </div>
       </div>
@@ -134,10 +134,10 @@ export default function UrlSlugGenerator() {
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <label className="block text-sm font-medium">Generated URL Slug</label>
-            <span className="text-xs text-gray-500 font-mono">{slug.length} characters</span>
+            <span className="text-xs text-gray-400 font-mono">{slug.length} characters</span>
           </div>
 
-          <div className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all flex justify-between items-center gap-3">
+          <div className="p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm break-all flex justify-between items-center gap-3">
             <span>{slug}</span>
             <button
               onClick={handleCopy}
@@ -147,8 +147,8 @@ export default function UrlSlugGenerator() {
             </button>
           </div>
 
-          <div className="text-xs text-gray-500 font-mono truncate">
-            <span className="text-gray-400">Preview URL:</span> https://example.com/posts/{slug}
+          <div className="text-xs text-gray-400 font-mono truncate">
+            <span className="text-gray-500">Preview URL:</span> https://example.com/posts/{slug}
           </div>
         </div>
       )}

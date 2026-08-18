@@ -116,20 +116,20 @@ export default function CsvToJsonConverter() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-gray-100">
       <div className="flex justify-between items-center">
         <label className="block text-sm font-medium">Input CSV Data</label>
         <div className="flex gap-2 text-xs">
           <button
             onClick={handleLoadSample}
-            className="text-blue-600 hover:underline dark:text-blue-400"
+            className="text-blue-400 hover:underline"
           >
             Load Sample
           </button>
           <span>|</span>
           <button
             onClick={handleClear}
-            className="text-gray-500 hover:underline dark:text-gray-400"
+            className="text-gray-400 hover:underline"
           >
             Clear
           </button>
@@ -140,7 +140,7 @@ export default function CsvToJsonConverter() {
         value={csv}
         onChange={(e) => setCsv(e.target.value)}
         placeholder="Paste your CSV data here..."
-        className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+        className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -152,19 +152,19 @@ export default function CsvToJsonConverter() {
             Convert CSV to JSON
           </button>
 
-          <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
             <input
               type="checkbox"
               checked={parseTypes}
               onChange={(e) => setParseTypes(e.target.checked)}
-              className="rounded text-blue-600 focus:ring-blue-500"
+              className="rounded bg-gray-900 border-gray-700 text-blue-600 focus:ring-blue-500"
             />
             Auto-parse numbers & booleans
           </label>
         </div>
 
         <div>
-          <label className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-xs font-medium cursor-pointer transition border dark:border-gray-600">
+          <label className="px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-medium cursor-pointer transition border border-gray-700 text-gray-100">
             Upload CSV File
             <input
               type="file"
@@ -177,7 +177,7 @@ export default function CsvToJsonConverter() {
       </div>
 
       {error && (
-        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono dark:bg-red-950 dark:border-red-800 dark:text-red-300">
+        <div className="p-3 border border-red-800 bg-red-950 text-red-300 rounded-lg text-sm font-mono">
           <strong>Error:</strong> {error}
         </div>
       )}
@@ -195,13 +195,13 @@ export default function CsvToJsonConverter() {
               </button>
               <button
                 onClick={handleDownload}
-                className="px-3 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-800 transition font-medium dark:bg-gray-600 dark:hover:bg-gray-500"
+                className="px-3 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-600 transition font-medium"
               >
                 Download .json
               </button>
             </div>
           </div>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap max-h-96">
+          <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap max-h-96">
             {json}
           </pre>
         </div>

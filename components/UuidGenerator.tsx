@@ -68,7 +68,7 @@ export default function UuidGenerator() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
@@ -81,7 +81,7 @@ export default function UuidGenerator() {
               onChange={(e) =>
                 setCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))
               }
-              className="w-24 p-2 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+              className="w-24 p-2 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
             />
           </div>
 
@@ -93,15 +93,15 @@ export default function UuidGenerator() {
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 border dark:border-gray-700 rounded-lg text-sm">
+        <div className="flex flex-wrap items-center gap-4 p-3 bg-gray-900 border border-gray-700 rounded-lg text-sm">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={useUppercase}
               onChange={(e) => setUseUppercase(e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-700 text-blue-600 focus:ring-blue-500 bg-gray-900"
             />
-            <span className="text-gray-700 dark:text-gray-300">Uppercase</span>
+            <span className="text-gray-300">Uppercase</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -109,9 +109,9 @@ export default function UuidGenerator() {
               type="checkbox"
               checked={removeHyphens}
               onChange={(e) => setRemoveHyphens(e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-700 text-blue-600 focus:ring-blue-500 bg-gray-900"
             />
-            <span className="text-gray-700 dark:text-gray-300">No Hyphens</span>
+            <span className="text-gray-300">No Hyphens</span>
           </label>
         </div>
       </div>
@@ -125,19 +125,19 @@ export default function UuidGenerator() {
             <div className="flex gap-2">
               <button
                 onClick={copyAllToClipboard}
-                className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition"
+                className="px-3 py-1 text-xs bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800 rounded transition"
               >
                 {copiedAll ? 'Copied All!' : 'Copy All'}
               </button>
               <button
                 onClick={() => downloadFile('txt')}
-                className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition"
+                className="px-3 py-1 text-xs bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800 rounded transition"
               >
                 .TXT
               </button>
               <button
                 onClick={() => downloadFile('json')}
-                className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition"
+                className="px-3 py-1 text-xs bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800 rounded transition"
               >
                 .JSON
               </button>
@@ -148,12 +148,12 @@ export default function UuidGenerator() {
             {formattedUuids.map((uuid, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm hover:border-gray-700 transition"
+                className="flex items-center justify-between p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm hover:border-gray-600 transition"
               >
                 <span className="break-all">{uuid}</span>
                 <button
                   onClick={() => copyToClipboard(uuid, index)}
-                  className="ml-4 shrink-0 px-3 py-1 text-xs bg-gray-800 text-gray-200 hover:bg-gray-700 rounded border border-gray-600 transition"
+                  className="ml-4 shrink-0 px-3 py-1 text-xs bg-gray-800 text-gray-200 hover:bg-gray-700 rounded border border-gray-700 transition"
                 >
                   {copiedIndex === index ? 'Copied!' : 'Copy'}
                 </button>

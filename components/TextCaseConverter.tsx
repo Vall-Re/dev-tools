@@ -89,7 +89,7 @@ export default function TextCaseConverter() {
   const lineCount = text ? text.split('\n').length : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <label className="block text-sm font-medium">Input Text</label>
@@ -105,7 +105,7 @@ export default function TextCaseConverter() {
             {text && (
               <button
                 onClick={() => setText('')}
-                className="text-xs text-red-500 hover:underline"
+                className="text-xs text-red-400 hover:underline"
               >
                 Clear
               </button>
@@ -117,10 +117,10 @@ export default function TextCaseConverter() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type or paste your text here..."
-          className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
 
-        <div className="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex gap-4 text-xs text-gray-400">
           <span>{charCount} Characters</span>
           <span>•</span>
           <span>{wordCount} Words</span>
@@ -134,61 +134,61 @@ export default function TextCaseConverter() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => transformCase('lower')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition"
           >
             lowercase
           </button>
           <button
             onClick={() => transformCase('upper')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition"
           >
             UPPERCASE
           </button>
           <button
             onClick={() => transformCase('sentence')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition"
           >
             Sentence case
           </button>
           <button
             onClick={() => transformCase('title')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition"
           >
             Title Case
           </button>
           <button
             onClick={() => transformCase('camel')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition font-mono"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition font-mono"
           >
             camelCase
           </button>
           <button
             onClick={() => transformCase('pascal')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition font-mono"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition font-mono"
           >
             PascalCase
           </button>
           <button
             onClick={() => transformCase('snake')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition font-mono"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition font-mono"
           >
             snake_case
           </button>
           <button
             onClick={() => transformCase('kebab')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition font-mono"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition font-mono"
           >
             kebab-case
           </button>
           <button
             onClick={() => transformCase('constant')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition font-mono"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition font-mono"
           >
             CONSTANT_CASE
           </button>
           <button
             onClick={() => transformCase('toggle')}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg text-sm transition"
+            className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm transition"
           >
             tOGGLE cASE
           </button>

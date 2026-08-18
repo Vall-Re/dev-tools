@@ -39,21 +39,21 @@ export default function SqlFormatter() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-3">
         <div className="flex justify-between items-center flex-wrap gap-2">
           <label className="block text-sm font-medium">Input SQL Query</label>
           <div className="flex gap-2">
             <button
               onClick={handleLoadSample}
-              className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1 rounded transition"
+              className="text-xs bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 px-3 py-1 rounded transition"
             >
               Load Sample
             </button>
             {input && (
               <button
                 onClick={() => setInput('')}
-                className="text-xs text-red-500 hover:underline px-2 py-1"
+                className="text-xs text-red-400 hover:underline px-2 py-1"
               >
                 Clear
               </button>
@@ -65,16 +65,16 @@ export default function SqlFormatter() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Paste or type unformatted SQL query..."
-          className="w-full h-36 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full h-36 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
 
         <div className="flex justify-between items-center flex-wrap gap-4 pt-1">
           <div className="flex items-center gap-3">
-            <label className="text-xs font-medium">Dialect:</label>
+            <label className="text-xs font-medium text-gray-300">Dialect:</label>
             <select
               value={dialect}
               onChange={(e) => setDialect(e.target.value as SqlDialect)}
-              className="p-1.5 text-xs border rounded bg-white dark:bg-gray-800 dark:border-gray-700 font-mono"
+              className="p-1.5 text-xs border rounded bg-gray-900 border-gray-700 text-gray-100 font-mono"
             >
               <option value="sql">Standard SQL</option>
               <option value="mysql">MySQL</option>
@@ -85,12 +85,12 @@ export default function SqlFormatter() {
             </select>
           </div>
 
-          <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-xs cursor-pointer select-none text-gray-300">
             <input
               type="checkbox"
               checked={uppercase}
               onChange={(e) => setUppercase(e.target.checked)}
-              className="rounded text-blue-600 focus:ring-blue-500"
+              className="rounded text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700"
             />
             UPPERCASE Keywords
           </label>
@@ -108,7 +108,7 @@ export default function SqlFormatter() {
               {copied ? 'Copied!' : 'Copy Query'}
             </button>
           </div>
-          <pre className="w-full p-4 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap select-all dark:border-gray-800 max-h-96">
+          <pre className="w-full p-4 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap select-all max-h-96">
             {formattedSql}
           </pre>
         </div>

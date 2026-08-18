@@ -59,14 +59,14 @@ export default function UrlConverter() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-3">
         <div className="flex justify-between items-center flex-wrap gap-2">
           <label className="block text-sm font-medium">Input URL or Text</label>
           {input && (
             <button
               onClick={() => setInput('')}
-              className="text-xs text-red-500 hover:underline"
+              className="text-xs text-red-400 hover:underline"
             >
               Clear
             </button>
@@ -77,18 +77,18 @@ export default function UrlConverter() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Paste full URL or text (e.g. https://example.com/search?q=hello world)..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
 
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-medium text-gray-500">Mode:</span>
+          <span className="text-xs font-medium text-gray-400">Mode:</span>
           <button
             type="button"
             onClick={() => setMode('encodeComponent')}
             className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
               mode === 'encodeComponent'
                 ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                : 'bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800'
             }`}
           >
             Encode Component
@@ -99,7 +99,7 @@ export default function UrlConverter() {
             className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
               mode === 'encodeURI'
                 ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                : 'bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800'
             }`}
           >
             Encode Full URL
@@ -110,7 +110,7 @@ export default function UrlConverter() {
             className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
               mode === 'decode'
                 ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                : 'bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800'
             }`}
           >
             Decode
@@ -119,7 +119,7 @@ export default function UrlConverter() {
       </div>
 
       {error && (
-        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono">
+        <div className="p-3 border border-red-800 bg-red-950/50 text-red-300 rounded-lg text-sm font-mono">
           <strong>Error:</strong> {error}
         </div>
       )}
@@ -136,7 +136,7 @@ export default function UrlConverter() {
                 {copied ? 'Copied!' : 'Copy Result'}
               </button>
             </div>
-            <pre className="w-full p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all select-all dark:border-gray-800">
+            <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all select-all">
               {output}
             </pre>
           </div>
@@ -146,19 +146,19 @@ export default function UrlConverter() {
               <label className="block text-sm font-medium">
                 Detected Query Parameters ({queryParams.length})
               </label>
-              <div className="border rounded-lg overflow-hidden dark:border-gray-800">
+              <div className="border rounded-lg overflow-hidden border-gray-700 bg-gray-900">
                 <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-gray-100 dark:bg-gray-800 border-b dark:border-gray-800 text-gray-600 dark:text-gray-400">
+                  <thead className="bg-gray-800 border-b border-gray-700 text-gray-400">
                     <tr>
                       <th className="p-2.5">Parameter</th>
                       <th className="p-2.5">Value</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y dark:divide-gray-800">
+                  <tbody className="divide-y divide-gray-700">
                     {queryParams.map((param, index) => (
-                      <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                        <td className="p-2.5 font-bold text-blue-600 dark:text-blue-400">{param.key}</td>
-                        <td className="p-2.5 text-gray-800 dark:text-gray-200 break-all">{param.value}</td>
+                      <tr key={index} className="hover:bg-gray-800/50">
+                        <td className="p-2.5 font-bold text-blue-400">{param.key}</td>
+                        <td className="p-2.5 text-gray-200 break-all">{param.value}</td>
                       </tr>
                     ))}
                   </tbody>

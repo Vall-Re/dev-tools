@@ -94,7 +94,7 @@ export default function RegexTester() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-3">
         <div className="flex justify-between items-center flex-wrap gap-2">
           <label className="block text-sm font-medium">Presets</label>
@@ -106,7 +106,7 @@ export default function RegexTester() {
                   setPattern(preset.pattern);
                   setFlags(preset.flags);
                 }}
-                className="text-xs px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 rounded transition"
+                className="text-xs px-2.5 py-1 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded transition"
               >
                 {preset.label}
               </button>
@@ -121,10 +121,10 @@ export default function RegexTester() {
               value={pattern}
               onChange={(e) => setPattern(e.target.value)}
               placeholder="e.g. [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-              className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+              className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
             />
           </div>
-          <div className="flex items-center gap-1 border p-1 rounded-lg dark:border-gray-700 justify-around bg-gray-50 dark:bg-gray-800">
+          <div className="flex items-center gap-1 border p-1 rounded-lg border-gray-700 justify-around bg-gray-900">
             {['g', 'i', 'm', 's'].map((f) => (
               <button
                 key={f}
@@ -133,7 +133,7 @@ export default function RegexTester() {
                 className={`px-2.5 py-1 text-xs font-mono rounded font-bold transition ${
                   flags.includes(f)
                     ? 'bg-blue-600 text-white'
-                    : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    : 'text-gray-400 hover:bg-gray-800'
                 }`}
               >
                 {f}
@@ -149,12 +149,12 @@ export default function RegexTester() {
           value={testText}
           onChange={(e) => setTestText(e.target.value)}
           placeholder="Paste string here to test matches..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
       </div>
 
       {error && (
-        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono">
+        <div className="p-3 border border-red-800 bg-red-950 text-red-300 rounded-lg text-sm font-mono">
           <strong>RegEx Error:</strong> {error}
         </div>
       )}
@@ -163,7 +163,7 @@ export default function RegexTester() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">Interactive Highlighting</label>
-            <div className="p-3 border rounded-lg bg-gray-900 text-gray-200 font-mono text-sm whitespace-pre-wrap break-all min-h-[5rem] overflow-y-auto">
+            <div className="p-3 border rounded-lg bg-gray-900 border-gray-700 text-gray-100 font-mono text-sm whitespace-pre-wrap break-all min-h-[5rem] overflow-y-auto">
               {renderHighlightedText()}
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function RegexTester() {
               {matchDetails.map((match, index) => (
                 <div
                   key={index}
-                  className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all space-y-1 dark:border-gray-800"
+                  className="p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm break-all space-y-1"
                 >
                   <div className="flex justify-between text-xs text-gray-400">
                     <span>Match #{index + 1}</span>

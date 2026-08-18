@@ -74,20 +74,20 @@ export default function HtmlFormatter() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-gray-100">
       <div className="flex justify-between items-center">
         <label className="block text-sm font-medium">Input Raw HTML</label>
         <div className="flex gap-2 text-xs">
           <button
             onClick={handleLoadSample}
-            className="text-blue-600 hover:underline dark:text-blue-400"
+            className="text-blue-400 hover:underline"
           >
             Load Sample
           </button>
           <span>|</span>
           <button
             onClick={handleClear}
-            className="text-gray-500 hover:underline dark:text-gray-400"
+            className="text-gray-400 hover:underline"
           >
             Clear
           </button>
@@ -98,7 +98,7 @@ export default function HtmlFormatter() {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         placeholder="<div><h1>Title</h1><p>Paragraph text</p></div>"
-        className="w-full h-36 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+        className="w-full h-36 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -111,18 +111,18 @@ export default function HtmlFormatter() {
           </button>
           <button
             onClick={minifyHtml}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium"
+            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition text-sm font-medium"
           >
             Minify HTML
           </button>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <label className="text-gray-700 dark:text-gray-300">Indent Spaces:</label>
+          <label className="text-gray-300">Indent Spaces:</label>
           <select
             value={indentSize}
             onChange={(e) => setIndentSize(Number(e.target.value))}
-            className="p-1 border rounded bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+            className="p-1 border rounded bg-gray-900 border-gray-700 text-gray-200"
           >
             <option value={2}>2 Spaces</option>
             <option value={4}>4 Spaces</option>
@@ -141,7 +141,7 @@ export default function HtmlFormatter() {
               {copied ? 'Copied!' : 'Copy Result'}
             </button>
           </div>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
+          <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
             {output}
           </pre>
         </div>

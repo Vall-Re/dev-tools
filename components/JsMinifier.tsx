@@ -85,20 +85,20 @@ const total = calculateTotal(itemPrice, 15);`;
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-gray-100">
       <div className="flex justify-between items-center">
         <label className="block text-sm font-medium">Input JavaScript Code</label>
         <div className="flex gap-2 text-xs">
           <button
             onClick={handleLoadSample}
-            className="text-blue-600 hover:underline dark:text-blue-400"
+            className="text-blue-400 hover:underline"
           >
             Load Sample
           </button>
           <span>|</span>
           <button
             onClick={handleClear}
-            className="text-gray-500 hover:underline dark:text-gray-400"
+            className="text-gray-400 hover:underline"
           >
             Clear
           </button>
@@ -109,7 +109,7 @@ const total = calculateTotal(itemPrice, 15);`;
         value={input}
         onChange={(e) => setInput(e.target.value)}
         placeholder="Paste your JS code here..."
-        className="w-full h-44 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+        className="w-full h-44 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
       />
 
       <div className="flex gap-2">
@@ -121,25 +121,25 @@ const total = calculateTotal(itemPrice, 15);`;
         </button>
         <button
           onClick={formatJs}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium"
+          className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition text-sm font-medium"
         >
           Basic Format
         </button>
       </div>
 
       {stats && (
-        <div className="grid grid-cols-3 gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs font-mono dark:bg-blue-950 dark:border-blue-800 dark:text-blue-200">
+        <div className="grid grid-cols-3 gap-3 p-3 bg-blue-950 border border-blue-800 rounded-lg text-xs font-mono text-blue-200">
           <div>
-            <span className="text-gray-500 dark:text-gray-400 block">Original Size</span>
+            <span className="text-gray-400 block">Original Size</span>
             <strong>{stats.original} bytes</strong>
           </div>
           <div>
-            <span className="text-gray-500 dark:text-gray-400 block">Minified Size</span>
+            <span className="text-gray-400 block">Minified Size</span>
             <strong>{stats.minified} bytes</strong>
           </div>
           <div>
-            <span className="text-gray-500 dark:text-gray-400 block">Savings</span>
-            <strong className="text-emerald-600 dark:text-emerald-400">{stats.savings}%</strong>
+            <span className="text-gray-400 block">Savings</span>
+            <strong className="text-emerald-400">{stats.savings}%</strong>
           </div>
         </div>
       )}
@@ -155,7 +155,7 @@ const total = calculateTotal(itemPrice, 15);`;
               {copied ? 'Copied!' : 'Copy Result'}
             </button>
           </div>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
+          <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
             {output}
           </pre>
         </div>

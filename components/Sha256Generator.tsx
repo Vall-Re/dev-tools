@@ -43,24 +43,24 @@ export default function Sha256Generator() {
   const displayHash = isUppercase ? hash.toUpperCase() : hash;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <label className="block text-sm font-medium">Input Text</label>
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+            <label className="flex items-center gap-2 text-xs cursor-pointer select-none text-gray-300">
               <input
                 type="checkbox"
                 checked={isUppercase}
                 onChange={(e) => setIsUppercase(e.target.checked)}
-                className="rounded text-blue-600 focus:ring-blue-500"
+                className="rounded text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700"
               />
               UPPERCASE Output
             </label>
             {input && (
               <button
                 onClick={() => setInput('')}
-                className="text-xs text-red-500 hover:underline"
+                className="text-xs text-red-400 hover:underline"
               >
                 Clear
               </button>
@@ -72,10 +72,10 @@ export default function Sha256Generator() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type or paste text to generate SHA-256 hash automatically..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
 
-        <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex gap-3 text-xs text-gray-400">
           <span>{input.length} Characters</span>
           <span>•</span>
           <span>{byteLength} Bytes (UTF-8)</span>
@@ -93,7 +93,7 @@ export default function Sha256Generator() {
               {copied ? 'Copied!' : 'Copy Hash'}
             </button>
           </div>
-          <div className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all select-all dark:border-gray-800">
+          <div className="p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm break-all select-all">
             {displayHash}
           </div>
         </div>

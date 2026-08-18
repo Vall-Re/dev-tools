@@ -69,24 +69,24 @@ export default function MultiHashGenerator() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <label className="block text-sm font-medium">Input Text</label>
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+            <label className="flex items-center gap-2 text-xs cursor-pointer select-none text-gray-300">
               <input
                 type="checkbox"
                 checked={isUppercase}
                 onChange={(e) => setIsUppercase(e.target.checked)}
-                className="rounded text-blue-600 focus:ring-blue-500"
+                className="rounded text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700"
               />
               UPPERCASE Output
             </label>
             {text && (
               <button
                 onClick={() => setText('')}
-                className="text-xs text-red-500 hover:underline"
+                className="text-xs text-red-400 hover:underline"
               >
                 Clear
               </button>
@@ -98,7 +98,7 @@ export default function MultiHashGenerator() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type or paste string to generate hashes in real time..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
       </div>
 
@@ -109,7 +109,7 @@ export default function MultiHashGenerator() {
             return (
               <div key={key} className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  <label className="text-xs font-semibold text-gray-300">
                     {label}
                   </label>
                   <button
@@ -119,7 +119,7 @@ export default function MultiHashGenerator() {
                     {copiedKey === key ? 'Copied!' : 'Copy Hash'}
                   </button>
                 </div>
-                <div className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all select-all dark:border-gray-800">
+                <div className="p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm break-all select-all">
                   {displayValue}
                 </div>
               </div>

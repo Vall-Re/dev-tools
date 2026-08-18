@@ -78,21 +78,21 @@ export default function UrlParser() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-100">
       <div className="space-y-2">
         <div className="flex justify-between items-center flex-wrap gap-2">
           <label className="block text-sm font-medium">Enter URL</label>
           <div className="flex gap-2">
             <button
               onClick={handleLoadSample}
-              className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1 rounded transition"
+              className="text-xs bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 px-3 py-1 rounded transition"
             >
               Load Sample
             </button>
             {inputUrl && (
               <button
                 onClick={() => setInputUrl('')}
-                className="text-xs text-red-500 hover:underline px-2 py-1"
+                className="text-xs text-red-400 hover:underline px-2 py-1"
               >
                 Clear
               </button>
@@ -105,20 +105,20 @@ export default function UrlParser() {
           value={inputUrl}
           onChange={(e) => setInputUrl(e.target.value)}
           placeholder="e.g. https://example.com:8080/path?user=123#section"
-          className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+          className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
       </div>
 
       {error && (
-        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono">
+        <div className="p-3 border border-red-800 bg-red-950/50 text-red-300 rounded-lg text-sm font-mono">
           <strong>Error:</strong> {error}
         </div>
       )}
 
       {parsed && (
         <div className="space-y-6">
-          <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50 dark:border-gray-700 space-y-3">
-            <h3 className="text-sm font-semibold border-b pb-2 dark:border-gray-700">
+          <div className="border rounded-lg p-4 bg-gray-900 border-gray-700 space-y-3">
+            <h3 className="text-sm font-semibold border-b pb-2 border-gray-700">
               URL Components
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
@@ -135,16 +135,16 @@ export default function UrlParser() {
               ].map(({ label, val }) => (
                 <div
                   key={label}
-                  className="flex justify-between items-center p-2 rounded bg-white dark:bg-gray-800 border dark:border-gray-700 gap-2"
+                  className="flex justify-between items-center p-2 rounded bg-gray-900 border border-gray-700 gap-2"
                 >
                   <div className="truncate">
-                    <span className="text-gray-500 text-xs block">{label}</span>
-                    <span className="text-gray-800 dark:text-gray-200">{val}</span>
+                    <span className="text-gray-400 text-xs block">{label}</span>
+                    <span className="text-gray-200">{val}</span>
                   </div>
                   {val && val !== '(none)' && (
                     <button
                       onClick={() => handleCopy(val, label)}
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline shrink-0"
+                      className="text-xs text-blue-400 hover:underline shrink-0"
                     >
                       {copiedKey === label ? 'Copied!' : 'Copy'}
                     </button>
@@ -161,7 +161,7 @@ export default function UrlParser() {
                 {parsed.pathSegments.map((segment, idx) => (
                   <span
                     key={idx}
-                    className="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-md"
+                    className="px-2.5 py-1 bg-blue-950/50 text-blue-300 border border-blue-800 rounded-md"
                   >
                     /{segment}
                   </span>
@@ -175,22 +175,22 @@ export default function UrlParser() {
               <label className="block text-sm font-medium">
                 Query Parameters ({parsed.queryParams.length})
               </label>
-              <div className="border rounded-lg overflow-hidden dark:border-gray-700">
+              <div className="border rounded-lg overflow-hidden border-gray-700 bg-gray-900">
                 <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-gray-100 dark:bg-gray-800 border-b dark:border-gray-700 text-gray-600 dark:text-gray-400">
+                  <thead className="bg-gray-800 border-b border-gray-700 text-gray-400">
                     <tr>
                       <th className="p-2.5">Key</th>
                       <th className="p-2.5">Value</th>
                       <th className="p-2.5 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y dark:divide-gray-700">
+                  <tbody className="divide-y divide-gray-700">
                     {parsed.queryParams.map((param, index) => (
-                      <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                        <td className="p-2.5 font-bold text-blue-600 dark:text-blue-400">
+                      <tr key={index} className="hover:bg-gray-800/50">
+                        <td className="p-2.5 font-bold text-blue-400">
                           {param.key}
                         </td>
-                        <td className="p-2.5 text-gray-800 dark:text-gray-200 break-all">
+                        <td className="p-2.5 text-gray-200 break-all">
                           {param.value}
                         </td>
                         <td className="p-2.5 text-right">
@@ -198,7 +198,7 @@ export default function UrlParser() {
                             onClick={() =>
                               handleCopy(`${param.key}=${param.value}`, `param-${index}`)
                             }
-                            className="text-xs text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
+                            className="text-xs text-gray-400 hover:text-gray-200"
                           >
                             {copiedKey === `param-${index}` ? 'Copied!' : 'Copy'}
                           </button>

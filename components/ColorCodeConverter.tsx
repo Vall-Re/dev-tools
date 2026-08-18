@@ -77,31 +77,31 @@ export default function ColorCodeConverter() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-gray-100">
       <div className="flex justify-between items-center">
         <label className="block text-sm font-medium">Color Palette Presets</label>
         <div className="flex gap-2 text-xs">
           <button
             onClick={() => handlePresetSelect('#3B82F6')}
-            className="px-2 py-1 rounded bg-blue-500 text-white hover:opacity-90 transition"
+            className="px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-500 transition"
           >
             Blue
           </button>
           <button
             onClick={() => handlePresetSelect('#10B981')}
-            className="px-2 py-1 rounded bg-emerald-500 text-white hover:opacity-90 transition"
+            className="px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-500 transition"
           >
             Green
           </button>
           <button
             onClick={() => handlePresetSelect('#EF4444')}
-            className="px-2 py-1 rounded bg-red-500 text-white hover:opacity-90 transition"
+            className="px-2 py-1 rounded bg-red-600 text-white hover:bg-red-500 transition"
           >
             Red
           </button>
           <button
             onClick={() => handlePresetSelect('#8B5CF6')}
-            className="px-2 py-1 rounded bg-purple-500 text-white hover:opacity-90 transition"
+            className="px-2 py-1 rounded bg-purple-600 text-white hover:bg-purple-500 transition"
           >
             Purple
           </button>
@@ -115,7 +115,7 @@ export default function ColorCodeConverter() {
             type="color"
             value={hex.startsWith('#') && hex.length === 7 ? hex : '#3b82f6'}
             onChange={(e) => setHex(e.target.value)}
-            className="w-16 h-12 p-1 border rounded-lg cursor-pointer bg-white dark:bg-gray-800 dark:border-gray-700"
+            className="w-16 h-12 p-1 border rounded-lg cursor-pointer bg-gray-900 border-gray-700"
           />
         </div>
         <div className="flex-1">
@@ -125,15 +125,15 @@ export default function ColorCodeConverter() {
             value={hex}
             onChange={(e) => setHex(e.target.value)}
             placeholder="#3b82f6"
-            className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
           />
         </div>
       </div>
 
       <div
-        className="w-full h-24 rounded-lg border shadow-inner transition-colors flex items-center justify-center font-mono text-sm font-bold"
+        className="w-full h-24 rounded-lg border border-gray-700 shadow-inner transition-colors flex items-center justify-center font-mono text-sm font-bold"
         style={{
-          backgroundColor: rgb ? rgbValue : '#ffffff',
+          backgroundColor: rgb ? rgbValue : '#111827',
           color: hsl && hsl.l > 50 ? '#000000' : '#ffffff',
         }}
       >
@@ -142,10 +142,10 @@ export default function ColorCodeConverter() {
 
       {rgb && hsl ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-sm">
-          <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex justify-between items-center">
+          <div className="p-3 border rounded-lg bg-gray-900 border-gray-700 flex justify-between items-center">
             <div>
-              <span className="text-xs text-gray-500 block">HEX</span>
-              <strong>{hexValue}</strong>
+              <span className="text-xs text-gray-400 block">HEX</span>
+              <strong className="text-gray-100">{hexValue}</strong>
             </div>
             <button
               onClick={() => handleCopy(hexValue, 'hex')}
@@ -155,10 +155,10 @@ export default function ColorCodeConverter() {
             </button>
           </div>
 
-          <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex justify-between items-center">
+          <div className="p-3 border rounded-lg bg-gray-900 border-gray-700 flex justify-between items-center">
             <div>
-              <span className="text-xs text-gray-500 block">RGB</span>
-              <strong>{rgbValue}</strong>
+              <span className="text-xs text-gray-400 block">RGB</span>
+              <strong className="text-gray-100">{rgbValue}</strong>
             </div>
             <button
               onClick={() => handleCopy(rgbValue, 'rgb')}
@@ -168,10 +168,10 @@ export default function ColorCodeConverter() {
             </button>
           </div>
 
-          <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex justify-between items-center">
+          <div className="p-3 border rounded-lg bg-gray-900 border-gray-700 flex justify-between items-center">
             <div>
-              <span className="text-xs text-gray-500 block">HSL</span>
-              <strong>{hslValue}</strong>
+              <span className="text-xs text-gray-400 block">HSL</span>
+              <strong className="text-gray-100">{hslValue}</strong>
             </div>
             <button
               onClick={() => handleCopy(hslValue, 'hsl')}
@@ -182,7 +182,7 @@ export default function ColorCodeConverter() {
           </div>
         </div>
       ) : (
-        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono dark:bg-red-950 dark:border-red-800 dark:text-red-300">
+        <div className="p-3 border border-red-800 bg-red-950 text-red-300 rounded-lg text-sm font-mono">
           <strong>Error:</strong> Please enter a valid 3-digit or 6-digit HEX color code.
         </div>
       )}

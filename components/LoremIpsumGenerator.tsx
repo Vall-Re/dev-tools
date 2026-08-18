@@ -100,7 +100,7 @@ export default function LoremIpsumGenerator() {
   const stats = getStats();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-gray-100">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div>
           <label className="block text-sm font-medium mb-2">Count</label>
@@ -110,7 +110,7 @@ export default function LoremIpsumGenerator() {
             max="100"
             value={count}
             onChange={(e) => setCount(Math.max(1, parseInt(e.target.value) || 1))}
-            className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
           />
         </div>
 
@@ -119,7 +119,7 @@ export default function LoremIpsumGenerator() {
           <select
             value={type}
             onChange={(e) => setType(e.target.value as GenType)}
-            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="paragraphs">Paragraphs</option>
             <option value="sentences">Sentences</option>
@@ -129,21 +129,21 @@ export default function LoremIpsumGenerator() {
         </div>
 
         <div className="flex flex-col justify-end space-y-2 py-1">
-          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none text-gray-300">
             <input
               type="checkbox"
               checked={startWithLorem}
               onChange={(e) => setStartWithLorem(e.target.checked)}
-              className="rounded text-blue-600 focus:ring-blue-500"
+              className="rounded text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700"
             />
             Start with "Lorem ipsum"
           </label>
-          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none text-gray-300">
             <input
               type="checkbox"
               checked={includeHtmlTags}
               onChange={(e) => setIncludeHtmlTags(e.target.checked)}
-              className="rounded text-blue-600 focus:ring-blue-500"
+              className="rounded text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700"
             />
             Wrap with HTML tags
           </label>
@@ -162,8 +162,8 @@ export default function LoremIpsumGenerator() {
       {output && (
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-              <span className="font-medium text-sm text-gray-900 dark:text-gray-100">Generated Text</span>
+            <div className="flex items-center gap-3 text-xs text-gray-400">
+              <span className="font-medium text-sm text-gray-100">Generated Text</span>
               <span>•</span>
               <span>{stats.words} Words</span>
               <span>•</span>
@@ -179,7 +179,7 @@ export default function LoremIpsumGenerator() {
           <textarea
             readOnly
             value={output}
-            className="w-full h-56 p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-y-auto focus:outline-none dark:border-gray-800"
+            className="w-full h-56 p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-y-auto focus:outline-none border-gray-700"
           />
         </div>
       )}

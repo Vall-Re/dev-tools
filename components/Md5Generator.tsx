@@ -55,12 +55,12 @@ function md5(string: string) {
     let lBytePosition = 0;
     let lByteCount = 0;
     while (lByteCount < lMessageLength) {
-      lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
+      let lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
       lBytePosition = (lByteCount % 4) * 8;
       lWordArray[lWordIndex] = (lWordArray[lWordIndex] | (string.charCodeAt(lByteCount) << lBytePosition));
       lByteCount++;
     }
-    lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
+    let lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
     lBytePosition = (lByteCount % 4) * 8;
     lWordArray[lWordIndex] = lWordArray[lWordIndex] | (0x80 << lBytePosition);
     lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
@@ -85,7 +85,6 @@ function md5(string: string) {
   let S31=4, S32=11, S33=16, S34=23;
   let S41=6, S42=10, S43=15, S44=21;
 
-  let lWordIndex;
   x = convertToWordArray(string);
   a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
 
@@ -178,14 +177,14 @@ export default function Md5Generator() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-gray-100">
       <div>
         <label className="block text-sm font-medium mb-2">Input String</label>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter text to generate MD5 hash..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
       </div>
 
@@ -199,7 +198,7 @@ export default function Md5Generator() {
       {hash && (
         <div>
           <label className="block text-sm font-medium mb-2">MD5 Hash</label>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all">
+          <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all">
             {hash}
           </pre>
         </div>
