@@ -1,210 +1,117 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState } from 'react';
 
 export default function JsonToCsvConverter() {
-  const [json, setJson] = useState('');
-  const [csv, setCsv] = useState('');
+  const [jsonInput, setJsonInput] = useState('');
+  const [csvOutput, setCsvOutput] = useState('');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const sampleJson = JSON.stringify(
-    [
-      { id: 1, name: "John Doe", role: "Developer", city: "New York", active: true },
-      { id: 2, name: "Jane Smith", role: "Designer", city: "London", active: false },
-      { id: 3, name: "Alex Johnson", role: "Product Owner", city: "Berlin", active: true }
-    ],
-    null,
-    2
-  );
-
   const convertToCsv = () => {
-    if (!json.trim()) {
-      setCsv('');
-      setError('');
-      return;
-    }
+    if (!jsonInput.trim()) return;
+    setError('');
 
     try {
-      let parsed = JSON.parse(json);
+      const parsed = JSON.parse(jsonInput);
+      const dataArray = Array.isArray(parsed) ? parsed : [parsed];
 
-      if (!Array.isArray(parsed)) {
-        if (typeof parsed === 'object' && parsed !== null) {
-          parsed = [parsed];
-        } else {
-          setError('Input must be a JSON array of objects or a single JSON object.');
-          setCsv('');
-          return;
-        }
-      }
-
-      if (parsed.length === 0) {
+      if (dataArray.length === 0) {
         setError('JSON array is empty.');
-        setCsv('');
+        setCsvOutput('');
         return;
       }
 
+      // Збираємо всі унікальні ключі (заголовки)
       const headers = Array.from(
         new Set(
-          parsed.flatMap((obj) => (typeof obj === 'object' && obj !== null ? Object.keys(obj) : []))
+          dataArray.flatMap((obj: Record<string, unknown>) =>
+            typeof obj === 'object' && obj !== null ? Object.keys(obj) : []
+          )
         )
       );
 
       if (headers.length === 0) {
-        setError('No valid key-value pairs found in objects.');
-        setCsv('');
+        setError('No valid objects found in JSON.');
+        setCsvOutput('');
         return;
       }
 
+      const escapeCsvValue = (val: unknown): string => {
+        if (val === null || val === undefined) return '""';
+        if (typeof val === 'object') return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
+        const str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
       const csvRows = [
-        headers.map((h) => `"${String(h).replace(/"/g, '""')}"`).join(','),
-        ...parsed.map((row) =>
+        headers.join(','),
+        ...dataArray.map((row: Record<string, unknown>) =>
           headers
-            .map((field) => {
-              const val = row && typeof row === 'object' ? row[field] : '';
-              let formattedVal = '';
-
-              if (val === null || val === undefined) {
-                formattedVal = '';
-              } else if (typeof val === 'object') {
-                formattedVal = JSON.stringify(val);
-              } else {
-                formattedVal = String(val);
-              }
-
-              const escaped = formattedVal.replace(/"/g, '""');
-              return `"${escaped}"`;
-            })
+            .map((header) =>
+              typeof row === 'object' && row !== null
+                ? escapeCsvValue(row[header])
+                : '""'
+            )
             .join(',')
         ),
       ];
 
-      setCsv(csvRows.join('\n'));
-      setError('');
+      setCsvOutput(csvRows.join('\n'));
     } catch (err: unknown) {
       setError('Invalid JSON format: ' + (err as Error).message);
-      setCsv('');
+      setCsvOutput('');
     }
   };
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      setJson(content);
-      setError('');
-      setCsv('');
-    };
-    reader.readAsText(file);
-  };
-
-  const handleDownload = () => {
-    if (!csv) return;
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'converted.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const handleCopy = async () => {
-    if (!csv) return;
-    await navigator.clipboard.writeText(csv);
+    if (!csvOutput) return;
+    await navigator.clipboard.writeText(csvOutput);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleClear = () => {
-    setJson('');
-    setCsv('');
-    setError('');
-  };
-
-  const handleLoadSample = () => {
-    setJson(sampleJson);
-    setCsv('');
-    setError('');
-  };
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium">Input JSON Array</label>
-        <div className="flex items-center gap-3 text-xs">
-          <label className="text-blue-600 hover:underline cursor-pointer dark:text-blue-400">
-            Upload File
-            <input 
-              type="file" 
-              accept=".json,application/json" 
-              onChange={handleFileUpload} 
-              className="hidden" 
-            />
-          </label>
-          <span>|</span>
-          <button
-            onClick={handleLoadSample}
-            className="text-blue-600 hover:underline dark:text-blue-400"
-          >
-            Load Sample
-          </button>
-          <span>|</span>
-          <button
-            onClick={handleClear}
-            className="text-gray-500 hover:underline dark:text-gray-400"
-          >
-            Clear
-          </button>
-        </div>
+      <div>
+        <label className="block text-sm font-medium mb-2">Input JSON</label>
+        <textarea
+          value={jsonInput}
+          onChange={(e) => setJsonInput(e.target.value)}
+          placeholder='[{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]'
+          className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+        />
       </div>
 
-      <textarea
-        value={json}
-        onChange={(e) => setJson(e.target.value)}
-        placeholder={`[\n  { "name": "John", "age": 30, "city": "New York" },\n  { "name": "Jane", "age": 25, "city": "London" }\n]`}
-        className="w-full h-44 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
-      />
-
-      <div className="flex gap-2">
-        <button
-          onClick={convertToCsv}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-        >
-          Convert JSON to CSV
-        </button>
-      </div>
+      <button
+        onClick={convertToCsv}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm"
+      >
+        Convert to CSV
+      </button>
 
       {error && (
-        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono dark:bg-red-950 dark:border-red-800 dark:text-red-300">
+        <div className="p-3 border border-red-300 bg-red-50 dark:bg-red-950/30 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg text-sm font-mono break-all">
           <strong>Error:</strong> {error}
         </div>
       )}
 
-      {csv && (
+      {csvOutput && (
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Converted CSV Result</label>
-            <div className="flex gap-2">
-              <button
-                onClick={handleDownload}
-                className="px-3 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-800 transition font-medium dark:bg-gray-600 dark:hover:bg-gray-500"
-              >
-                Download .csv
-              </button>
-              <button
-                onClick={handleCopy}
-                className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-medium"
-              >
-                {copied ? 'Copied!' : 'Copy CSV'}
-              </button>
-            </div>
+            <label className="block text-sm font-medium">CSV Output</label>
+            <button
+              onClick={handleCopy}
+              className="px-3 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded transition"
+            >
+              {copied ? 'Copied!' : 'Copy CSV'}
+            </button>
           </div>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
-            {csv}
+          <pre className="w-full p-4 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
+            {csvOutput}
           </pre>
         </div>
       )}
