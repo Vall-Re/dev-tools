@@ -1,6 +1,8 @@
 import { tools } from '@/data/tools';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import Link from 'next/link';
+
 import JsonFormatter from '@/components/JsonFormatter';
 import Base64Converter from '@/components/Base64Converter';
 import UrlConverter from '@/components/UrlConverter';
@@ -44,13 +46,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${tool.name} - Free Online Tool`,
+    title: `${tool.name} - Free Online Developer Tool`,
     description: tool.description,
     alternates: {
       canonical: `https://100devtoolshub.com/tools/${tool.slug}`,
     },
     openGraph: {
-      title: `${tool.name} - Free Online Tool`,
+      title: `${tool.name} - Free Online Developer Tool`,
       description: tool.description,
       url: `https://100devtoolshub.com/tools/${tool.slug}`,
       type: 'website',
@@ -72,7 +74,13 @@ export default async function ToolPage({ params }: Props) {
     notFound();
   }
 
-  const jsonLd = tool.faqs && tool.faqs.length > 0 ? {
+  // Схожі інструменти для перелінковки
+  const relatedTools = tool.relatedSlugs
+    ? tools.filter((t) => tool.relatedSlugs?.includes(t.slug))
+    : [];
+
+  // JSON-LD Schema: FAQPage + SoftwareApplication
+  const faqSchema = tool.faqs && tool.faqs.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     mainEntity: tool.faqs.map((faq) => ({
@@ -85,20 +93,44 @@ export default async function ToolPage({ params }: Props) {
     })),
   } : null;
 
+  const appSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: tool.name,
+    operatingSystem: 'All',
+    applicationCategory: 'DeveloperApplication',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    description: tool.description,
+  };
+
   return (
     <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-12">
-      {jsonLd && (
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
+      />
+      {faqSchema && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
 
+      {/* Header & Breadcrumbs */}
       <div>
+        <nav className="text-sm text-gray-500 mb-4">
+          <Link href="/" className="hover:underline">Home</Link> &gt;{' '}
+          <span className="text-gray-900 font-medium">{tool.name}</span>
+        </nav>
         <h1 className="text-3xl font-bold mb-2">{tool.name}</h1>
-        <p className="text-gray-600">{tool.description}</p>
+        <p className="text-gray-600 text-lg">{tool.description}</p>
       </div>
 
+      {/* Tool Component */}
       <div className="p-6 border rounded-lg bg-white shadow-sm">
         {slug === 'json-formatter' && <JsonFormatter />}
         {slug === 'base64-encoder-decoder' && <Base64Converter />}
@@ -127,11 +159,49 @@ export default async function ToolPage({ params }: Props) {
         {slug === 'json-minifier' && <JsonMinifier />}
       </div>
 
+      {/* How to Use Section */}
+      {tool.howToUse && tool.howToUse.length > 0 && (
+        <section className="space-y-4 pt-6 border-t">
+          <h2 className="text-2xl font-semibold">How to Use {tool.name}</h2>
+          <ol className="list-decimal list-inside space-y-2 text-gray-700">
+            {tool.howToUse.map((step, idx) => (
+              <li key={idx} className="leading-relaxed">{step}</li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* Key Features */}
+      {tool.features && tool.features.length > 0 && (
+        <section className="space-y-4 pt-6 border-t">
+          <h2 className="text-2xl font-semibold">Key Features</h2>
+          <ul className="list-disc list-inside space-y-2 text-gray-700">
+            {tool.features.map((feat, idx) => (
+              <li key={idx} className="leading-relaxed">{feat}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* About Section */}
       <section className="space-y-4 pt-6 border-t">
         <h2 className="text-2xl font-semibold">About {tool.name}</h2>
-        <p className="text-gray-700 leading-relaxed">{tool.aboutText}</p>
+        <p className="text-gray-700 leading-relaxed whitespace-pre-line">{tool.aboutText}</p>
       </section>
 
+      {/* Use Cases */}
+      {tool.useCases && tool.useCases.length > 0 && (
+        <section className="space-y-4 pt-6 border-t">
+          <h2 className="text-2xl font-semibold">Common Use Cases</h2>
+          <ul className="list-disc list-inside space-y-2 text-gray-700">
+            {tool.useCases.map((useCase, idx) => (
+              <li key={idx} className="leading-relaxed">{useCase}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* FAQ Section */}
       {tool.faqs && tool.faqs.length > 0 && (
         <section className="space-y-6 pt-6 border-t">
           <h2 className="text-2xl font-semibold">Frequently Asked Questions</h2>
@@ -139,8 +209,27 @@ export default async function ToolPage({ params }: Props) {
             {tool.faqs.map((faq, index) => (
               <div key={index} className="p-4 border rounded-lg bg-gray-50">
                 <h3 className="font-semibold text-lg mb-1">{faq.question}</h3>
-                <p className="text-gray-600 text-sm">{faq.answer}</p>
+                <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
               </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Related Tools (Internal Links) */}
+      {relatedTools.length > 0 && (
+        <section className="space-y-4 pt-6 border-t">
+          <h2 className="text-2xl font-semibold">Related Tools</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {relatedTools.map((relTool) => (
+              <Link
+                key={relTool.slug}
+                href={`/tools/${relTool.slug}`}
+                className="p-4 border rounded-lg hover:border-blue-500 transition-colors bg-white shadow-sm block"
+              >
+                <h3 className="font-semibold text-blue-600 mb-1">{relTool.name}</h3>
+                <p className="text-sm text-gray-600 line-clamp-2">{relTool.description}</p>
+              </Link>
             ))}
           </div>
         </section>

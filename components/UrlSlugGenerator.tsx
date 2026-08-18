@@ -1,57 +1,154 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+
+const CYRILLIC_MAP: Record<string, string> = {
+  а: 'a', б: 'b', в: 'v', г: 'h', ґ: 'g', д: 'd', е: 'e', є: 'ye', ж: 'zh',
+  з: 'z', и: 'y', і: 'i', ї: 'yi', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n',
+  о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'kh', ц: 'ts',
+  ч: 'ch', ш: 'sh', щ: 'shch', ь: '', ю: 'yu', я: 'ya',
+  ё: 'yo', ъ: '', э: 'e', ы: 'y',
+};
+
+function transliterate(str: string): string {
+  return str
+    .toLowerCase()
+    .split('')
+    .map((char) => CYRILLIC_MAP[char] ?? char)
+    .join('');
+}
 
 export default function UrlSlugGenerator() {
   const [input, setInput] = useState('');
-  const [slug, setSlug] = useState('');
+  const [separator, setSeparator] = useState<'-' | '_'>('-');
+  const [lowercase, setLowercase] = useState(true);
+  const [copied, setCopied] = useState(false);
 
-  const generateSlug = () => {
-    if (!input.trim()) return;
+  const slug = useMemo(() => {
+    if (!input.trim()) return '';
 
-    const generated = input
-      .toLowerCase()
-      .trim()
+    let text = transliterate(input.trim());
+
+    if (lowercase) {
+      text = text.toLowerCase();
+    }
+
+    text = text
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9 -]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
+      .replace(/[\u0300-\u036f]/g, '');
 
-    setSlug(generated);
+    const allowedCharsRegex = lowercase ? /[^a-z0-9 -_]/g : /[^a-zA-Z0-9 -_]/g;
+    text = text.replace(allowedCharsRegex, '');
+
+    const sepEscaped = separator === '-' ? '\\-' : '_';
+    const multiSepRegex = new RegExp(`[\\s${sepEscaped}]+`, 'g');
+    const trimSepRegex = new RegExp(`^${sepEscaped}+|${sepEscaped}+$`, 'g');
+
+    return text
+      .replace(multiSepRegex, separator)
+      .replace(trimSepRegex, '');
+  }, [input, separator, lowercase]);
+
+  const handleCopy = async () => {
+    if (!slug) return;
+    await navigator.clipboard.writeText(slug);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleLoadSample = () => {
+    setInput('10 Кращих інструментів розробника для Next.js у 2026 році!');
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-2">Input Title / Text</label>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex justify-between items-center flex-wrap gap-2">
+          <label className="block text-sm font-medium">Input Title / Text</label>
+          <div className="flex gap-2">
+            <button
+              onClick={handleLoadSample}
+              className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1 rounded transition"
+            >
+              Load Sample
+            </button>
+            {input && (
+              <button
+                onClick={() => setInput('')}
+                className="text-xs text-red-500 hover:underline px-2 py-1"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="e.g. 10 Best Developer Tools for Next.js in 2026!"
-          className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
         />
       </div>
 
-      <button
-        onClick={generateSlug}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        Generate Slug
-      </button>
+      <div className="flex flex-wrap gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 border dark:border-gray-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-gray-600 dark:text-gray-400 font-medium">Separator:</span>
+          <button
+            onClick={() => setSeparator('-')}
+            className={`px-2.5 py-1 text-xs rounded border transition font-mono ${
+              separator === '-'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            Dash (-)
+          </button>
+          <button
+            onClick={() => setSeparator('_')}
+            className={`px-2.5 py-1 text-xs rounded border transition font-mono ${
+              separator === '_'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            Underscore (_)
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={lowercase}
+              onChange={(e) => setLowercase(e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-gray-700 dark:text-gray-300">Lowercase only</span>
+          </label>
+        </div>
+      </div>
 
       {slug && (
-        <div>
-          <label className="block text-sm font-medium mb-2">Generated URL Slug</label>
-          <div className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all flex justify-between items-center">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <label className="block text-sm font-medium">Generated URL Slug</label>
+            <span className="text-xs text-gray-500 font-mono">{slug.length} characters</span>
+          </div>
+
+          <div className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all flex justify-between items-center gap-3">
             <span>{slug}</span>
             <button
-              onClick={() => navigator.clipboard.writeText(slug)}
-              className="ml-4 text-xs bg-gray-800 text-white px-2 py-1 rounded hover:bg-gray-700 transition"
+              onClick={handleCopy}
+              className="shrink-0 text-xs bg-gray-800 text-white px-3 py-1.5 rounded hover:bg-gray-700 transition border border-gray-700"
             >
-              Copy
+              {copied ? 'Copied!' : 'Copy'}
             </button>
+          </div>
+
+          <div className="text-xs text-gray-500 font-mono truncate">
+            <span className="text-gray-400">Preview URL:</span> https://example.com/posts/{slug}
           </div>
         </div>
       )}

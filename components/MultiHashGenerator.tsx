@@ -1,64 +1,130 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
+type HashState = {
+  sha1: string;
+  sha256: string;
+  sha384: string;
+  sha512: string;
+};
 
 export default function MultiHashGenerator() {
   const [text, setText] = useState('');
-  const [sha1Hash, setSha1Hash] = useState('');
-  const [sha512Hash, setSha512Hash] = useState('');
+  const [isUppercase, setIsUppercase] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [hashes, setHashes] = useState<HashState>({
+    sha1: '',
+    sha256: '',
+    sha384: '',
+    sha512: '',
+  });
 
-  const generateHashes = async () => {
-    if (!text) {
-      setSha1Hash('');
-      setSha512Hash('');
+  const calculateHashes = useCallback(async (inputText: string) => {
+    if (!inputText) {
+      setHashes({ sha1: '', sha256: '', sha384: '', sha512: '' });
       return;
     }
 
     const encoder = new TextEncoder();
-    const data = encoder.encode(text);
+    const data = encoder.encode(inputText);
 
-    const hash1Buffer = await crypto.subtle.digest('SHA-1', data);
-    const hash1Array = Array.from(new Uint8Array(hash1Buffer));
-    setSha1Hash(hash1Array.map((b) => b.toString(16).padStart(2, '0')).join(''));
+    const hashAlgo = async (algorithm: string) => {
+      const buffer = await crypto.subtle.digest(algorithm, data);
+      const array = Array.from(new Uint8Array(buffer));
+      return array.map((b) => b.toString(16).padStart(2, '0')).join('');
+    };
 
-    const hash512Buffer = await crypto.subtle.digest('SHA-512', data);
-    const hash512Array = Array.from(new Uint8Array(hash512Buffer));
-    setSha512Hash(hash512Array.map((b) => b.toString(16).padStart(2, '0')).join(''));
+    try {
+      const [sha1, sha256, sha384, sha512] = await Promise.all([
+        hashAlgo('SHA-1'),
+        hashAlgo('SHA-256'),
+        hashAlgo('SHA-384'),
+        hashAlgo('SHA-512'),
+      ]);
+
+      setHashes({ sha1, sha256, sha384, sha512 });
+    } catch (error) {
+      console.error('Error generating hashes:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    calculateHashes(text);
+  }, [text, calculateHashes]);
+
+  const handleCopy = async (hashValue: string, key: string) => {
+    if (!hashValue) return;
+    const finalValue = isUppercase ? hashValue.toUpperCase() : hashValue;
+    await navigator.clipboard.writeText(finalValue);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
   };
 
+  const hashList = [
+    { label: 'SHA-1', value: hashes.sha1, key: 'sha1' },
+    { label: 'SHA-256', value: hashes.sha256, key: 'sha256' },
+    { label: 'SHA-384', value: hashes.sha384, key: 'sha384' },
+    { label: 'SHA-512', value: hashes.sha512, key: 'sha512' },
+  ];
+
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-2">Input Text</label>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <label className="block text-sm font-medium">Input Text</label>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={isUppercase}
+                onChange={(e) => setIsUppercase(e.target.checked)}
+                className="rounded text-blue-600 focus:ring-blue-500"
+              />
+              UPPERCASE Output
+            </label>
+            {text && (
+              <button
+                onClick={() => setText('')}
+                className="text-xs text-red-500 hover:underline"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Enter string to generate SHA-1 and SHA-512 hashes..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Type or paste string to generate hashes in real time..."
+          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
         />
       </div>
 
-      <button
-        onClick={generateHashes}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        Generate Hashes
-      </button>
-
-      {sha1Hash && (
+      {hashes.sha1 && (
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">SHA-1 Hash</label>
-            <div className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all">
-              {sha1Hash}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">SHA-512 Hash</label>
-            <div className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all">
-              {sha512Hash}
-            </div>
-          </div>
+          {hashList.map(({ label, value, key }) => {
+            const displayValue = isUppercase ? value.toUpperCase() : value;
+            return (
+              <div key={key} className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    {label}
+                  </label>
+                  <button
+                    onClick={() => handleCopy(value, key)}
+                    className="px-2.5 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-medium"
+                  >
+                    {copiedKey === key ? 'Copied!' : 'Copy Hash'}
+                  </button>
+                </div>
+                <div className="p-3 border rounded-lg bg-gray-900 text-green-400 font-mono text-sm break-all select-all dark:border-gray-800">
+                  {displayValue}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

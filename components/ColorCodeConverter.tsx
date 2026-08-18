@@ -4,9 +4,10 @@ import { useState } from 'react';
 
 export default function ColorCodeConverter() {
   const [hex, setHex] = useState('#3b82f6');
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const hexToRgb = (hexStr: string) => {
-    let cleanHex = hexStr.replace('#', '');
+    let cleanHex = hexStr.replace('#', '').trim();
     if (cleanHex.length === 3) {
       cleanHex = cleanHex.split('').map((char) => char + char).join('');
     }
@@ -60,16 +61,61 @@ export default function ColorCodeConverter() {
   const rgb = hexToRgb(hex);
   const hsl = rgb ? rgbToHsl(rgb.r, rgb.g, rgb.b) : null;
 
+  const hexValue = hex.startsWith('#') ? hex.toUpperCase() : `#${hex.toUpperCase()}`;
+  const rgbValue = rgb ? `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` : '';
+  const hslValue = hsl ? `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)` : '';
+
+  const handleCopy = async (text: string, fieldName: string) => {
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    setCopiedField(fieldName);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handlePresetSelect = (presetHex: string) => {
+    setHex(presetHex);
+  };
+
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <label className="block text-sm font-medium">Color Palette Presets</label>
+        <div className="flex gap-2 text-xs">
+          <button
+            onClick={() => handlePresetSelect('#3B82F6')}
+            className="px-2 py-1 rounded bg-blue-500 text-white hover:opacity-90 transition"
+          >
+            Blue
+          </button>
+          <button
+            onClick={() => handlePresetSelect('#10B981')}
+            className="px-2 py-1 rounded bg-emerald-500 text-white hover:opacity-90 transition"
+          >
+            Green
+          </button>
+          <button
+            onClick={() => handlePresetSelect('#EF4444')}
+            className="px-2 py-1 rounded bg-red-500 text-white hover:opacity-90 transition"
+          >
+            Red
+          </button>
+          <button
+            onClick={() => handlePresetSelect('#8B5CF6')}
+            className="px-2 py-1 rounded bg-purple-500 text-white hover:opacity-90 transition"
+          >
+            Purple
+          </button>
+        </div>
+      </div>
+
       <div className="flex items-center space-x-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Select Color</label>
+          <label className="block text-sm font-medium mb-2">Picker</label>
           <input
             type="color"
             value={hex.startsWith('#') && hex.length === 7 ? hex : '#3b82f6'}
             onChange={(e) => setHex(e.target.value)}
-            className="w-16 h-12 p-1 border rounded-lg cursor-pointer bg-white"
+            className="w-16 h-12 p-1 border rounded-lg cursor-pointer bg-white dark:bg-gray-800 dark:border-gray-700"
           />
         </div>
         <div className="flex-1">
@@ -79,31 +125,65 @@ export default function ColorCodeConverter() {
             value={hex}
             onChange={(e) => setHex(e.target.value)}
             placeholder="#3b82f6"
-            className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
           />
         </div>
       </div>
 
       <div
-        className="w-full h-24 rounded-lg border shadow-inner transition-colors"
-        style={{ backgroundColor: rgb ? `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` : '#ffffff' }}
-      />
+        className="w-full h-24 rounded-lg border shadow-inner transition-colors flex items-center justify-center font-mono text-sm font-bold"
+        style={{
+          backgroundColor: rgb ? rgbValue : '#ffffff',
+          color: hsl && hsl.l > 50 ? '#000000' : '#ffffff',
+        }}
+      >
+        {rgb ? `${hexValue} | ${rgbValue}` : 'Invalid Color'}
+      </div>
 
       {rgb && hsl ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-sm">
-          <div className="p-3 border rounded-lg bg-gray-50">
-            <strong>HEX:</strong> {hex.toUpperCase()}
+          <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex justify-between items-center">
+            <div>
+              <span className="text-xs text-gray-500 block">HEX</span>
+              <strong>{hexValue}</strong>
+            </div>
+            <button
+              onClick={() => handleCopy(hexValue, 'hex')}
+              className="px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition"
+            >
+              {copiedField === 'hex' ? 'Copied!' : 'Copy'}
+            </button>
           </div>
-          <div className="p-3 border rounded-lg bg-gray-50">
-            <strong>RGB:</strong> rgb({rgb.r}, {rgb.g}, {rgb.b})
+
+          <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex justify-between items-center">
+            <div>
+              <span className="text-xs text-gray-500 block">RGB</span>
+              <strong>{rgbValue}</strong>
+            </div>
+            <button
+              onClick={() => handleCopy(rgbValue, 'rgb')}
+              className="px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition"
+            >
+              {copiedField === 'rgb' ? 'Copied!' : 'Copy'}
+            </button>
           </div>
-          <div className="p-3 border rounded-lg bg-gray-50">
-            <strong>HSL:</strong> hsl({hsl.h}, {hsl.s}%, {hsl.l}%)
+
+          <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700 flex justify-between items-center">
+            <div>
+              <span className="text-xs text-gray-500 block">HSL</span>
+              <strong>{hslValue}</strong>
+            </div>
+            <button
+              onClick={() => handleCopy(hslValue, 'hsl')}
+              className="px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition"
+            >
+              {copiedField === 'hsl' ? 'Copied!' : 'Copy'}
+            </button>
           </div>
         </div>
       ) : (
-        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono">
-          <strong>Error:</strong> Invalid HEX color code.
+        <div className="p-3 border border-red-300 bg-red-50 text-red-700 rounded-lg text-sm font-mono dark:bg-red-950 dark:border-red-800 dark:text-red-300">
+          <strong>Error:</strong> Please enter a valid 3-digit or 6-digit HEX color code.
         </div>
       )}
     </div>
