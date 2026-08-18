@@ -1,11 +1,12 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: '/:slug', // будь-який старий шлях
-        destination: '/tools/:slug', // перенаправлення на новий
+        // Перенаправляє все, КРІМ about, privacy, terms та самої папки tools
+        source: '/:slug((?!about|privacy|terms|tools).*)',
+        destination: '/tools/:slug',
         permanent: true,
       },
     ];
