@@ -46,9 +46,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${tool.name} - Free Online Tool`,
     description: tool.description,
+    alternates: {
+      canonical: `https://100devtoolshub.com/${tool.slug}`,
+    },
     openGraph: {
       title: `${tool.name} - Free Online Tool`,
       description: tool.description,
+      url: `https://100devtoolshub.com/${tool.slug}`,
       type: 'website',
     },
   };
@@ -68,8 +72,28 @@ export default async function ToolPage({ params }: Props) {
     notFound();
   }
 
+  const jsonLd = tool.faqs && tool.faqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: tool.faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  } : null;
+
   return (
     <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-12">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+
       <div>
         <h1 className="text-3xl font-bold mb-2">{tool.name}</h1>
         <p className="text-gray-600">{tool.description}</p>
