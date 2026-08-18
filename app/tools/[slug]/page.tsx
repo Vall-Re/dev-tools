@@ -46,12 +46,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${tool.name} - Free Online Tool`,
     description: tool.description,
     alternates: {
-      canonical: `https://100devtoolshub.com/${tool.slug}`,
+      canonical: `https://100devtoolshub.com/tools/${tool.slug}`,
     },
     openGraph: {
       title: `${tool.name} - Free Online Tool`,
       description: tool.description,
-      url: `https://100devtoolshub.com/${tool.slug}`,
+      url: `https://100devtoolshub.com/tools/${tool.slug}`,
       type: 'website',
     },
   };
