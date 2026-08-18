@@ -46,7 +46,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    // Покращений SEO Title з ключовим словом Online
     title: `${tool.name} Online – Free Developer Tool`,
     description: `${tool.description} Fast, secure, and runs entirely in your browser with no data saved.`,
     alternates: {
@@ -92,7 +91,6 @@ export default async function ToolPage({ params }: Props) {
     })),
   } : null;
 
-  // Покращена SoftwareApplication Schema з категоріями
   const appSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
@@ -109,7 +107,7 @@ export default async function ToolPage({ params }: Props) {
   };
 
   return (
-    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-12">
+    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-12 text-gray-100">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
@@ -122,16 +120,16 @@ export default async function ToolPage({ params }: Props) {
       )}
 
       <div>
-        <nav className="text-sm text-gray-500 mb-4">
-          <Link href="/" className="hover:underline">Home</Link> &gt;{' '}
-          <Link href="/tools" className="hover:underline">Tools</Link> &gt;{' '}
-          <span className="text-gray-900 font-medium">{tool.name}</span>
+        <nav className="text-sm text-gray-400 mb-4">
+          <Link href="/" className="hover:text-blue-400 transition-colors">Home</Link> &gt;{' '}
+          <Link href="/tools" className="hover:text-blue-400 transition-colors">Tools</Link> &gt;{' '}
+          <span className="text-gray-200 font-medium">{tool.name}</span>
         </nav>
-        <h1 className="text-3xl font-bold mb-2">{tool.name}</h1>
-        <p className="text-gray-600 text-lg">{tool.description}</p>
+        <h1 className="text-3xl font-bold mb-2 text-gray-100">{tool.name}</h1>
+        <p className="text-gray-400 text-lg">{tool.description}</p>
       </div>
 
-      <div className="p-6 border rounded-lg bg-white shadow-sm">
+      <div className="p-6 border border-gray-800 rounded-lg bg-gray-900/60 shadow-sm">
         {slug === 'json-formatter' && <JsonFormatter />}
         {slug === 'base64-encoder-decoder' && <Base64Converter />}
         {slug === 'url-encoder-decoder' && <UrlConverter />}
@@ -160,9 +158,9 @@ export default async function ToolPage({ params }: Props) {
       </div>
 
       {tool.howToUse && tool.howToUse.length > 0 && (
-        <section className="space-y-4 pt-6 border-t">
-          <h2 className="text-2xl font-semibold">How to Use {tool.name}</h2>
-          <ol className="list-decimal list-inside space-y-2 text-gray-700">
+        <section className="space-y-4 pt-6 border-t border-gray-800">
+          <h2 className="text-2xl font-semibold text-gray-100">How to Use {tool.name}</h2>
+          <ol className="list-decimal list-inside space-y-2 text-gray-300">
             {tool.howToUse.map((step, idx) => (
               <li key={idx} className="leading-relaxed">{step}</li>
             ))}
@@ -171,9 +169,9 @@ export default async function ToolPage({ params }: Props) {
       )}
 
       {tool.features && tool.features.length > 0 && (
-        <section className="space-y-4 pt-6 border-t">
-          <h2 className="text-2xl font-semibold">Key Features</h2>
-          <ul className="list-disc list-inside space-y-2 text-gray-700">
+        <section className="space-y-4 pt-6 border-t border-gray-800">
+          <h2 className="text-2xl font-semibold text-gray-100">Key Features</h2>
+          <ul className="list-disc list-inside space-y-2 text-gray-300">
             {tool.features.map((feat, idx) => (
               <li key={idx} className="leading-relaxed">{feat}</li>
             ))}
@@ -181,15 +179,15 @@ export default async function ToolPage({ params }: Props) {
         </section>
       )}
 
-      <section className="space-y-4 pt-6 border-t">
-        <h2 className="text-2xl font-semibold">About {tool.name}</h2>
-        <p className="text-gray-700 leading-relaxed whitespace-pre-line">{tool.aboutText}</p>
+      <section className="space-y-4 pt-6 border-t border-gray-800">
+        <h2 className="text-2xl font-semibold text-gray-100">About {tool.name}</h2>
+        <p className="text-gray-300 leading-relaxed whitespace-pre-line">{tool.aboutText}</p>
       </section>
 
       {tool.useCases && tool.useCases.length > 0 && (
-        <section className="space-y-4 pt-6 border-t">
-          <h2 className="text-2xl font-semibold">Common Use Cases</h2>
-          <ul className="list-disc list-inside space-y-2 text-gray-700">
+        <section className="space-y-4 pt-6 border-t border-gray-800">
+          <h2 className="text-2xl font-semibold text-gray-100">Common Use Cases</h2>
+          <ul className="list-disc list-inside space-y-2 text-gray-300">
             {tool.useCases.map((useCase, idx) => (
               <li key={idx} className="leading-relaxed">{useCase}</li>
             ))}
@@ -198,13 +196,13 @@ export default async function ToolPage({ params }: Props) {
       )}
 
       {tool.faqs && tool.faqs.length > 0 && (
-        <section className="space-y-6 pt-6 border-t">
-          <h2 className="text-2xl font-semibold">Frequently Asked Questions</h2>
+        <section className="space-y-6 pt-6 border-t border-gray-800">
+          <h2 className="text-2xl font-semibold text-gray-100">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {tool.faqs.map((faq, index) => (
-              <div key={index} className="p-4 border rounded-lg bg-gray-50">
-                <h3 className="font-semibold text-lg mb-1">{faq.question}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
+              <div key={index} className="p-4 border border-gray-800 rounded-lg bg-gray-900/60">
+                <h3 className="font-semibold text-lg mb-1 text-gray-200">{faq.question}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{faq.answer}</p>
               </div>
             ))}
           </div>
@@ -212,17 +210,17 @@ export default async function ToolPage({ params }: Props) {
       )}
 
       {relatedTools.length > 0 && (
-        <section className="space-y-4 pt-6 border-t">
-          <h2 className="text-2xl font-semibold">Related Tools</h2>
+        <section className="space-y-4 pt-6 border-t border-gray-800">
+          <h2 className="text-2xl font-semibold text-gray-100">Related Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {relatedTools.map((relTool) => (
               <Link
                 key={relTool.slug}
                 href={`/tools/${relTool.slug}`}
-                className="p-4 border rounded-lg hover:border-blue-500 transition-colors bg-white shadow-sm block"
+                className="p-4 border border-gray-800 rounded-lg hover:border-blue-500 transition-colors bg-gray-900/60 shadow-sm block group"
               >
-                <h3 className="font-semibold text-blue-600 mb-1">{relTool.name}</h3>
-                <p className="text-sm text-gray-600 line-clamp-2">{relTool.description}</p>
+                <h3 className="font-semibold text-blue-400 group-hover:text-blue-300 mb-1">{relTool.name}</h3>
+                <p className="text-sm text-gray-400 line-clamp-2">{relTool.description}</p>
               </Link>
             ))}
           </div>
