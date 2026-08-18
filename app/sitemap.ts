@@ -5,9 +5,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://100devtoolshub.com';
 
   const toolEntries: MetadataRoute.Sitemap = tools.map((tool) => ({
-    url: `${baseUrl}/${tool.slug}`,
+    url: `${baseUrl}/tools/${tool.slug}`, 
     lastModified: new Date(),
-    changeFrequency: 'monthly',
+    changeFrequency: 'weekly',
     priority: 0.8,
   }));
 
