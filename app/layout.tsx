@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "100 DevTools Hub | Free Client-Side Online Tools for Developers",
   description: "Fast, secure, client-side web tools for developers. Formatters, converters, generators, and encoders with zero server-side storage.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
