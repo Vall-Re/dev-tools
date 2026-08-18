@@ -1,35 +1,21 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata = {
-  title: 'Terms of Service | 100 DevTools Hub',
-  description: 'Terms of Service for 100 DevTools Hub.',
+export const metadata: Metadata = {
+  title: 'Terms of Service – 100 DevTools Hub',
+  description: 'Terms and conditions for using 100 DevTools Hub developer utilities.',
 };
 
 export default function TermsPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 text-gray-800">
-      <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
-      <p className="mb-4">Last updated: August 2026</p>
-
-      <p className="mb-4">
-        By accessing and using <strong>100 DevTools Hub</strong> (https://100devtoolshub.com), you accept and agree to be bound by the terms and provision of this agreement.
+    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-6 text-gray-300">
+      <nav className="text-sm text-gray-500 mb-4">
+        <Link href="/" className="hover:underline">Home</Link> &gt; <span className="text-gray-100">Terms of Service</span>
+      </nav>
+      <h1 className="text-3xl font-bold text-gray-100">Terms of Service</h1>
+      <p className="leading-relaxed">
+        By accessing 100 DevTools Hub, you agree to use our free online developer utilities responsibly. The tools are provided "as is" without warranty of any kind.
       </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-3">Use License</h2>
-      <p className="mb-4">
-        All utilities provided on this website are completely free to use for personal, educational, and commercial development purposes. All computations and processing take place locally within your browser.
-      </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-3">Disclaimer</h2>
-      <p className="mb-4">
-        The materials and tools on 100 DevTools Hub are provided on an 'as is' basis. We make no warranties, expressed or implied, regarding accuracy, completeness, or uptime guarantees.
-      </p>
-
-      <div className="mt-8 pt-6 border-t">
-        <Link href="/" className="text-blue-600 hover:underline">
-          &larr; Back to Tools
-        </Link>
-      </div>
-    </div>
+    </main>
   );
 }

@@ -1,34 +1,25 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata = {
-  title: 'About Us | 100 DevTools Hub',
-  description: 'Learn more about 100 DevTools Hub, a fast, client-side, developer-first tool repository.',
+export const metadata: Metadata = {
+  title: 'About Us – 100 DevTools Hub',
+  description: 'Learn more about 100 DevTools Hub, our privacy-first philosophy, and our mission to provide fast, secure developer utilities.',
 };
 
 export default function AboutPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 text-gray-800">
-      <h1 className="text-3xl font-bold mb-6">About 100 DevTools Hub</h1>
-      
-      <p className="mb-4">
-        Welcome to <strong>100 DevTools Hub</strong>. This platform was created to provide developers, privacy-conscious engineers, and creators with fast, reliable, and secure daily utilities.
+    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-6 text-gray-300">
+      <nav className="text-sm text-gray-500 mb-4">
+        <Link href="/" className="hover:underline">Home</Link> &gt; <span className="text-gray-100">About Us</span>
+      </nav>
+      <h1 className="text-3xl font-bold text-gray-100">About 100 DevTools Hub</h1>
+      <p className="leading-relaxed">
+        100 DevTools Hub is a professional, client-side developer utilities platform designed for maximum speed, security, and privacy. 
       </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-3">Client-Side First & Privacy-Focused</h2>
-      <p className="mb-4">
-        Unlike many online conversion tools that send your raw code or sensitive tokens to back-end servers, all utilities on 100 DevTools Hub run 100% locally inside your web browser. Your data never leaves your environment.
+      <h2 className="text-xl font-semibold text-gray-100 pt-4">Our Privacy Philosophy</h2>
+      <p className="leading-relaxed">
+        All data processing happens right in your browser using modern web technologies. We do not store, log, or transmit your sensitive code, JSON, tokens, or text data to any server. Your work stays strictly yours.
       </p>
-
-      <h2 className="text-xl font-semibold mt-6 mb-3">Our Mission</h2>
-      <p className="mb-4">
-        Our mission is to build a modern, zero-latency repository of high-quality tools without intrusive popups or heavy server overhead, making web development friction-free.
-      </p>
-
-      <div className="mt-8 pt-6 border-t">
-        <Link href="/" className="text-blue-600 hover:underline">
-          &larr; Back to Tools
-        </Link>
-      </div>
-    </div>
+    </main>
   );
 }
