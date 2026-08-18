@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface BinaryParticle {
   id: number;
@@ -16,8 +17,9 @@ interface BinaryParticle {
 
 export default function Header() {
   const [particles, setParticles] = useState<BinaryParticle[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Генерація хаотичних блакитно-рожевих бінарних елементів для фону хедера
   useEffect(() => {
     const colors = [
       'text-blue-400', 
@@ -40,10 +42,20 @@ export default function Header() {
     setParticles(generated);
   }, []);
 
+  const handleCategoryClick = (category: string) => {
+    if (pathname === '/') {
+      // Якщо ми вже на головній — просто міняємо хеш і викликаємо подію
+      window.location.hash = category;
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } else {
+      // Якщо ми на іншій сторінці (наприклад, усередині інструменту) — перенаправляємо на головну з хешем
+      router.push(`/#${category}`);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-gray-950/85 border-b border-gray-800/80 text-gray-100 overflow-hidden relative">
       
-      {/* Хаотичні фонові цифри двійкового коду в блакитно-рожевих кольорах */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-60">
         {particles.map((p) => (
           <span
@@ -63,7 +75,6 @@ export default function Header() {
 
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4 relative z-10">
         
-        {/* Логотип */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-36 h-12 flex items-center">
@@ -78,26 +89,24 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Навігація по категоріях на головну сторінку */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
-          <Link href="/#formatters" className="hover:text-blue-400 transition-colors">
+          <button onClick={() => handleCategoryClick('formatters')} className="hover:text-blue-400 transition-colors bg-transparent border-none cursor-pointer">
             Formatters
-          </Link>
-          <Link href="/#encoders" className="hover:text-cyan-400 transition-colors">
+          </button>
+          <button onClick={() => handleCategoryClick('encoders')} className="hover:text-cyan-400 transition-colors bg-transparent border-none cursor-pointer">
             Encoders
-          </Link>
-          <Link href="/#generators" className="hover:text-pink-500 transition-colors">
+          </button>
+          <button onClick={() => handleCategoryClick('generators')} className="hover:text-pink-500 transition-colors bg-transparent border-none cursor-pointer">
             Generators
-          </Link>
-          <Link href="/#utilities" className="hover:text-purple-400 transition-colors">
+          </button>
+          <button onClick={() => handleCategoryClick('utilities')} className="hover:text-purple-400 transition-colors bg-transparent border-none cursor-pointer">
             Utilities
-          </Link>
-          <Link href="/#converters" className="hover:text-blue-400 transition-colors">
+          </button>
+          <button onClick={() => handleCategoryClick('converters')} className="hover:text-blue-400 transition-colors bg-transparent border-none cursor-pointer">
             Converters
-          </Link>
+          </button>
         </nav>
 
-        {/* Статус онлайн */}
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 px-2.5 py-1 rounded-full">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
