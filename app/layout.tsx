@@ -37,6 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1">{children}</main>
         <footer className="mt-auto py-6 border-t border-gray-200 text-center text-sm text-gray-500 bg-white">
           <div className="space-x-4 mb-2">
+            <Link href="/about" className="hover:underline hover:text-gray-700">
+              About Us
+            </Link>
+            <span>•</span>
             <Link href="/privacy" className="hover:underline hover:text-gray-700">
               Privacy Policy
             </Link>
