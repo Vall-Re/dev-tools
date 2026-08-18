@@ -44,12 +44,22 @@ export default function Header() {
 
   const handleCategoryClick = (category: string) => {
     if (pathname === '/') {
-      // Якщо ми вже на головній — просто міняємо хеш і викликаємо подію
       window.location.hash = category;
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     } else {
-      // Якщо ми на іншій сторінці (наприклад, усередині інструменту) — перенаправляємо на головну з хешем
       router.push(`/#${category}`);
+    }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (pathname === '/') {
+      // Якщо на головній — просто прибираємо хеш і оновлюємо фільтр на All
+      window.location.hash = '';
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } else {
+      // Якщо на іншій сторінці — переходимо на головну без хешу (фільтр All за замовчуванням)
+      router.push('/');
     }
   };
 
@@ -75,18 +85,19 @@ export default function Header() {
 
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4 relative z-10">
         
+        {/* Логотип із повним скиданням фільтра на All */}
         <div className="flex items-center">
-          <Link href="/" className="flex items-center gap-3 group">
+          <a href="/" onClick={handleLogoClick} className="flex items-center gap-3 group cursor-pointer">
             <div className="relative w-36 h-12 flex items-center">
               <Image
-                src="/logo.webp"
+                src="/logo.png"
                 alt="100DevToolsHub Logo"
                 fill
                 className="object-contain object-left group-hover:opacity-90 transition"
                 priority
               />
             </div>
-          </Link>
+          </a>
         </div>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
