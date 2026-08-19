@@ -4,6 +4,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <p>&copy; {new Date().getFullYear()} 100 DevTools Hub. All rights reserved.</p>
         </footer>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
