@@ -1,4 +1,6 @@
 import ToolSearch from '@/components/ToolSearch';
+import { tools } from '@/data/tools';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -13,6 +15,18 @@ export default function Home() {
       </header>
 
       <ToolSearch />
+
+      {/* Статичний список посилань для SEO-роботів, щоб уникнути помилки "orphaned pages" */}
+      <section className="sr-only">
+        <h2>All Developer Tools Directory</h2>
+        <ul>
+          {tools.map((tool) => (
+            <li key={tool.slug}>
+              <Link href={`/tools/${tool.slug}`}>{tool.name}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }
