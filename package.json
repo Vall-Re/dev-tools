@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "dompurify": "^3.4.13",
     "marked": "^18.0.10",
     "next": "16.3.1",
