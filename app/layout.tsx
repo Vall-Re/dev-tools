@@ -17,8 +17,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "100 DevTools Hub | Free Client-Side Online Tools for Developers",
-  description: "Fast, secure, client-side web tools for developers. Formatters, converters, generators, and encoders with zero server-side storage.",
+  metadataBase: new URL('https://100devtoolshub.com'),
+
+  title: {
+    default: '100 DevTools Hub | Free Online Developer Tools',
+    template: '%s | 100 DevTools Hub',
+  },
+
+  description:
+    'Fast, privacy-focused developer tools that run directly in your browser. Format JSON, encode data, generate hashes, convert text, and more without uploading your data.',
+
+  applicationName: '100 DevTools Hub',
+
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: '100 DevTools Hub',
+    title: '100 DevTools Hub | Free Online Developer Tools',
+    description:
+      'Fast, privacy-focused developer tools that run directly in your browser without uploading your data.',
+  },
+
+  twitter: {
+    card: 'summary',
+    title: '100 DevTools Hub | Free Online Developer Tools',
+    description:
+      'Fast, privacy-focused developer tools that run directly in your browser without uploading your data.',
+  },
+
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.png',
