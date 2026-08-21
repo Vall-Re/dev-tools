@@ -36,7 +36,11 @@ export default function ToolsIndexPage() {
           const formattedCategoryName = category.charAt(0).toUpperCase() + category.slice(1);
 
           return (
-            <section key={category} id={category} className="space-y-4">
+            <section
+              key={category}
+              id={category}
+              className="scroll-mt-28 space-y-6"
+            >
               <h2 className="text-2xl font-bold border-b border-gray-800 pb-2 capitalize">{formattedCategoryName}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryTools.map((tool) => (
