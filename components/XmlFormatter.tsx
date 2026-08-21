@@ -13,7 +13,7 @@ export default function XmlFormatter() {
     const tab = ' '.repeat(indentSpaces);
 
     const formatNode = (node: Node, level: number): string => {
-      let indent = tab.repeat(level);
+      const indent = tab.repeat(level);
 
       if (node.nodeType === Node.TEXT_NODE) {
         const text = node.textContent?.trim();
