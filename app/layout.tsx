@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
         </script>
       </head>
-      <body className="min-h-full flex flex-col bg-gray-950 text-gray-100">
+      <body className="min-h-full flex flex-col">
         <Header />
         <div className="flex-1">{children}</div>
         <footer className="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-400 bg-gray-900/60">
