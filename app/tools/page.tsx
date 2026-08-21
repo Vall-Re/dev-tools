@@ -29,7 +29,7 @@ export default function ToolsIndexPage() {
       </div>
 
       {/* Categories & Tool Cards */}
-      <div className="space-y-12">
+      <div id="categories" className="scroll-mt-28 space-y-12">
         {categories.map((category) => {
           const categoryTools = tools.filter((t) => t.category.toLowerCase() === category);
           // Робимо першу літеру великою для красивого заголовка секції

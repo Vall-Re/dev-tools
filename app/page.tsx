@@ -14,7 +14,9 @@ export default function Home() {
         </p>
       </header>
 
-      <ToolSearch />
+      <div id="search" className="scroll-mt-28">
+        <ToolSearch />
+      </div>
 
       {/* Статичний список посилань для SEO-роботів, щоб уникнути помилки "orphaned pages" */}
       <section className="sr-only">
