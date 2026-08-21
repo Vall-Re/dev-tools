@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 type HashState = {
   sha1: string;
@@ -20,38 +20,46 @@ export default function MultiHashGenerator() {
     sha512: '',
   });
 
-  const calculateHashes = useCallback(async (inputText: string) => {
-    if (!inputText) {
-      setHashes({ sha1: '', sha256: '', sha384: '', sha512: '' });
-      return;
-    }
+  useEffect(() => {
+    if (!text) return;
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(inputText);
+    let cancelled = false;
 
-    const hashAlgo = async (algorithm: string) => {
-      const buffer = await crypto.subtle.digest(algorithm, data);
-      const array = Array.from(new Uint8Array(buffer));
-      return array.map((b) => b.toString(16).padStart(2, '0')).join('');
+    const calculateHashes = async () => {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(text);
+
+      const hashAlgo = async (algorithm: string) => {
+        const buffer = await crypto.subtle.digest(algorithm, data);
+        const array = Array.from(new Uint8Array(buffer));
+
+        return array
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+      };
+
+      try {
+        const [sha1, sha256, sha384, sha512] = await Promise.all([
+          hashAlgo('SHA-1'),
+          hashAlgo('SHA-256'),
+          hashAlgo('SHA-384'),
+          hashAlgo('SHA-512'),
+        ]);
+
+        if (!cancelled) {
+          setHashes({ sha1, sha256, sha384, sha512 });
+        }
+      } catch (error) {
+        console.error('Error generating hashes:', error);
+      }
     };
 
-    try {
-      const [sha1, sha256, sha384, sha512] = await Promise.all([
-        hashAlgo('SHA-1'),
-        hashAlgo('SHA-256'),
-        hashAlgo('SHA-384'),
-        hashAlgo('SHA-512'),
-      ]);
+    calculateHashes();
 
-      setHashes({ sha1, sha256, sha384, sha512 });
-    } catch (error) {
-      console.error('Error generating hashes:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    calculateHashes(text);
-  }, [text, calculateHashes]);
+    return () => {
+      cancelled = true;
+    };
+  }, [text]);
 
   const handleCopy = async (hashValue: string, key: string) => {
     if (!hashValue) return;
@@ -85,7 +93,15 @@ export default function MultiHashGenerator() {
             </label>
             {text && (
               <button
-                onClick={() => setText('')}
+                onClick={() => {
+                  setText('');
+                  setHashes({
+                    sha1: '',
+                    sha256: '',
+                    sha384: '',
+                    sha512: '',
+                  });
+                }}
                 className="text-xs text-red-400 hover:underline"
               >
                 Clear
@@ -96,7 +112,19 @@ export default function MultiHashGenerator() {
 
         <textarea
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setText(value);
+
+            if (!value) {
+              setHashes({
+                sha1: '',
+                sha256: '',
+                sha384: '',
+                sha512: '',
+              });
+            }
+          }}
           placeholder="Type or paste string to generate hashes in real time..."
           className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
         />
