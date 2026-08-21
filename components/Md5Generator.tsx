@@ -47,20 +47,20 @@ function md5(string: string) {
   }
 
   function convertToWordArray(string: string) {
-    let lMessageLength = string.length;
-    let lNumberOfWords_temp1 = lMessageLength + 8;
-    let lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
-    let lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
-    let lWordArray = Array(lNumberOfWords - 1);
+    const lMessageLength = string.length;
+    const lNumberOfWords_temp1 = lMessageLength + 8;
+    const lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
+    const lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
+    const lWordArray = Array(lNumberOfWords - 1);
     let lBytePosition = 0;
     let lByteCount = 0;
     while (lByteCount < lMessageLength) {
-      let lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
+      const lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
       lBytePosition = (lByteCount % 4) * 8;
       lWordArray[lWordIndex] = (lWordArray[lWordIndex] | (string.charCodeAt(lByteCount) << lBytePosition));
       lByteCount++;
     }
-    let lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
+    const lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
     lBytePosition = (lByteCount % 4) * 8;
     lWordArray[lWordIndex] = lWordArray[lWordIndex] | (0x80 << lBytePosition);
     lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
@@ -78,12 +78,12 @@ function md5(string: string) {
     return WordToHexValue;
   }
 
-  let x = Array();
+  let x: number[] = [];
   let k, AA, BB, CC, DD, a, b, c, d;
-  let S11=7, S12=12, S13=17, S14=22;
-  let S21=5, S22=9, S23=14, S24=20;
-  let S31=4, S32=11, S33=16, S34=23;
-  let S41=6, S42=10, S43=15, S44=21;
+  const S11=7, S12=12, S13=17, S14=22;
+  const S21=5, S22=9, S23=14, S24=20;
+  const S31=4, S32=11, S33=16, S34=23;
+  const S41=6, S42=10, S43=15, S44=21;
 
   x = convertToWordArray(string);
   a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
