@@ -45,15 +45,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex-1">{children}</div>
         <footer className="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-400 bg-gray-900/60">
           <div className="space-x-4 mb-2">
-            <Link href="https://100devtoolshub.com/about" className="hover:underline hover:text-gray-200">
+            <Link href="/about" className="hover:underline hover:text-gray-200">
               About Us
             </Link>
             <span>•</span>
-            <Link href="https://100devtoolshub.com/privacy" className="hover:underline hover:text-gray-200">
+            <Link href="/privacy" className="hover:underline hover:text-gray-200">
               Privacy Policy
             </Link>
             <span>•</span>
-            <Link href="https://100devtoolshub.com/terms" className="hover:underline hover:text-gray-200">
+            <Link href="/terms" className="hover:underline hover:text-gray-200">
               Terms of Service
             </Link>
           </div>
