@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Sha256Generator() {
   const [input, setInput] = useState('');
@@ -8,28 +8,35 @@ export default function Sha256Generator() {
   const [isUppercase, setIsUppercase] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const calculateHash = useCallback(async (text: string) => {
-    if (!text) {
-      setHash('');
-      return;
-    }
-    try {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(text);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
-      setHash(hashHex);
-    } catch (error) {
-      console.error('Error calculating SHA-256 hash:', error);
-    }
-  }, []);
-
   useEffect(() => {
-    calculateHash(input);
-  }, [input, calculateHash]);
+    if (!input) return;
+
+    let cancelled = false;
+
+    const calculateHash = async () => {
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(input);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+
+        if (!cancelled) {
+          setHash(hashHex);
+        }
+      } catch (error) {
+        console.error('Error calculating SHA-256 hash:', error);
+      }
+    };
+
+    calculateHash();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [input]);
 
   const handleCopy = async () => {
     if (!hash) return;
@@ -59,7 +66,10 @@ export default function Sha256Generator() {
             </label>
             {input && (
               <button
-                onClick={() => setInput('')}
+                onClick={() => {
+                  setInput('');
+                  setHash('');
+                }}
                 className="text-xs text-red-400 hover:underline"
               >
                 Clear
