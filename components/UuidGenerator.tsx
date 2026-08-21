@@ -1,23 +1,31 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+
+const DEFAULT_UUID_COUNT = 5;
+
+const createUuids = (quantity: number): string[] =>
+  Array.from({ length: quantity }, () => crypto.randomUUID());
 
 export default function UuidGenerator() {
+  const [count, setCount] = useState<number>(DEFAULT_UUID_COUNT);
   const [uuids, setUuids] = useState<string[]>([]);
-  const [count, setCount] = useState<number>(5);
   const [useUppercase, setUseUppercase] = useState<boolean>(false);
   const [removeHyphens, setRemoveHyphens] = useState<boolean>(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copiedAll, setCopiedAll] = useState<boolean>(false);
 
-  const generateUuids = useCallback(() => {
-    const rawUuids = Array.from({ length: count }, () => crypto.randomUUID());
-    setUuids(rawUuids);
-  }, [count]);
-
   useEffect(() => {
-    generateUuids();
-  }, [generateUuids]);
+    const frameId = requestAnimationFrame(() => {
+      setUuids(createUuids(DEFAULT_UUID_COUNT));
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  const generateUuids = () => {
+    setUuids(createUuids(count));
+  };
 
   const formatUuid = (uuid: string): string => {
     let result = uuid;
