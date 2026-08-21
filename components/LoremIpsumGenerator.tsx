@@ -1,29 +1,28 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 
 type GenType = 'paragraphs' | 'words' | 'sentences' | 'lists';
+
+const sampleParagraphs = [
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+  'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  'Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.',
+  'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris ut leo. Cras dolor metus, ultrices in, egestas egestas, dapibus id, elit. Integer vel magna.',
+  'Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet.'
+];
 
 export default function LoremIpsumGenerator() {
   const [count, setCount] = useState(3);
   const [type, setType] = useState<GenType>('paragraphs');
   const [startWithLorem, setStartWithLorem] = useState(true);
   const [includeHtmlTags, setIncludeHtmlTags] = useState(false);
-  const [output, setOutput] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const sampleParagraphs = [
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-    'Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.',
-    'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris ut leo. Cras dolor metus, ultrices in, egestas egestas, dapibus id, elit. Integer vel magna.',
-    'Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet.'
-  ];
 
-  const generateLorem = useCallback(() => {
+  const output = useMemo(() => {
     if (count <= 0) {
-      setOutput('');
-      return;
+      return '';
     }
 
     let result = '';
@@ -69,18 +68,14 @@ export default function LoremIpsumGenerator() {
       const allSentences = sampleParagraphs.join(' ').split(/(?<=\.)\s+/);
       const items = [];
       for (let i = 0; i < count; i++) {
-        let item = allSentences[i % allSentences.length].replace(/\.$/, '');
+        const item = allSentences[i % allSentences.length].replace(/\.$/, '');
         items.push(includeHtmlTags ? `  <li>${item}</li>` : `• ${item}`);
       }
       result = includeHtmlTags ? `<ul>\n${items.join('\n')}\n</ul>` : items.join('\n');
     }
 
-    setOutput(result);
+    return result;
   }, [count, type, startWithLorem, includeHtmlTags]);
-
-  useEffect(() => {
-    generateLorem();
-  }, [generateLorem]);
 
   const handleCopy = async () => {
     if (!output) return;
@@ -101,7 +96,7 @@ export default function LoremIpsumGenerator() {
 
   return (
     <div className="space-y-4 text-gray-100">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium mb-2">Count</label>
           <input
@@ -136,7 +131,7 @@ export default function LoremIpsumGenerator() {
               onChange={(e) => setStartWithLorem(e.target.checked)}
               className="rounded text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700"
             />
-            Start with "Lorem ipsum"
+            Start with &quot;Lorem ipsum&quot;
           </label>
           <label className="flex items-center gap-2 text-sm cursor-pointer select-none text-gray-300">
             <input
@@ -147,15 +142,6 @@ export default function LoremIpsumGenerator() {
             />
             Wrap with HTML tags
           </label>
-        </div>
-
-        <div className="flex items-end">
-          <button
-            onClick={generateLorem}
-            className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm"
-          >
-            Regenerate
-          </button>
         </div>
       </div>
 
