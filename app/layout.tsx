@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-full flex flex-col bg-gray-950 text-gray-100">
         <Header />
-        <main className="flex-1">{children}</main>
+        <div className="flex-1">{children}</div>
         <footer className="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-400 bg-gray-900/60">
           <div className="space-x-4 mb-2">
             <Link href="https://100devtoolshub.com/about" className="hover:underline hover:text-gray-200">
