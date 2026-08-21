@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         <script 
@@ -43,21 +43,38 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         <Header />
         <div className="flex-1">{children}</div>
-        <footer className="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-400 bg-gray-900/60">
-          <div className="space-x-4 mb-2">
-            <Link href="/about" className="hover:underline hover:text-gray-200">
-              About Us
-            </Link>
-            <span>•</span>
-            <Link href="/privacy" className="hover:underline hover:text-gray-200">
-              Privacy Policy
-            </Link>
-            <span>•</span>
-            <Link href="/terms" className="hover:underline hover:text-gray-200">
-              Terms of Service
-            </Link>
+        <footer className="mt-auto border-t border-border bg-surface-900/60">
+          <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 px-6 py-6 text-sm text-text-secondary">
+            <nav
+              aria-label="Footer navigation"
+              className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
+            >
+              <Link
+                href="/about"
+                className="transition-colors hover:text-text-primary"
+              >
+                About Us
+              </Link>
+
+              <Link
+                href="/privacy"
+                className="transition-colors hover:text-text-primary"
+              >
+                Privacy Policy
+              </Link>
+
+              <Link
+                href="/terms"
+                className="transition-colors hover:text-text-primary"
+              >
+                Terms of Service
+              </Link>
+            </nav>
+
+            <p>
+              &copy; {new Date().getFullYear()} 100 DevTools Hub. All rights reserved.
+            </p>
           </div>
-          <p>&copy; {new Date().getFullYear()} 100 DevTools Hub. All rights reserved.</p>
         </footer>
         <Analytics />
         <SpeedInsights />
