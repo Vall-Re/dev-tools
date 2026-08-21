@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 
 interface TokenStatus {
   isExpired: boolean;
@@ -33,7 +33,7 @@ export default function JwtDecoder() {
     );
   };
 
-  const parseToken = useCallback((jwtToken: string) => {
+  const parseToken = (jwtToken: string) => {
     if (!jwtToken.trim()) {
       setHeader('');
       setPayload('');
@@ -95,11 +95,7 @@ export default function JwtDecoder() {
       setPayload('');
       setStatus(null);
     }
-  }, []);
-
-  useEffect(() => {
-    parseToken(token);
-  }, [token, parseToken]);
+  };
 
   const handleCopyHeader = async () => {
     if (!header) return;
@@ -125,6 +121,7 @@ export default function JwtDecoder() {
 
   const handleLoadSample = () => {
     setToken(sampleJwt);
+    parseToken(sampleJwt);
   };
 
   return (
@@ -150,7 +147,11 @@ export default function JwtDecoder() {
 
       <textarea
         value={token}
-        onChange={(e) => setToken(e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value;
+          setToken(value);
+          parseToken(value);
+        }}
         placeholder="Paste JWT token here (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...)"
         className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
       />
@@ -169,7 +170,13 @@ export default function JwtDecoder() {
         }`}>
           <div>
             <span className="opacity-70 block">Token Status</span>
-            <strong>{status.isExpired ? 'Expired' : 'Active / Valid'}</strong>
+            <strong>
+              {status.isExpired
+                ? 'Expired'
+                : status.expDate
+                  ? 'Not Expired'
+                  : 'No Expiration Claim'}
+            </strong>
           </div>
           {status.iatDate && (
             <div>
