@@ -32,7 +32,7 @@ export default function Base64Converter() {
       const bytes = Uint8Array.from(binString, (m) => m.charCodeAt(0));
       setOutput(new TextDecoder().decode(bytes));
       setError('');
-    } catch (err: unknown) {
+    } catch {
       setError('Invalid Base64 string format. Ensure the input is a valid Base64 payload.');
       setOutput('');
     }
