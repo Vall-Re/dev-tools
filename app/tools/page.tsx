@@ -2,12 +2,30 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { tools } from '@/data/tools';
 
+const toolsDescription =
+  'Browse free online developer tools for formatting, encoding, converting, generating, hashing, debugging, and everyday development tasks.';
+
 export const metadata: Metadata = {
   title: 'Developer Tools',
-  description:
-    'Browse free online developer tools for formatting, encoding, converting, generating, hashing, debugging, and everyday development tasks.',
+  description: toolsDescription,
+
   alternates: {
     canonical: '/tools',
+  },
+
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: '100 DevTools Hub',
+    title: 'Developer Tools | 100 DevTools Hub',
+    description: toolsDescription,
+    url: '/tools',
+  },
+
+  twitter: {
+    card: 'summary',
+    title: 'Developer Tools | 100 DevTools Hub',
+    description: toolsDescription,
   },
 };
 
@@ -19,9 +37,38 @@ const categories = Array.from(
   tools: tools.filter((tool) => tool.category === category),
 }));
 
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: 'https://100devtoolshub.com/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Tools',
+      item: 'https://100devtoolshub.com/tools',
+    },
+  ],
+};
+
 export default function ToolsIndexPage() {
   return (
     <main className="min-h-screen">
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbSchema
+          ),
+        }}
+      />
+
       <section className="border-b border-border">
         <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:py-20">
           <nav
