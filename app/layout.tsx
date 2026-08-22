@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import AdSenseScript from '@/components/AdSenseScript';
 import {
   Geist,
   Geist_Mono,
@@ -80,16 +81,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <head>
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7938500556034307"
-          crossOrigin="anonymous"
-        />
-      </head>
 
       <body className="flex min-h-full flex-col">
         <Header />
+        <AdSenseScript />
 
         <div className="flex-1">
           {children}
