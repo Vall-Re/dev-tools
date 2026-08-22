@@ -10,6 +10,14 @@ export const metadata: Metadata = {
   },
 };
 
+const serializeJsonLd = (
+  value: unknown
+) =>
+  JSON.stringify(value).replace(
+    /</g,
+    '\\u003c'
+  );
+
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
@@ -45,6 +53,17 @@ const categories = Array.from(new Set(tools.map((tool) => tool.category))).map(
 export default function Home() {
   return (
     <main className="min-h-screen">
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            serializeJsonLd(
+              websiteSchema
+            ),
+        }}
+      />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -85,12 +104,12 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link
+              <a
                 href="#search"
                 className="rounded-lg bg-brand-blue px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-cyan"
               >
                 Find a tool
-              </Link>
+              </a>
 
               <Link
                 href="/tools"
