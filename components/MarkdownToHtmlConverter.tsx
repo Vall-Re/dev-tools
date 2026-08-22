@@ -1,53 +1,151 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { marked } from 'marked';
+import { useMemo, useState } from 'react';
 import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+
+interface ConversionResult {
+  html: string;
+  error: string;
+}
+
+const sampleMarkdown = `# Markdown Preview
+
+This is **bold**, *italic*, and ~~strikethrough~~ text.
+
+Visit [Example](https://example.com).
+
+## List
+
+- First item
+- Second item
+- Third item
+
+## Task list
+
+- [x] Parse Markdown
+- [ ] Review HTML output
+
+## Table
+
+| Tool | Status |
+| --- | --- |
+| Markdown | Ready |
+| HTML | Generated |
+
+## Code
+
+\`\`\`javascript
+const message = "Hello, World!";
+console.log(message);
+\`\`\`
+
+> Blockquote example`;
 
 export default function MarkdownToHtmlConverter() {
-  const [markdown, setMarkdown] = useState<string>('');
-  const [copied, setCopied] = useState<boolean>(false);
+  const [markdown, setMarkdown] = useState('');
+  const [copied, setCopied] = useState(false);
 
-  // Налаштування збереження рядків та безпечної генерації
-  marked.setOptions({
-    breaks: true,
-    gfm: true,
-  });
+  const conversion = useMemo<ConversionResult>(() => {
+    if (!markdown.trim()) {
+      return {
+        html: '',
+        error: '',
+      };
+    }
 
-  const rawHtml = useMemo(() => {
-    if (!markdown.trim()) return '';
-    const parsed = marked.parse(markdown) as string;
-    // Санітизація коду від XSS вразливостей
-    return typeof window !== 'undefined' ? DOMPurify.sanitize(parsed) : parsed;
+    try {
+      const normalizedMarkdown = markdown.replace(
+        /^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/,
+        ''
+      );
+
+      const parsed = marked.parse(normalizedMarkdown, {
+        breaks: true,
+        gfm: true,
+        async: false,
+      }) as string;
+
+      const sanitized = DOMPurify.sanitize(parsed, {
+        USE_PROFILES: {
+          html: true,
+        },
+        SANITIZE_NAMED_PROPS: true,
+        FORBID_TAGS: ['style'],
+        FORBID_ATTR: ['style'],
+      });
+
+      return {
+        html: sanitized,
+        error: '',
+      };
+    } catch (error) {
+      return {
+        html: '',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Unable to convert this Markdown.',
+      };
+    }
   }, [markdown]);
 
   const handleCopy = async () => {
-    if (!rawHtml) return;
-    await navigator.clipboard.writeText(rawHtml);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (!conversion.html) return;
+
+    try {
+      await navigator.clipboard.writeText(conversion.html);
+
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      setCopied(false);
+    }
   };
 
   const handleLoadSample = () => {
-    setMarkdown(
-      `# Header 1\n## Header 2\n\nThis is **bold** text and *italic* text with a [Link](https://example.com).\n\n- List Item 1\n- List Item 2\n\n\`\`\`javascript\nconsole.log("Hello, World!");\n\`\`\`\n\n> Blockquote sample`
-    );
+    setMarkdown(sampleMarkdown);
+    setCopied(false);
+  };
+
+  const handleClear = () => {
+    setMarkdown('');
+    setCopied(false);
   };
 
   return (
-    <div className="space-y-6 text-gray-100">
-      <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium">Input Markdown</label>
-        <div className="space-x-2">
+    <div className="space-y-6 text-text-primary">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <label
+          htmlFor="markdown-input"
+          className="text-sm font-medium text-text-primary"
+        >
+          Input Markdown
+        </label>
+
+        <div className="flex items-center gap-2 text-xs">
           <button
+            type="button"
             onClick={handleLoadSample}
-            className="text-xs bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-1 rounded transition"
+            className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
           >
             Load Sample
           </button>
+
+          <span
+            aria-hidden="true"
+            className="text-text-muted"
+          >
+            /
+          </span>
+
           <button
-            onClick={() => setMarkdown('')}
-            className="text-xs bg-red-950 text-red-300 border border-red-800 hover:bg-red-900 px-3 py-1 rounded transition"
+            type="button"
+            onClick={handleClear}
+            className="font-medium text-text-muted transition-colors hover:text-text-primary"
           >
             Clear
           </button>
@@ -55,38 +153,90 @@ export default function MarkdownToHtmlConverter() {
       </div>
 
       <textarea
+        id="markdown-input"
         value={markdown}
-        onChange={(e) => setMarkdown(e.target.value)}
-        placeholder="# Hello World&#10;&#10;Type Markdown here..."
-        className="w-full h-48 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
+        onChange={(event) => {
+          setMarkdown(event.target.value);
+          setCopied(false);
+        }}
+        placeholder={'# Hello World\n\nType Markdown here...'}
+        spellCheck={false}
+        className="h-52 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
       />
 
-      {rawHtml && (
+      <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-4">
+        <p className="text-xs leading-5 text-text-secondary">
+          Markdown is converted to HTML and sanitized before
+          it is displayed or copied. Potentially unsafe HTML
+          such as scripts and event handlers is removed.
+        </p>
+      </div>
+
+      {conversion.error && (
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            Markdown error
+          </p>
+
+          <p className="mt-2 break-words text-sm leading-6 text-text-secondary">
+            {conversion.error}
+          </p>
+        </div>
+      )}
+
+      {conversion.html && (
         <div className="space-y-6">
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium">HTML Output Code</label>
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-text-primary">
+                  Sanitized HTML Output
+                </p>
+
+                <p className="mt-1 text-xs text-text-muted">
+                  This is the HTML used by the preview below.
+                </p>
+              </div>
+
               <button
+                type="button"
                 onClick={handleCopy}
-                className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-medium"
+                className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition hover:bg-success/15"
               >
                 {copied ? 'Copied!' : 'Copy HTML'}
               </button>
             </div>
+
             <textarea
               readOnly
-              value={rawHtml}
-              className="w-full h-40 p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-y-auto focus:outline-none"
+              value={conversion.html}
+              aria-label="Converted HTML output"
+              spellCheck={false}
+              className="h-48 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-success outline-none"
             />
-          </div>
+          </section>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Rendered Live Preview</label>
+          <section className="space-y-3">
+            <div>
+              <p className="text-sm font-medium text-text-primary">
+                Rendered Live Preview
+              </p>
+
+              <p className="mt-1 text-xs text-text-muted">
+                Preview generated from the sanitized HTML output.
+              </p>
+            </div>
+
             <div
-              className="p-4 border rounded-lg bg-gray-900 border-gray-700 text-gray-100 prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: rawHtml }}
+              className="min-h-32 overflow-auto rounded-xl border border-border bg-surface-900 p-5 text-text-primary [&_a]:text-brand-cyan [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-brand-purple [&_blockquote]:pl-4 [&_code]:rounded [&_code]:bg-surface-800 [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:mb-4 [&_h1]:text-2xl [&_h1]:font-semibold [&_h2]:mb-3 [&_h2]:mt-6 [&_h2]:text-xl [&_h2]:font-semibold [&_li]:ml-5 [&_ol]:list-decimal [&_p]:my-3 [&_pre]:my-4 [&_pre]:overflow-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-border [&_pre]:bg-surface-950 [&_pre]:p-4 [&_table]:my-4 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-border [&_td]:p-2 [&_th]:border [&_th]:border-border [&_th]:bg-surface-800 [&_th]:p-2 [&_ul]:list-disc"
+              dangerouslySetInnerHTML={{
+                __html: conversion.html,
+              }}
             />
-          </div>
+          </section>
         </div>
       )}
     </div>

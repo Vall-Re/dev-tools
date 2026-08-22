@@ -1,117 +1,390 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import {
+  useMemo,
+  useState,
+} from 'react';
+
 import { format } from 'sql-formatter';
 
-type SqlDialect = 'sql' | 'mysql' | 'postgresql' | 'sqlite' | 'transactsql' | 'plsql';
+type SqlDialect =
+  | 'sql'
+  | 'mysql'
+  | 'postgresql'
+  | 'sqlite'
+  | 'transactsql'
+  | 'plsql';
+
+interface DialectOption {
+  value: SqlDialect;
+  label: string;
+}
+
+interface FormatResult {
+  sql: string;
+  error: string;
+}
+
+const DIALECTS: DialectOption[] = [
+  {
+    value: 'sql',
+    label: 'Basic SQL',
+  },
+  {
+    value: 'mysql',
+    label: 'MySQL',
+  },
+  {
+    value: 'postgresql',
+    label: 'PostgreSQL',
+  },
+  {
+    value: 'sqlite',
+    label: 'SQLite',
+  },
+  {
+    value: 'transactsql',
+    label: 'SQL Server (T-SQL)',
+  },
+  {
+    value: 'plsql',
+    label: 'Oracle PL/SQL',
+  },
+];
+
+const sampleSql = `select
+u.id,
+u.name,
+count(o.id) as total_orders
+from users u
+left join orders o on u.id = o.user_id
+where u.status = 'active'
+and u.created_at >= '2026-01-01'
+group by u.id, u.name
+having count(o.id) > 5
+order by total_orders desc
+limit 10;`;
 
 export default function SqlFormatter() {
-  const [input, setInput] = useState('');
-  const [dialect, setDialect] = useState<SqlDialect>('sql');
-  const [uppercase, setUppercase] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [input, setInput] =
+    useState('');
 
-  const formattedSql = useMemo(() => {
-    if (!input.trim()) return '';
-    try {
-      return format(input, {
-        language: dialect,
-        keywordCase: uppercase ? 'upper' : 'lower',
-        tabWidth: 2,
-        useTabs: false,
-      });
-    } catch (err: unknown) {
-      return `-- Syntax Error during formatting:\n${(err as Error).message}`;
-    }
-  }, [input, dialect, uppercase]);
+  const [dialect, setDialect] =
+    useState<SqlDialect>('sql');
+
+  const [
+    uppercaseKeywords,
+    setUppercaseKeywords,
+  ] = useState(true);
+
+  const [indent, setIndent] =
+    useState<2 | 4>(2);
+
+  const [copied, setCopied] =
+    useState(false);
+
+  const result =
+    useMemo<FormatResult>(() => {
+      if (!input.trim()) {
+        return {
+          sql: '',
+          error: '',
+        };
+      }
+
+      try {
+        return {
+          sql: format(input, {
+            language: dialect,
+            keywordCase:
+              uppercaseKeywords
+                ? 'upper'
+                : 'lower',
+            tabWidth: indent,
+            useTabs: false,
+          }),
+          error: '',
+        };
+      } catch (err) {
+        return {
+          sql: '',
+          error:
+            err instanceof Error
+              ? err.message
+              : 'Unable to format this SQL.',
+        };
+      }
+    }, [
+      input,
+      dialect,
+      uppercaseKeywords,
+      indent,
+    ]);
+
+  const updateInput = (
+    value: string
+  ) => {
+    setInput(value);
+    setCopied(false);
+  };
 
   const handleCopy = async () => {
-    if (!formattedSql) return;
-    await navigator.clipboard.writeText(formattedSql);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (!result.sql) return;
+
+    try {
+      await navigator.clipboard.writeText(
+        result.sql
+      );
+
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      setCopied(false);
+    }
   };
 
   const handleLoadSample = () => {
-    setInput(
-      `select u.id, u.name, count(o.id) as total_orders from users u left join orders o on u.id = o.user_id where u.status = 'active' and u.created_at >= '2026-01-01' group by u.id, u.name having count(o.id) > 5 order by total_orders desc limit 10;`
-    );
+    setInput(sampleSql);
+    setDialect('sql');
+    setCopied(false);
+  };
+
+  const handleClear = () => {
+    setInput('');
+    setCopied(false);
   };
 
   return (
-    <div className="space-y-6 text-gray-100">
+    <div className="space-y-6 text-text-primary">
       <div className="space-y-3">
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <label className="block text-sm font-medium">Input SQL Query</label>
-          <div className="flex gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label
+            htmlFor="sql-input"
+            className="text-sm font-medium"
+          >
+            Input SQL
+          </label>
+
+          <div className="flex items-center gap-2 text-xs">
             <button
-              onClick={handleLoadSample}
-              className="text-xs bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 px-3 py-1 rounded transition"
+              type="button"
+              onClick={
+                handleLoadSample
+              }
+              className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
             >
               Load Sample
             </button>
-            {input && (
-              <button
-                onClick={() => setInput('')}
-                className="text-xs text-red-400 hover:underline px-2 py-1"
-              >
-                Clear
-              </button>
-            )}
+
+            <span
+              aria-hidden="true"
+              className="text-text-muted"
+            >
+              /
+            </span>
+
+            <button
+              type="button"
+              onClick={handleClear}
+              className="font-medium text-text-muted transition-colors hover:text-danger"
+            >
+              Clear
+            </button>
           </div>
         </div>
 
         <textarea
+          id="sql-input"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Paste or type unformatted SQL query..."
-          className="w-full h-36 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
+          onChange={(event) =>
+            updateInput(
+              event.target.value
+            )
+          }
+          placeholder="Paste or type SQL to format..."
+          spellCheck={false}
+          className="h-44 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
         />
 
-        <div className="flex justify-between items-center flex-wrap gap-4 pt-1">
-          <div className="flex items-center gap-3">
-            <label className="text-xs font-medium text-gray-300">Dialect:</label>
-            <select
-              value={dialect}
-              onChange={(e) => setDialect(e.target.value as SqlDialect)}
-              className="p-1.5 text-xs border rounded bg-gray-900 border-gray-700 text-gray-100 font-mono"
-            >
-              <option value="sql">Standard SQL</option>
-              <option value="mysql">MySQL</option>
-              <option value="postgresql">PostgreSQL</option>
-              <option value="sqlite">SQLite</option>
-              <option value="transactsql">T-SQL (SQL Server)</option>
-              <option value="plsql">PL/SQL (Oracle)</option>
-            </select>
-          </div>
+        <p className="font-mono text-xs text-text-muted">
+          {input.length.toLocaleString()}{' '}
+          characters
+        </p>
+      </div>
 
-          <label className="flex items-center gap-2 text-xs cursor-pointer select-none text-gray-300">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-1.5">
+          <label
+            htmlFor="sql-dialect"
+            className="block text-xs font-medium text-text-secondary"
+          >
+            SQL dialect
+          </label>
+
+          <select
+            id="sql-dialect"
+            value={dialect}
+            onChange={(event) => {
+              setDialect(
+                event.target
+                  .value as SqlDialect
+              );
+
+              setCopied(false);
+            }}
+            className="w-full rounded-lg border border-border bg-surface-900 px-3 py-2 text-sm text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
+          >
+            {DIALECTS.map(
+              ({
+                value,
+                label,
+              }) => (
+                <option
+                  key={value}
+                  value={value}
+                >
+                  {label}
+                </option>
+              )
+            )}
+          </select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label
+            htmlFor="sql-indent"
+            className="block text-xs font-medium text-text-secondary"
+          >
+            Indentation
+          </label>
+
+          <select
+            id="sql-indent"
+            value={indent}
+            onChange={(event) => {
+              setIndent(
+                Number(
+                  event.target.value
+                ) as 2 | 4
+              );
+
+              setCopied(false);
+            }}
+            className="w-full rounded-lg border border-border bg-surface-900 px-3 py-2 text-sm text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
+          >
+            <option value={2}>
+              2 spaces
+            </option>
+
+            <option value={4}>
+              4 spaces
+            </option>
+          </select>
+        </div>
+
+        <div className="flex items-end">
+          <label className="flex cursor-pointer select-none items-center gap-2 rounded-lg border border-border bg-surface-900 px-3 py-2.5 text-xs text-text-secondary">
             <input
               type="checkbox"
-              checked={uppercase}
-              onChange={(e) => setUppercase(e.target.checked)}
-              className="rounded text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700"
+              checked={
+                uppercaseKeywords
+              }
+              onChange={(event) => {
+                setUppercaseKeywords(
+                  event.target
+                    .checked
+                );
+
+                setCopied(false);
+              }}
+              className="size-4 rounded border-border bg-surface-900 text-brand-blue focus:ring-brand-cyan"
             />
-            UPPERCASE Keywords
+
+            Uppercase SQL keywords
           </label>
         </div>
       </div>
 
-      {formattedSql && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Formatted SQL</label>
+      <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-4">
+        <p className="text-xs leading-5 text-text-secondary">
+          Formatting is dialect-aware.
+          Choose the database dialect that
+          best matches the query for more
+          accurate keyword and syntax
+          handling.
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-text-muted">
+          Basic SQL is a common subset,
+          not automatic dialect detection.
+          This tool formats SQL but does
+          not connect to a database or
+          verify tables, columns, types,
+          permissions, or query semantics.
+        </p>
+      </div>
+
+      {result.error && (
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            Formatting error
+          </p>
+
+          <p className="mt-2 break-words font-mono text-sm leading-6 text-text-secondary">
+            {result.error}
+          </p>
+
+          <p className="mt-2 text-xs leading-5 text-text-muted">
+            The selected formatter dialect
+            could not parse this input.
+            This does not necessarily mean
+            that the query is invalid for
+            every SQL database or engine.
+          </p>
+        </div>
+      )}
+
+      {result.sql && (
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">
+                Formatted SQL
+              </p>
+
+              <p className="mt-1 text-xs text-text-muted">
+                {
+                  DIALECTS.find(
+                    (item) =>
+                      item.value ===
+                      dialect
+                  )?.label
+                }{' '}
+                formatting
+              </p>
+            </div>
+
             <button
+              type="button"
               onClick={handleCopy}
-              className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-medium"
+              className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition hover:bg-success/15"
             >
-              {copied ? 'Copied!' : 'Copy Query'}
+              {copied
+                ? 'Copied!'
+                : 'Copy Query'}
             </button>
           </div>
-          <pre className="w-full p-4 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap select-all max-h-96">
-            {formattedSql}
+
+          <pre className="max-h-[32rem] w-full overflow-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-success">
+            {result.sql}
           </pre>
-        </div>
+        </section>
       )}
     </div>
   );

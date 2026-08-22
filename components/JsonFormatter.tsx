@@ -1,224 +1,630 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+} from 'react';
 
-export default function JsonFormatter() {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
-  const [indent, setIndent] = useState<number>(2);
-  const [stats, setStats] = useState<{ original: number; formatted: number; savings?: number } | null>(null);
+type Operation = 'format' | 'minify' | null;
 
-  const sampleJson = JSON.stringify(
-    { name: "100DevToolsHub", type: "SEO Platform", features: ["Fast", "Client-Side", "Free"], active: true },
-    null,
-    2
+interface Stats {
+  original: number;
+  result: number;
+  saved: number;
+  reduction: number;
+}
+
+interface JsonValidationError {
+  line: number;
+  column: number;
+}
+
+const sampleJson = `{
+  "name": "100DevToolsHub",
+  "type": "Developer Tools",
+  "features": [
+    "Fast",
+    "Client-side",
+    "Free"
+  ],
+  "active": true,
+  "largeId": 9007199254740993
+}`;
+
+const getByteSize = (value: string) =>
+  new Blob([value]).size;
+
+const normalizeInput = (value: string) =>
+  value.replace(/^\uFEFF/, '');
+
+const validateJson = async (
+  value: string
+): Promise<JsonValidationError | null> => {
+  const { visit } = await import('jsonc-parser');
+
+  let firstError: JsonValidationError | null =
+    null;
+
+  visit(
+    value,
+    {
+      onError: (
+        _error,
+        _offset,
+        _length,
+        startLine,
+        startCharacter
+      ) => {
+        if (!firstError) {
+          firstError = {
+            line: startLine + 1,
+            column: startCharacter + 1,
+          };
+        }
+      },
+    },
+    {
+      disallowComments: true,
+      allowTrailingComma: false,
+      allowEmptyContent: false,
+    }
   );
 
-  const calculateStats = (orig: string, res: string, isMinify: boolean = false) => {
-    const originalSize = new Blob([orig]).size;
-    const resultSize = new Blob([res]).size;
-    const savings = isMinify && originalSize > 0 
-      ? Math.max(0, Math.round(((originalSize - resultSize) / originalSize) * 100)) 
-      : undefined;
+  return firstError;
+};
 
-    setStats({
-      original: originalSize,
-      formatted: resultSize,
-      savings,
-    });
+const formatJsonText = async (
+  value: string,
+  indent: number
+) => {
+  const { applyEdits, format } =
+    await import('jsonc-parser');
+
+  const edits = format(
+    value,
+    undefined,
+    {
+      tabSize: indent,
+      insertSpaces: true,
+      eol: '\n',
+    }
+  );
+
+  return applyEdits(value, edits).trim();
+};
+
+const minifyJsonText = async (
+  value: string
+) => {
+  const { createScanner } =
+    await import('jsonc-parser');
+
+  // jsonc-parser SyntaxKind.EOF.
+  // Kept numeric because SyntaxKind is an ambient
+  // const enum and isolatedModules forbids direct use.
+  const EOF_TOKEN = 17;
+
+  const scanner = createScanner(
+    value,
+    true
+  );
+
+  let result = '';
+
+  while (true) {
+    const token = scanner.scan();
+
+    if (token === EOF_TOKEN) {
+      break;
+    }
+
+    const offset =
+      scanner.getTokenOffset();
+
+    const length =
+      scanner.getTokenLength();
+
+    result += value.slice(
+      offset,
+      offset + length
+    );
+  }
+
+  return result;
+};
+
+export default function JsonFormatter() {
+  const [input, setInput] =
+    useState('');
+
+  const [output, setOutput] =
+    useState('');
+
+  const [error, setError] =
+    useState('');
+
+  const [copied, setCopied] =
+    useState(false);
+
+  const [indent, setIndent] =
+    useState<2 | 4>(2);
+
+  const [stats, setStats] =
+    useState<Stats | null>(null);
+
+  const [operation, setOperation] =
+    useState<Operation>(null);
+
+  const [isProcessing, setIsProcessing] =
+    useState(false);
+
+  const fileInputRef =
+    useRef<HTMLInputElement>(null);
+
+  const resetResult = () => {
+    setOutput('');
+    setError('');
+    setCopied(false);
+    setStats(null);
+    setOperation(null);
   };
 
-  const formatJson = () => {
+  const processJson = async (
+    nextOperation: Exclude<
+      Operation,
+      null
+    >
+  ) => {
+    if (!input.trim()) {
+      resetResult();
+      return;
+    }
+
+    setIsProcessing(true);
+    setError('');
+    setOutput('');
+    setCopied(false);
+    setStats(null);
+    setOperation(null);
+
     try {
-      if (!input.trim()) return;
-      const parsed = JSON.parse(input);
-      const formatted = JSON.stringify(parsed, null, indent);
-      setOutput(formatted);
-      setError('');
-      calculateStats(input, formatted, false);
-    } catch (err: unknown) {
-      setError((err as Error).message);
+      const normalized =
+        normalizeInput(input);
+
+      const validationError =
+        await validateJson(
+          normalized
+        );
+
+      if (validationError) {
+        throw new Error(
+          `Invalid JSON near line ${validationError.line}, column ${validationError.column}.`
+        );
+      }
+
+      const result =
+        nextOperation === 'format'
+          ? await formatJsonText(
+              normalized,
+              indent
+            )
+          : await minifyJsonText(
+              normalized
+            );
+
+      const originalSize =
+        getByteSize(input);
+
+      const resultSize =
+        getByteSize(result);
+
+      const saved = Math.max(
+        0,
+        originalSize - resultSize
+      );
+
+      const reduction =
+        originalSize > 0
+          ? Math.max(
+              0,
+              Math.round(
+                (saved /
+                  originalSize) *
+                  100
+              )
+            )
+          : 0;
+
+      setOutput(result);
+
+      setStats({
+        original: originalSize,
+        result: resultSize,
+        saved,
+        reduction,
+      });
+
+      setOperation(nextOperation);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to process this JSON.'
+      );
+
       setOutput('');
       setStats(null);
+      setOperation(null);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const minifyJson = () => {
-    try {
-      if (!input.trim()) return;
-      const parsed = JSON.parse(input);
-      const minified = JSON.stringify(parsed);
-      setOutput(minified);
-      setError('');
-      calculateStats(input, minified, true);
-    } catch (err: unknown) {
-      setError((err as Error).message);
-      setOutput('');
-      setStats(null);
-    }
-  };
+  const handleFileUpload = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file =
+      event.target.files?.[0];
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+      const content =
+        typeof reader.result ===
+        'string'
+          ? reader.result
+          : '';
+
       setInput(content);
-      setError('');
+      resetResult();
+    };
+
+    reader.onerror = () => {
+      setError(
+        'Unable to read the selected JSON file.'
+      );
+
       setOutput('');
       setStats(null);
+      setOperation(null);
     };
+
     reader.readAsText(file);
   };
 
   const handleDownload = () => {
     if (!output) return;
-    const blob = new Blob([output], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'formatted.json';
-    a.click();
+
+    const blob = new Blob(
+      [output],
+      {
+        type: 'application/json;charset=utf-8',
+      }
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const anchor =
+      document.createElement('a');
+
+    anchor.href = url;
+
+    anchor.download =
+      operation === 'minify'
+        ? 'minified.json'
+        : 'formatted.json';
+
+    document.body.appendChild(anchor);
+
+    anchor.click();
+    anchor.remove();
+
     URL.revokeObjectURL(url);
   };
 
   const handleCopy = async () => {
     if (!output) return;
-    await navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    try {
+      await navigator.clipboard.writeText(
+        output
+      );
+
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      setCopied(false);
+    }
   };
 
   const handleClear = () => {
     setInput('');
-    setOutput('');
-    setError('');
-    setStats(null);
+    resetResult();
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleLoadSample = () => {
     setInput(sampleJson);
-    setError('');
-    setOutput('');
-    setStats(null);
+    resetResult();
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
-    <div className="space-y-4 text-gray-100">
-      <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium">Input JSON</label>
-        <div className="flex items-center gap-3 text-xs">
-          <label className="text-blue-400 hover:underline cursor-pointer">
-            Upload File
-            <input 
-              type="file" 
-              accept=".json,application/json" 
-              onChange={handleFileUpload} 
-              className="hidden" 
-            />
+    <div className="space-y-6 text-text-primary">
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label
+            htmlFor="json-formatter-input"
+            className="text-sm font-medium"
+          >
+            Input JSON
           </label>
-          <span>|</span>
-          <button
-            onClick={handleLoadSample}
-            className="text-blue-400 hover:underline"
-          >
-            Load Sample
-          </button>
-          <span>|</span>
-          <button
-            onClick={handleClear}
-            className="text-gray-400 hover:underline"
-          >
-            Clear
-          </button>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <label className="cursor-pointer font-medium text-brand-cyan transition-colors hover:text-text-primary">
+              Upload File
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,application/json"
+                onChange={
+                  handleFileUpload
+                }
+                className="hidden"
+              />
+            </label>
+
+            <span
+              aria-hidden="true"
+              className="text-text-muted"
+            >
+              /
+            </span>
+
+            <button
+              type="button"
+              onClick={
+                handleLoadSample
+              }
+              className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
+            >
+              Load Sample
+            </button>
+
+            <span
+              aria-hidden="true"
+              className="text-text-muted"
+            >
+              /
+            </span>
+
+            <button
+              type="button"
+              onClick={handleClear}
+              className="font-medium text-text-muted transition-colors hover:text-danger"
+            >
+              Clear
+            </button>
+          </div>
         </div>
+
+        <textarea
+          id="json-formatter-input"
+          value={input}
+          onChange={(event) => {
+            setInput(
+              event.target.value
+            );
+
+            resetResult();
+          }}
+          placeholder={'{\n  "name": "John",\n  "age": 30\n}'}
+          spellCheck={false}
+          className="h-52 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
+        />
+
+        <p className="text-xs text-text-muted">
+          {getByteSize(
+            input
+          ).toLocaleString()}{' '}
+          bytes input
+        </p>
       </div>
 
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Paste your raw JSON here..."
-        className="w-full h-48 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
-      />
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-wrap gap-2">
           <button
-            onClick={formatJson}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+            type="button"
+            onClick={() =>
+              processJson('format')
+            }
+            disabled={
+              !input.trim() ||
+              isProcessing
+            }
+            className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Format / Beautify
+            {isProcessing
+              ? 'Processing…'
+              : 'Format / Beautify'}
           </button>
+
           <button
-            onClick={minifyJson}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition text-sm font-medium"
+            type="button"
+            onClick={() =>
+              processJson('minify')
+            }
+            disabled={
+              !input.trim() ||
+              isProcessing
+            }
+            className="rounded-lg border border-border bg-surface-800 px-4 py-2 text-sm font-medium text-text-primary transition hover:border-brand-cyan/50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Minify
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-sm">
-          <label className="text-gray-300">Indent:</label>
-          <select
-            value={indent}
-            onChange={(e) => setIndent(Number(e.target.value))}
-            className="p-1.5 border rounded-lg bg-gray-900 border-gray-700 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className="space-y-1">
+          <label
+            htmlFor="json-formatter-indent"
+            className="block text-xs text-text-muted"
           >
-            <option value={2} className="bg-gray-900 text-gray-100">2 Spaces</option>
-            <option value={4} className="bg-gray-900 text-gray-100">4 Spaces</option>
+            Format indentation
+          </label>
+
+          <select
+            id="json-formatter-indent"
+            value={indent}
+            onChange={(event) =>
+              setIndent(
+                Number(
+                  event.target.value
+                ) as 2 | 4
+              )
+            }
+            className="rounded-lg border border-border bg-surface-900 px-3 py-2 text-sm text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
+          >
+            <option value={2}>
+              2 spaces
+            </option>
+
+            <option value={4}>
+              4 spaces
+            </option>
           </select>
         </div>
       </div>
 
+      <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-4">
+        <p className="text-xs leading-5 text-text-secondary">
+          Strict JSON is validated before
+          formatting. Formatting changes
+          whitespace without converting
+          JSON values into JavaScript
+          values, preserving large integer
+          literals, escape sequences,
+          duplicate keys, and numeric
+          notation.
+        </p>
+      </div>
+
       {error && (
-        <div className="p-3 border border-red-800 bg-red-950 text-red-300 rounded-lg text-sm font-mono">
-          <strong>Invalid JSON Error:</strong> {error}
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            Invalid JSON
+          </p>
+
+          <p className="mt-2 break-words font-mono text-sm leading-6 text-text-secondary">
+            {error}
+          </p>
         </div>
       )}
 
-      {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-blue-950 border border-blue-800 rounded-lg text-xs font-mono text-blue-200">
+      {stats && output && (
+        <div className="grid gap-3 rounded-xl border border-brand-blue/20 bg-brand-blue/5 p-4 sm:grid-cols-4">
           <div>
-            <span className="text-gray-400 block">Original Size</span>
-            <strong>{stats.original} bytes</strong>
+            <span className="block text-xs text-text-muted">
+              Input
+            </span>
+
+            <strong className="mt-1 block font-mono text-sm">
+              {stats.original.toLocaleString()}{' '}
+              bytes
+            </strong>
           </div>
+
           <div>
-            <span className="text-gray-400 block">Result Size</span>
-            <strong>{stats.formatted} bytes</strong>
+            <span className="block text-xs text-text-muted">
+              Output
+            </span>
+
+            <strong className="mt-1 block font-mono text-sm">
+              {stats.result.toLocaleString()}{' '}
+              bytes
+            </strong>
           </div>
-          {stats.savings !== undefined && (
-            <div>
-              <span className="text-gray-400 block">Compression</span>
-              <strong className="text-emerald-400">{stats.savings}% saved</strong>
-            </div>
-          )}
+
+          <div>
+            <span className="block text-xs text-text-muted">
+              Saved
+            </span>
+
+            <strong className="mt-1 block font-mono text-sm">
+              {stats.saved.toLocaleString()}{' '}
+              bytes
+            </strong>
+          </div>
+
+          <div>
+            <span className="block text-xs text-text-muted">
+              Reduction
+            </span>
+
+            <strong className="mt-1 block font-mono text-sm text-success">
+              {stats.reduction}%
+            </strong>
+          </div>
         </div>
       )}
 
       {output && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Result</label>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">
+                {operation === 'minify'
+                  ? 'Minified JSON'
+                  : 'Formatted JSON'}
+              </p>
+
+              <p className="mt-1 text-xs text-text-muted">
+                Original JSON literals are
+                preserved.
+              </p>
+            </div>
+
             <div className="flex gap-2">
               <button
-                onClick={handleDownload}
-                className="px-3 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-600 transition font-medium"
+                type="button"
+                onClick={
+                  handleDownload
+                }
+                className="rounded-lg border border-border bg-surface-800 px-3 py-1.5 text-xs font-medium transition hover:border-brand-cyan/50"
               >
                 Download .json
               </button>
+
               <button
+                type="button"
                 onClick={handleCopy}
-                className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-medium"
+                className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition hover:bg-success/15"
               >
-                {copied ? 'Copied!' : 'Copy Result'}
+                {copied
+                  ? 'Copied!'
+                  : 'Copy Result'}
               </button>
             </div>
           </div>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto max-h-96">
+
+          <pre className="max-h-[32rem] w-full overflow-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-success">
             {output}
           </pre>
         </div>

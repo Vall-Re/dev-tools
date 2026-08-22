@@ -1,214 +1,814 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import {
+  useMemo,
+  useState,
+} from 'react';
+
+interface QueryParam {
+  key: string;
+  value: string;
+}
+
+interface PathSegment {
+  raw: string;
+  decoded: string;
+}
 
 interface ParsedUrl {
+  href: string;
   origin: string;
   protocol: string;
   username: string;
   password: string;
   hostname: string;
   port: string;
+  effectivePort: string;
   pathname: string;
-  pathSegments: string[];
+  pathSegments: PathSegment[];
   search: string;
   hash: string;
-  queryParams: Array<{ key: string; value: string }>;
+  queryParams: QueryParam[];
+  assumedScheme: boolean;
 }
 
+interface ComponentRow {
+  label: string;
+  displayValue: string;
+  copyValue?: string;
+}
+
+const sampleUrl =
+  'https://demo-user:demo-pass@api.example.com:8080/v1/users/profile?id=42&role=admin&active=true#settings';
+
+const SCHEME_PATTERN =
+  /^[A-Za-z][A-Za-z0-9+.-]*:/;
+
+const HOST_PORT_PATTERN =
+  /^[A-Za-z0-9._~-]+:\d+(?:[/?#]|$)/;
+
+const IPV6_PORT_PATTERN =
+  /^\[[0-9A-Fa-f:.]+\]:\d+(?:[/?#]|$)/;
+
+const getDefaultPort = (
+  protocol: string
+) => {
+  switch (protocol) {
+    case 'http:':
+      return '80';
+
+    case 'https:':
+      return '443';
+
+    case 'ftp:':
+      return '21';
+
+    default:
+      return '';
+  }
+};
+
+const safeDecodeComponent = (
+  value: string
+) => {
+  try {
+    return decodeURIComponent(
+      value
+    );
+  } catch {
+    return value;
+  }
+};
+
+const normalizeUrlInput = (
+  value: string
+) => {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    throw new Error(
+      'Enter a URL to parse.'
+    );
+  }
+
+  if (
+    trimmed.startsWith('/') &&
+    !trimmed.startsWith('//')
+  ) {
+    throw new Error(
+      'Relative paths require a base URL. Enter an absolute URL instead.'
+    );
+  }
+
+  if (
+    trimmed.startsWith('?') ||
+    trimmed.startsWith('#')
+  ) {
+    throw new Error(
+      'A query string or fragment alone is not an absolute URL.'
+    );
+  }
+
+  if (
+    trimmed.startsWith('//')
+  ) {
+    return {
+      value: `https:${trimmed}`,
+      assumedScheme: true,
+    };
+  }
+
+  /*
+   * Host:port is common during local
+   * development and would otherwise look
+   * similar to a URI scheme.
+   */
+  if (
+    HOST_PORT_PATTERN.test(
+      trimmed
+    ) ||
+    IPV6_PORT_PATTERN.test(
+      trimmed
+    )
+  ) {
+    return {
+      value: `https://${trimmed}`,
+      assumedScheme: true,
+    };
+  }
+
+  if (
+    SCHEME_PATTERN.test(trimmed)
+  ) {
+    return {
+      value: trimmed,
+      assumedScheme: false,
+    };
+  }
+
+  return {
+    value: `https://${trimmed}`,
+    assumedScheme: true,
+  };
+};
+
 export default function UrlParser() {
-  const [inputUrl, setInputUrl] = useState('');
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [
+    inputUrl,
+    setInputUrl,
+  ] = useState('');
 
-  const { parsed, error } = useMemo(() => {
-    const trimmed = inputUrl.trim();
-    if (!trimmed) {
-      return { parsed: null, error: '' };
-    }
+  const [
+    copiedKey,
+    setCopiedKey,
+  ] = useState<string | null>(
+    null
+  );
 
-    let urlToParse = trimmed;
-    if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)) {
-      urlToParse = `https://${trimmed}`;
+  const [
+    copyError,
+    setCopyError,
+  ] = useState('');
+
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
+
+  const {
+    parsed,
+    error,
+  } = useMemo(() => {
+    if (!inputUrl.trim()) {
+      return {
+        parsed: null,
+        error: '',
+      };
     }
 
     try {
-      const url = new URL(urlToParse);
-      const queryParams: Array<{ key: string; value: string }> = [];
+      const normalized =
+        normalizeUrlInput(
+          inputUrl
+        );
 
-      url.searchParams.forEach((value, key) => {
-        queryParams.push({ key, value });
-      });
+      const url = new URL(
+        normalized.value
+      );
 
-      const pathSegments = url.pathname.split('/').filter(Boolean);
+      const queryParams:
+        QueryParam[] = [];
 
-      const parsedData: ParsedUrl = {
-        origin: url.origin,
-        protocol: url.protocol,
-        username: url.username,
-        password: url.password,
-        hostname: url.hostname,
-        port: url.port || '(default)',
-        pathname: url.pathname,
-        pathSegments,
-        search: url.search,
-        hash: url.hash,
-        queryParams,
+      url.searchParams.forEach(
+        (value, key) => {
+          queryParams.push({
+            key,
+            value,
+          });
+        }
+      );
+
+      const pathSegments =
+        url.pathname
+          .split('/')
+          .filter(Boolean)
+          .map((segment) => ({
+            raw: segment,
+            decoded:
+              safeDecodeComponent(
+                segment
+              ),
+          }));
+
+      const defaultPort =
+        getDefaultPort(
+          url.protocol
+        );
+
+      const parsedData: ParsedUrl =
+        {
+          href: url.href,
+          origin: url.origin,
+          protocol:
+            url.protocol,
+          username:
+            safeDecodeComponent(
+              url.username
+            ),
+          password:
+            safeDecodeComponent(
+              url.password
+            ),
+          hostname:
+            url.hostname,
+          port: url.port,
+          effectivePort:
+            url.port ||
+            defaultPort,
+          pathname:
+            url.pathname,
+          pathSegments,
+          search: url.search,
+          hash: url.hash,
+          queryParams,
+          assumedScheme:
+            normalized.assumedScheme,
+        };
+
+      return {
+        parsed: parsedData,
+        error: '',
       };
-
-      return { parsed: parsedData, error: '' };
-    } catch {
+    } catch (err) {
       return {
         parsed: null,
-        error: 'Invalid URL structure. Please check syntax.',
+        error:
+          err instanceof Error
+            ? err.message
+            : 'Unable to parse this URL.',
       };
     }
   }, [inputUrl]);
 
-  const handleCopy = async (text: string, label: string) => {
+  const handleCopy = async (
+    text: string,
+    key: string
+  ) => {
     if (!text) return;
-    await navigator.clipboard.writeText(text);
-    setCopiedKey(label);
-    setTimeout(() => setCopiedKey(null), 1500);
+
+    try {
+      await navigator.clipboard.writeText(
+        text
+      );
+
+      setCopiedKey(key);
+      setCopyError('');
+
+      window.setTimeout(() => {
+        setCopiedKey(
+          (current) =>
+            current === key
+              ? null
+              : current
+        );
+      }, 1500);
+    } catch {
+      setCopiedKey(null);
+      setCopyError(
+        'Unable to copy to the clipboard.'
+      );
+    }
   };
 
   const handleLoadSample = () => {
-    setInputUrl(
-      'https://admin:secret@api.example.com:8080/v1/users/profile?id=42&role=admin&active=true#settings'
-    );
+    setInputUrl(sampleUrl);
+    setCopiedKey(null);
+    setCopyError('');
+    setShowPassword(false);
   };
 
+  const handleClear = () => {
+    setInputUrl('');
+    setCopiedKey(null);
+    setCopyError('');
+    setShowPassword(false);
+  };
+
+  const componentRows =
+    useMemo<ComponentRow[]>(
+      () => {
+        if (!parsed) {
+          return [];
+        }
+
+        const originDisplay =
+          parsed.origin === 'null'
+            ? '(no tuple origin)'
+            : parsed.origin;
+
+        const portDisplay =
+          parsed.port
+            ? parsed.port
+            : parsed.effectivePort
+              ? `${parsed.effectivePort} (default)`
+              : '(none)';
+
+        return [
+          {
+            label:
+              'Normalized URL',
+            displayValue:
+              parsed.href,
+            copyValue:
+              parsed.href,
+          },
+          {
+            label: 'Origin',
+            displayValue:
+              originDisplay,
+            copyValue:
+              parsed.origin ===
+              'null'
+                ? undefined
+                : parsed.origin,
+          },
+          {
+            label: 'Protocol',
+            displayValue:
+              parsed.protocol,
+            copyValue:
+              parsed.protocol,
+          },
+          {
+            label: 'Hostname',
+            displayValue:
+              parsed.hostname ||
+              '(none)',
+            copyValue:
+              parsed.hostname ||
+              undefined,
+          },
+          {
+            label:
+              'Port (effective)',
+            displayValue:
+              portDisplay,
+            copyValue:
+              parsed.effectivePort ||
+              undefined,
+          },
+          {
+            label: 'Pathname',
+            displayValue:
+              parsed.pathname ||
+              '/',
+            copyValue:
+              parsed.pathname ||
+              '/',
+          },
+          {
+            label:
+              'Search Query',
+            displayValue:
+              parsed.search ||
+              '(none)',
+            copyValue:
+              parsed.search ||
+              undefined,
+          },
+          {
+            label:
+              'Hash / Fragment',
+            displayValue:
+              parsed.hash ||
+              '(none)',
+            copyValue:
+              parsed.hash ||
+              undefined,
+          },
+          {
+            label: 'Username',
+            displayValue:
+              parsed.username ||
+              '(none)',
+            copyValue:
+              parsed.username ||
+              undefined,
+          },
+        ];
+      },
+      [parsed]
+    );
+
   return (
-    <div className="space-y-6 text-gray-100">
-      <div className="space-y-2">
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <label className="block text-sm font-medium">Enter URL</label>
-          <div className="flex gap-2">
+    <div className="space-y-6 text-text-primary">
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label
+            htmlFor="url-parser-input"
+            className="text-sm font-medium"
+          >
+            Enter URL
+          </label>
+
+          <div className="flex items-center gap-2 text-xs">
             <button
-              onClick={handleLoadSample}
-              className="text-xs bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 px-3 py-1 rounded transition"
+              type="button"
+              onClick={
+                handleLoadSample
+              }
+              className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
             >
               Load Sample
             </button>
-            {inputUrl && (
-              <button
-                onClick={() => setInputUrl('')}
-                className="text-xs text-red-400 hover:underline px-2 py-1"
-              >
-                Clear
-              </button>
-            )}
+
+            <span
+              aria-hidden="true"
+              className="text-text-muted"
+            >
+              /
+            </span>
+
+            <button
+              type="button"
+              onClick={handleClear}
+              className="font-medium text-text-muted transition-colors hover:text-danger"
+            >
+              Clear
+            </button>
           </div>
         </div>
 
         <input
+          id="url-parser-input"
           type="text"
           value={inputUrl}
-          onChange={(e) => setInputUrl(e.target.value)}
-          placeholder="e.g. https://example.com:8080/path?user=123#section"
-          className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
+          onChange={(event) => {
+            setInputUrl(
+              event.target.value
+            );
+
+            setCopiedKey(null);
+            setCopyError('');
+            setShowPassword(false);
+          }}
+          placeholder="https://example.com:8080/path?user=123#section"
+          spellCheck={false}
+          className="w-full rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
         />
       </div>
 
+      <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-4">
+        <p className="text-xs leading-5 text-text-secondary">
+          URLs are parsed with the
+          browser&apos;s native URL API.
+          If no scheme is supplied, this
+          tool assumes{' '}
+          <code className="font-mono text-brand-cyan">
+            https://
+          </code>
+          .
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-text-muted">
+          Parsing can normalize URL
+          serialization, such as hostname
+          casing, percent-encoding, or
+          default ports. Parsing does not
+          verify that the destination
+          exists, is reachable, or is safe
+          to visit.
+        </p>
+      </div>
+
       {error && (
-        <div className="p-3 border border-red-800 bg-red-950/50 text-red-300 rounded-lg text-sm font-mono">
-          <strong>Error:</strong> {error}
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            URL parse error
+          </p>
+
+          <p className="mt-2 break-words text-sm leading-6 text-text-secondary">
+            {error}
+          </p>
+        </div>
+      )}
+
+      {copyError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm text-text-secondary"
+        >
+          {copyError}
         </div>
       )}
 
       {parsed && (
         <div className="space-y-6">
-          <div className="border rounded-lg p-4 bg-gray-900 border-gray-700 space-y-3">
-            <h3 className="text-sm font-semibold border-b pb-2 border-gray-700">
-              URL Components
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm font-mono">
-              {[
-                { label: 'Origin', val: parsed.origin },
-                { label: 'Protocol', val: parsed.protocol },
-                { label: 'Hostname', val: parsed.hostname },
-                { label: 'Port', val: parsed.port },
-                { label: 'Pathname', val: parsed.pathname },
-                { label: 'Search Query', val: parsed.search || '(none)' },
-                { label: 'Hash / Fragment', val: parsed.hash || '(none)' },
-                { label: 'Username', val: parsed.username || '(none)' },
-                { label: 'Password', val: parsed.password || '(none)' },
-              ].map(({ label, val }) => (
-                <div
-                  key={label}
-                  className="flex justify-between items-center p-2 rounded bg-gray-900 border border-gray-700 gap-2"
-                >
-                  <div className="truncate">
-                    <span className="text-gray-400 text-xs block">{label}</span>
-                    <span className="text-gray-200">{val}</span>
-                  </div>
-                  {val && val !== '(none)' && (
-                    <button
-                      onClick={() => handleCopy(val, label)}
-                      className="text-xs text-blue-400 hover:underline shrink-0"
-                    >
-                      {copiedKey === label ? 'Copied!' : 'Copy'}
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {parsed.pathSegments.length > 0 && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Path Segments ({parsed.pathSegments.length})</label>
-              <div className="flex flex-wrap gap-2 font-mono text-xs">
-                {parsed.pathSegments.map((segment, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2.5 py-1 bg-blue-950/50 text-blue-300 border border-blue-800 rounded-md"
-                  >
-                    /{segment}
-                  </span>
-                ))}
-              </div>
+          {parsed.assumedScheme && (
+            <div className="rounded-xl border border-warning/30 bg-warning/10 p-4">
+              <p className="text-xs leading-5 text-text-secondary">
+                No explicit scheme was
+                detected, so the URL was
+                parsed as HTTPS.
+              </p>
             </div>
           )}
 
-          {parsed.queryParams.length > 0 && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">
-                Query Parameters ({parsed.queryParams.length})
-              </label>
-              <div className="border rounded-lg overflow-hidden border-gray-700 bg-gray-900">
-                <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-gray-800 border-b border-gray-700 text-gray-400">
+          <section className="space-y-3">
+            <div>
+              <p className="text-sm font-medium">
+                URL Components
+              </p>
+
+              <p className="mt-1 text-xs text-text-muted">
+                Values below come from the
+                normalized URL
+                representation.
+              </p>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              {componentRows.map(
+                ({
+                  label,
+                  displayValue,
+                  copyValue,
+                }) => (
+                  <div
+                    key={label}
+                    className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border bg-surface-900 p-3"
+                  >
+                    <div className="min-w-0">
+                      <span className="block text-xs text-text-muted">
+                        {label}
+                      </span>
+
+                      <span className="mt-1 block break-all font-mono text-sm text-text-secondary">
+                        {
+                          displayValue
+                        }
+                      </span>
+                    </div>
+
+                    {copyValue && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleCopy(
+                            copyValue,
+                            label
+                          )
+                        }
+                        className="shrink-0 text-xs font-medium text-brand-cyan transition-colors hover:text-text-primary"
+                      >
+                        {copiedKey ===
+                        label
+                          ? 'Copied!'
+                          : 'Copy'}
+                      </button>
+                    )}
+                  </div>
+                )
+              )}
+
+              <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border bg-surface-900 p-3">
+                <div className="min-w-0">
+                  <span className="block text-xs text-text-muted">
+                    Password
+                  </span>
+
+                  <span className="mt-1 block break-all font-mono text-sm text-text-secondary">
+                    {!parsed.password
+                      ? '(none)'
+                      : showPassword
+                        ? parsed.password
+                        : '••••••••'}
+                  </span>
+                </div>
+
+                {parsed.password && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPassword(
+                        (current) =>
+                          !current
+                      )
+                    }
+                    className="shrink-0 text-xs font-medium text-warning transition-colors hover:text-text-primary"
+                  >
+                    {showPassword
+                      ? 'Hide'
+                      : 'Show'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {(parsed.username ||
+              parsed.password) && (
+              <div className="rounded-xl border border-warning/30 bg-warning/10 p-4">
+                <p className="text-xs leading-5 text-text-secondary">
+                  This URL contains
+                  credentials. Userinfo in
+                  URLs can be exposed in
+                  logs, history, screenshots,
+                  or copied text. Avoid
+                  placing real secrets in
+                  URLs.
+                </p>
+              </div>
+            )}
+          </section>
+
+          {parsed.pathSegments.length >
+            0 && (
+            <section className="space-y-3">
+              <div>
+                <p className="text-sm font-medium">
+                  Path Segments
+                </p>
+
+                <p className="mt-1 text-xs text-text-muted">
+                  Raw segments preserve
+                  percent-encoding; decoded
+                  values are shown
+                  separately.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {parsed.pathSegments.map(
+                  (
+                    segment,
+                    index
+                  ) => (
+                    <div
+                      key={`${segment.raw}-${index}`}
+                      className="grid gap-2 rounded-xl border border-border bg-surface-900 p-3 sm:grid-cols-[auto_1fr_1fr]"
+                    >
+                      <span className="font-mono text-xs text-text-muted">
+                        #
+                        {index + 1}
+                      </span>
+
+                      <div>
+                        <span className="block text-[10px] uppercase tracking-wide text-text-muted">
+                          Raw
+                        </span>
+
+                        <code className="mt-1 block break-all text-xs text-brand-cyan">
+                          /
+                          {
+                            segment.raw
+                          }
+                        </code>
+                      </div>
+
+                      <div>
+                        <span className="block text-[10px] uppercase tracking-wide text-text-muted">
+                          Decoded
+                        </span>
+
+                        <code className="mt-1 block break-all text-xs text-text-secondary">
+                          /
+                          {
+                            segment.decoded
+                          }
+                        </code>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
+          )}
+
+          {parsed.queryParams.length >
+            0 && (
+            <section className="space-y-3">
+              <div>
+                <p className="text-sm font-medium">
+                  Query Parameters
+                </p>
+
+                <p className="mt-1 text-xs text-text-muted">
+                  {
+                    parsed.queryParams
+                      .length
+                  }{' '}
+                  parameter
+                  {parsed.queryParams
+                    .length === 1
+                    ? ''
+                    : 's'}
+                  . Values are decoded by
+                  URLSearchParams.
+                </p>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-border bg-surface-900">
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-border bg-surface-800 text-text-muted">
                     <tr>
-                      <th className="p-2.5">Key</th>
-                      <th className="p-2.5">Value</th>
-                      <th className="p-2.5 text-right">Action</th>
+                      <th
+                        scope="col"
+                        className="p-3 font-medium"
+                      >
+                        Key
+                      </th>
+
+                      <th
+                        scope="col"
+                        className="p-3 font-medium"
+                      >
+                        Value
+                      </th>
+
+                      <th
+                        scope="col"
+                        className="p-3 text-right font-medium"
+                      >
+                        Action
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700">
-                    {parsed.queryParams.map((param, index) => (
-                      <tr key={index} className="hover:bg-gray-800/50">
-                        <td className="p-2.5 font-bold text-blue-400">
-                          {param.key}
-                        </td>
-                        <td className="p-2.5 text-gray-200 break-all">
-                          {param.value}
-                        </td>
-                        <td className="p-2.5 text-right">
-                          <button
-                            onClick={() =>
-                              handleCopy(`${param.key}=${param.value}`, `param-${index}`)
-                            }
-                            className="text-xs text-gray-400 hover:text-gray-200"
+
+                  <tbody className="divide-y divide-border font-mono">
+                    {parsed.queryParams.map(
+                      (
+                        param,
+                        index
+                      ) => {
+                        const copyKey =
+                          `param-${index}`;
+
+                        return (
+                          <tr
+                            key={`${param.key}-${index}`}
                           >
-                            {copiedKey === `param-${index}` ? 'Copied!' : 'Copy'}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                            <td className="p-3 break-all text-brand-cyan">
+                              {
+                                param.key
+                              }
+                            </td>
+
+                            <td className="p-3 break-all text-text-secondary">
+                              {param.value ||
+                                '(empty)'}
+                            </td>
+
+                            <td className="p-3 text-right">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleCopy(
+                                    param.value,
+                                    copyKey
+                                  )
+                                }
+                                disabled={
+                                  !param.value
+                                }
+                                className="text-xs text-text-muted transition-colors hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                {copiedKey ===
+                                copyKey
+                                  ? 'Copied!'
+                                  : 'Copy Value'}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      }
+                    )}
                   </tbody>
                 </table>
               </div>
-            </div>
+            </section>
           )}
         </div>
       )}

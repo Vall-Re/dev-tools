@@ -1,23 +1,31 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next';
+
 import { tools } from '@/data/tools';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://100devtoolshub.com';
+const BASE_URL =
+  'https://100devtoolshub.com';
 
-  const toolEntries: MetadataRoute.Sitemap = tools.map((tool) => ({
-    url: `${baseUrl}/tools/${tool.slug}`, 
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }));
+export default function sitemap(): MetadataRoute.Sitemap {
+  const staticRoutes = [
+    '',
+    '/tools',
+    '/about',
+    '/privacy',
+    '/terms',
+  ];
+
+  const staticEntries: MetadataRoute.Sitemap =
+    staticRoutes.map((route) => ({
+      url: `${BASE_URL}${route}`,
+    }));
+
+  const toolEntries: MetadataRoute.Sitemap =
+    tools.map((tool) => ({
+      url: `${BASE_URL}/tools/${tool.slug}`,
+    }));
 
   return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1.0,
-    },
+    ...staticEntries,
     ...toolEntries,
   ];
 }
