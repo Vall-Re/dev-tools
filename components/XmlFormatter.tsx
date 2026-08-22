@@ -2,253 +2,873 @@
 
 import { useState } from 'react';
 
-export default function XmlFormatter() {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
-  const [indentSize, setIndentSize] = useState<number>(2);
-  const [copied, setCopied] = useState(false);
+type Operation = 'format' | 'minify' | null;
 
-  const formatXmlString = (xmlDoc: Document, indentSpaces: number): string => {
-    const tab = ' '.repeat(indentSpaces);
+const XML_NAMESPACE =
+  'http://www.w3.org/XML/1998/namespace';
 
-    const formatNode = (node: Node, level: number): string => {
-      const indent = tab.repeat(level);
+const sampleXml = `<?xml version="1.0" encoding="UTF-8"?>
+<?catalog version="1"?>
+<catalog xmlns:meta="https://example.com/meta">
+  <!-- Catalog comment -->
+  <book id="bk101" meta:status="active">
+    <author>Gambardella, Matthew</author>
+    <title>XML Developer's Guide</title>
+    <description><![CDATA[Text with <tags> & symbols]]></description>
+    <empty />
+  </book>
+</catalog>`;
 
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent?.trim();
-        return text ? text : '';
+const getXmlDeclaration = (input: string) => {
+  const match = input.match(
+    /^\uFEFF?\s*(<\?xml[\s\S]*?\?>)/i
+  );
+
+  return match?.[1] ?? '';
+};
+
+const getParseError = (
+  document: Document
+): string | null => {
+  const root = document.documentElement;
+
+  if (
+    root?.localName === 'parsererror'
+  ) {
+    return (
+      root.textContent?.trim() ||
+      'Invalid XML structure.'
+    );
+  }
+
+  const possibleError =
+    document.getElementsByTagName(
+      'parsererror'
+    )[0];
+
+  if (
+    possibleError &&
+    possibleError.namespaceURI?.includes(
+      'parsererror'
+    )
+  ) {
+    return (
+      possibleError.textContent?.trim() ||
+      'Invalid XML structure.'
+    );
+  }
+
+  return null;
+};
+
+const getPreserveWhitespace = (
+  element: Element,
+  inherited: boolean
+) => {
+  const explicit =
+    element.getAttributeNS(
+      XML_NAMESPACE,
+      'space'
+    ) ??
+    element.getAttribute('xml:space');
+
+  if (explicit === 'preserve') {
+    return true;
+  }
+
+  if (explicit === 'default') {
+    return false;
+  }
+
+  return inherited;
+};
+
+const escapeAttribute = (
+  value: string
+) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/"/g, '&quot;')
+    .replace(/\r/g, '&#xD;')
+    .replace(/\n/g, '&#xA;')
+    .replace(/\t/g, '&#x9;');
+
+const serializeStartTag = (
+  element: Element
+) => {
+  const attributes = Array.from(
+    element.attributes
+  )
+    .map(
+      (attribute) =>
+        ` ${attribute.name}="${escapeAttribute(
+          attribute.value
+        )}"`
+    )
+    .join('');
+
+  return `<${element.tagName}${attributes}>`;
+};
+
+const formatXmlDocument = (
+  document: Document,
+  input: string,
+  indentSize: number
+) => {
+  const declaration =
+    getXmlDeclaration(input);
+
+  const serializer =
+    new XMLSerializer();
+
+  const indentUnit =
+    ' '.repeat(indentSize);
+
+  const formatNode = (
+    node: Node,
+    level: number,
+    inheritedPreserve = false
+  ): string => {
+    const indent =
+      indentUnit.repeat(level);
+
+    if (
+      node.nodeType ===
+      Node.DOCUMENT_TYPE_NODE
+    ) {
+      return (
+        indent +
+        serializer.serializeToString(
+          node
+        )
+      );
+    }
+
+    if (
+      node.nodeType ===
+      Node.PROCESSING_INSTRUCTION_NODE
+    ) {
+      const instruction =
+        node as ProcessingInstruction;
+
+      if (
+        instruction.target.toLowerCase() ===
+        'xml'
+      ) {
+        return '';
       }
 
-      if (node.nodeType === Node.COMMENT_NODE) {
-        return `${indent}<!--${node.textContent}-->\n`;
-      }
+      return `${indent}<?${instruction.target}${
+        instruction.data
+          ? ` ${instruction.data}`
+          : ''
+      }?>`;
+    }
 
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as Element;
-        let result = `${indent}<${element.tagName}`;
+    if (
+      node.nodeType ===
+      Node.COMMENT_NODE
+    ) {
+      return `${indent}<!--${
+        node.nodeValue ?? ''
+      }-->`;
+    }
 
-        Array.from(element.attributes).forEach((attr) => {
-          result += ` ${attr.name}="${attr.value}"`;
-        });
+    if (
+      node.nodeType ===
+      Node.CDATA_SECTION_NODE
+    ) {
+      return `${indent}<![CDATA[${
+        node.nodeValue ?? ''
+      }]]>`;
+    }
 
-        const childNodes = Array.from(element.childNodes).filter((child) => {
-          return (
-            child.nodeType !== Node.TEXT_NODE ||
-            (child.textContent && child.textContent.trim().length > 0)
-          );
-        });
+    if (
+      node.nodeType ===
+      Node.TEXT_NODE
+    ) {
+      return (
+        indent +
+        serializer.serializeToString(
+          node
+        )
+      );
+    }
 
-        if (childNodes.length === 0) {
-          return `${result} />\n`;
-        }
-
-        result += '>';
-
-        const isSingleTextChild =
-          childNodes.length === 1 && childNodes[0].nodeType === Node.TEXT_NODE;
-
-        if (isSingleTextChild) {
-          result += `${childNodes[0].textContent?.trim()}</${element.tagName}>\n`;
-        } else {
-          result += '\n';
-          childNodes.forEach((child) => {
-            result += formatNode(child, level + 1);
-          });
-          result += `${indent}</${element.tagName}>\n`;
-        }
-
-        return result;
-      }
-
+    if (
+      node.nodeType !==
+      Node.ELEMENT_NODE
+    ) {
       return '';
-    };
+    }
 
-    let result = '';
-    xmlDoc.childNodes.forEach((child) => {
-      result += formatNode(child, 0);
-    });
+    const element = node as Element;
 
-    return result.trim();
+    const preserve =
+      getPreserveWhitespace(
+        element,
+        inheritedPreserve
+      );
+
+    const children = Array.from(
+      element.childNodes
+    );
+
+    const hasStructuralChild =
+      children.some(
+        (child) =>
+          child.nodeType ===
+            Node.ELEMENT_NODE ||
+          child.nodeType ===
+            Node.COMMENT_NODE ||
+          child.nodeType ===
+            Node.PROCESSING_INSTRUCTION_NODE
+      );
+
+    const hasNonWhitespaceText =
+      children.some(
+        (child) =>
+          child.nodeType ===
+            Node.TEXT_NODE &&
+          /\S/.test(
+            child.nodeValue ?? ''
+          )
+      );
+
+    const hasAnyText =
+      children.some(
+        (child) =>
+          child.nodeType ===
+          Node.TEXT_NODE
+      );
+
+    const hasCdata = children.some(
+      (child) =>
+        child.nodeType ===
+        Node.CDATA_SECTION_NODE
+    );
+
+    const mustPreserveContent =
+      preserve ||
+      hasNonWhitespaceText ||
+      hasCdata ||
+      (!hasStructuralChild &&
+        hasAnyText);
+
+    /*
+     * Mixed content and whitespace-sensitive
+     * elements are serialized without inserting
+     * formatting whitespace.
+     */
+    if (mustPreserveContent) {
+      return (
+        indent +
+        serializer.serializeToString(
+          element
+        )
+      );
+    }
+
+    const structuralChildren =
+      children.filter(
+        (child) =>
+          !(
+            child.nodeType ===
+              Node.TEXT_NODE &&
+            !/\S/.test(
+              child.nodeValue ?? ''
+            )
+          )
+      );
+
+    if (
+      structuralChildren.length === 0
+    ) {
+      const startTag =
+        serializeStartTag(element);
+
+      return (
+        indent +
+        startTag.replace(/>$/, '/>')
+      );
+    }
+
+    const startTag =
+      serializeStartTag(element);
+
+    const formattedChildren =
+      structuralChildren
+        .map((child) =>
+          formatNode(
+            child,
+            level + 1,
+            preserve
+          )
+        )
+        .filter(Boolean)
+        .join('\n');
+
+    return `${indent}${startTag}\n${formattedChildren}\n${indent}</${element.tagName}>`;
+  };
+
+  const parts: string[] = [];
+
+  if (declaration) {
+    parts.push(declaration);
+  }
+
+  Array.from(document.childNodes)
+    .map((node) =>
+      formatNode(node, 0)
+    )
+    .filter(Boolean)
+    .forEach((value) =>
+      parts.push(value)
+    );
+
+  return parts.join('\n');
+};
+
+const minifyXmlDocument = (
+  document: Document,
+  input: string
+) => {
+  const declaration =
+    getXmlDeclaration(input);
+
+  const cloned =
+    document.cloneNode(
+      true
+    ) as Document;
+
+  const removeFormattingWhitespace = (
+    node: Node,
+    inheritedPreserve = false
+  ) => {
+    if (
+      node.nodeType !==
+      Node.ELEMENT_NODE
+    ) {
+      return;
+    }
+
+    const element = node as Element;
+
+    const preserve =
+      getPreserveWhitespace(
+        element,
+        inheritedPreserve
+      );
+
+    const children = Array.from(
+      element.childNodes
+    );
+
+    const hasStructuralChild =
+      children.some(
+        (child) =>
+          child.nodeType ===
+            Node.ELEMENT_NODE ||
+          child.nodeType ===
+            Node.COMMENT_NODE ||
+          child.nodeType ===
+            Node.PROCESSING_INSTRUCTION_NODE
+      );
+
+    const hasNonWhitespaceText =
+      children.some(
+        (child) =>
+          child.nodeType ===
+            Node.TEXT_NODE &&
+          /\S/.test(
+            child.nodeValue ?? ''
+          )
+      );
+
+    const hasCdata = children.some(
+      (child) =>
+        child.nodeType ===
+        Node.CDATA_SECTION_NODE
+    );
+
+    if (
+      !preserve &&
+      hasStructuralChild &&
+      !hasNonWhitespaceText &&
+      !hasCdata
+    ) {
+      children.forEach(
+        (child) => {
+          if (
+            child.nodeType ===
+              Node.TEXT_NODE &&
+            !/\S/.test(
+              child.nodeValue ?? ''
+            )
+          ) {
+            element.removeChild(
+              child
+            );
+          }
+        }
+      );
+    }
+
+    Array.from(
+      element.children
+    ).forEach((child) =>
+      removeFormattingWhitespace(
+        child,
+        preserve
+      )
+    );
+  };
+
+  if (cloned.documentElement) {
+    removeFormattingWhitespace(
+      cloned.documentElement
+    );
+  }
+
+  const serializer =
+    new XMLSerializer();
+
+  const body = Array.from(
+    cloned.childNodes
+  )
+    .filter((node) => {
+      if (
+        node.nodeType !==
+        Node.PROCESSING_INSTRUCTION_NODE
+      ) {
+        return true;
+      }
+
+      return (
+        (
+          node as ProcessingInstruction
+        ).target.toLowerCase() !==
+        'xml'
+      );
+    })
+    .map((node) =>
+      serializer.serializeToString(
+        node
+      )
+    )
+    .join('');
+
+  return declaration
+    ? `${declaration}${body}`
+    : body;
+};
+
+export default function XmlFormatter() {
+  const [input, setInput] =
+    useState('');
+  const [output, setOutput] =
+    useState('');
+  const [error, setError] =
+    useState('');
+  const [indentSize, setIndentSize] =
+    useState<2 | 4>(2);
+  const [copied, setCopied] =
+    useState(false);
+  const [operation, setOperation] =
+    useState<Operation>(null);
+
+  const resetResult = () => {
+    setOutput('');
+    setError('');
+    setCopied(false);
+    setOperation(null);
+  };
+
+  const parseXml = () => {
+    const parser =
+      new DOMParser();
+
+    const document =
+      parser.parseFromString(
+        input,
+        'application/xml'
+      );
+
+    const parseError =
+      getParseError(document);
+
+    if (parseError) {
+      throw new Error(parseError);
+    }
+
+    return document;
   };
 
   const handleFormat = () => {
     if (!input.trim()) return;
+
     setError('');
+    setOutput('');
+    setCopied(false);
 
     try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(input, 'text/xml');
-      const parseError = xmlDoc.getElementsByTagName('parsererror');
+      const document = parseXml();
 
-      if (parseError.length > 0) {
-        setError(parseError[0].textContent || 'Invalid XML structure');
-        setOutput('');
-        return;
-      }
+      setOutput(
+        formatXmlDocument(
+          document,
+          input,
+          indentSize
+        )
+      );
 
-      const formatted = formatXmlString(xmlDoc, indentSize);
-      setOutput(formatted);
-    } catch (err: unknown) {
-      setError('Error processing XML: ' + (err as Error).message);
-      setOutput('');
+      setOperation('format');
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to format this XML.'
+      );
+
+      setOperation(null);
     }
   };
 
   const handleMinify = () => {
     if (!input.trim()) return;
+
     setError('');
+    setOutput('');
+    setCopied(false);
 
     try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(input, 'text/xml');
-      const parseError = xmlDoc.getElementsByTagName('parsererror');
+      const document = parseXml();
 
-      if (parseError.length > 0) {
-        setError(parseError[0].textContent || 'Invalid XML structure');
-        setOutput('');
-        return;
-      }
+      setOutput(
+        minifyXmlDocument(
+          document,
+          input
+        )
+      );
 
-      const minified = input
-        .replace(/>\s+</g, '><')
-        .replace(/\s+/g, ' ')
-        .trim();
+      setOperation('minify');
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to minify this XML.'
+      );
 
-      setOutput(minified);
-    } catch (err: unknown) {
-      setError('Error processing XML: ' + (err as Error).message);
-      setOutput('');
+      setOperation(null);
     }
   };
 
   const handleCopy = async () => {
     if (!output) return;
-    await navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    try {
+      await navigator.clipboard.writeText(
+        output
+      );
+
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      setCopied(false);
+    }
   };
 
   const handleDownload = () => {
     if (!output) return;
-    const blob = new Blob([output], { type: 'text/xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'formatted.xml';
-    a.click();
+
+    const blob = new Blob(
+      [output],
+      {
+        type: 'application/xml;charset=utf-8',
+      }
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const anchor =
+      document.createElement('a');
+
+    anchor.href = url;
+    anchor.download =
+      operation === 'minify'
+        ? 'minified.xml'
+        : 'formatted.xml';
+
+    document.body.appendChild(
+      anchor
+    );
+
+    anchor.click();
+    anchor.remove();
+
     URL.revokeObjectURL(url);
   };
 
   const handleLoadSample = () => {
-    setInput(
-      `<?xml version="1.0" encoding="UTF-8"?><catalog><book id="bk101"><author>Gambardella, Matthew</author><title>XML Developer's Guide</title><genre>Computer</genre><price>44.95</price><publish_date>2000-10-01</publish_date><description>An in-depth look at creating applications with XML.</description></book></catalog>`
-    );
+    setInput(sampleXml);
+    resetResult();
   };
 
+  const handleClear = () => {
+    setInput('');
+    resetResult();
+  };
+
+  const inputBytes =
+    new Blob([input]).size;
+
+  const outputBytes =
+    new Blob([output]).size;
+
+  const savedBytes =
+    operation === 'minify'
+      ? Math.max(
+          0,
+          inputBytes -
+            outputBytes
+        )
+      : 0;
+
+  const savedPercent =
+    operation === 'minify' &&
+    inputBytes > 0
+      ? Math.max(
+          0,
+          Math.round(
+            ((inputBytes -
+              outputBytes) /
+              inputBytes) *
+              100
+          )
+        )
+      : 0;
+
   return (
-    <div className="space-y-6 text-gray-100">
-      <div className="space-y-2">
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <label className="block text-sm font-medium">Input Raw XML</label>
-          <div className="flex gap-2">
+    <div className="space-y-6 text-text-primary">
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label
+            htmlFor="xml-input"
+            className="text-sm font-medium"
+          >
+            Input XML
+          </label>
+
+          <div className="flex items-center gap-2 text-xs">
             <button
-              onClick={handleLoadSample}
-              className="text-xs bg-gray-900 border border-gray-700 hover:bg-gray-800 text-gray-300 px-3 py-1 rounded transition"
+              type="button"
+              onClick={
+                handleLoadSample
+              }
+              className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
             >
               Load Sample
             </button>
-            {input && (
-              <button
-                onClick={() => {
-                  setInput('');
-                  setOutput('');
-                  setError('');
-                }}
-                className="text-xs text-red-400 hover:underline px-2 py-1"
-              >
-                Clear
-              </button>
-            )}
+
+            <span
+              aria-hidden="true"
+              className="text-text-muted"
+            >
+              /
+            </span>
+
+            <button
+              type="button"
+              onClick={handleClear}
+              className="font-medium text-text-muted transition-colors hover:text-text-primary"
+            >
+              Clear
+            </button>
           </div>
         </div>
 
         <textarea
+          id="xml-input"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="<note><to>User</to><from>Dev</from><heading>Reminder</heading><body>Don't forget!</body></note>"
-          className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
+          onChange={(event) => {
+            setInput(
+              event.target.value
+            );
+            resetResult();
+          }}
+          placeholder='<?xml version="1.0"?><note><to>User</to><body>Reminder</body></note>'
+          spellCheck={false}
+          className="h-52 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
         />
+
+        <p className="text-xs text-text-muted">
+          {inputBytes.toLocaleString()}{' '}
+          bytes input
+        </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 p-3 bg-gray-900 border border-gray-700 rounded-lg text-sm">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap gap-2">
           <button
+            type="button"
             onClick={handleFormat}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm"
+            disabled={!input.trim()}
+            className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Format XML
           </button>
+
           <button
+            type="button"
             onClick={handleMinify}
-            className="px-4 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg hover:bg-gray-700 transition font-medium text-sm"
+            disabled={!input.trim()}
+            className="rounded-lg border border-border bg-surface-800 px-4 py-2 text-sm font-medium text-text-primary transition hover:border-brand-cyan/50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Minify XML
           </button>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 font-medium text-xs">Indent:</span>
-          <button
-            onClick={() => setIndentSize(2)}
-            className={`px-2.5 py-1 text-xs rounded border transition font-mono ${
-              indentSize === 2
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
-            }`}
-          >
-            2 spaces
-          </button>
-          <button
-            onClick={() => setIndentSize(4)}
-            className={`px-2.5 py-1 text-xs rounded border transition font-mono ${
-              indentSize === 4
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-gray-900 border-gray-700 text-gray-300 hover:bg-gray-800'
-            }`}
-          >
-            4 spaces
-          </button>
+          <span className="text-xs text-text-muted">
+            Indent
+          </span>
+
+          {[2, 4].map((size) => (
+            <button
+              key={size}
+              type="button"
+              onClick={() =>
+                setIndentSize(
+                  size as 2 | 4
+                )
+              }
+              aria-pressed={
+                indentSize === size
+              }
+              className={`rounded-lg border px-3 py-1.5 font-mono text-xs transition ${
+                indentSize === size
+                  ? 'border-brand-blue bg-brand-blue text-white'
+                  : 'border-border bg-surface-900 text-text-secondary hover:border-brand-cyan/50'
+              }`}
+            >
+              {size} spaces
+            </button>
+          ))}
         </div>
       </div>
 
+      <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-4">
+        <p className="text-xs leading-5 text-text-secondary">
+          Formatting preserves
+          mixed-content text, CDATA,
+          processing instructions, comments,
+          namespaces, and XML whitespace
+          marked with xml:space=&quot;preserve&quot;.
+          Minification removes formatting
+          whitespace conservatively rather
+          than collapsing text content.
+        </p>
+      </div>
+
       {error && (
-        <div className="p-3 border border-red-800 bg-red-950/30 text-red-400 rounded-lg text-sm font-mono break-all">
-          <strong>Error:</strong> {error}
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            XML error
+          </p>
+
+          <p className="mt-2 break-words text-sm leading-6 text-text-secondary">
+            {error}
+          </p>
         </div>
       )}
 
       {output && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Result</label>
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">
+                {operation ===
+                'minify'
+                  ? 'Minified XML'
+                  : 'Formatted XML'}
+              </p>
+
+              <p className="mt-1 text-xs text-text-muted">
+                {outputBytes.toLocaleString()}{' '}
+                bytes output
+              </p>
+            </div>
+
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={handleCopy}
-                className="px-3 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded transition"
+                className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition hover:bg-success/15"
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied
+                  ? 'Copied!'
+                  : 'Copy'}
               </button>
+
               <button
-                onClick={handleDownload}
-                className="px-3 py-1 text-xs bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800 rounded transition"
+                type="button"
+                onClick={
+                  handleDownload
+                }
+                className="rounded-lg border border-border bg-surface-800 px-3 py-1.5 text-xs font-medium transition hover:border-brand-cyan/50"
               >
-                Download .XML
+                Download .xml
               </button>
             </div>
           </div>
 
-          <pre className="w-full p-4 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
+          {operation ===
+            'minify' && (
+            <div className="grid gap-3 rounded-xl border border-brand-blue/20 bg-brand-blue/5 p-4 sm:grid-cols-3">
+              <div>
+                <span className="block text-xs text-text-muted">
+                  Input
+                </span>
+
+                <strong className="mt-1 block font-mono text-sm">
+                  {inputBytes.toLocaleString()}{' '}
+                  bytes
+                </strong>
+              </div>
+
+              <div>
+                <span className="block text-xs text-text-muted">
+                  Output
+                </span>
+
+                <strong className="mt-1 block font-mono text-sm">
+                  {outputBytes.toLocaleString()}{' '}
+                  bytes
+                </strong>
+              </div>
+
+              <div>
+                <span className="block text-xs text-text-muted">
+                  Saved
+                </span>
+
+                <strong className="mt-1 block font-mono text-sm">
+                  {savedBytes.toLocaleString()}{' '}
+                  bytes ({savedPercent}%)
+                </strong>
+              </div>
+            </div>
+          )}
+
+          <pre className="max-h-[32rem] w-full overflow-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-success">
             {output}
           </pre>
         </div>
