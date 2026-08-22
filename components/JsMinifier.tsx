@@ -2,33 +2,49 @@
 
 import { useState } from 'react';
 
-export default function JsMinifier() {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [copied, setCopied] = useState(false);
-  const [stats, setStats] = useState<{ original: number; minified: number; savings: number } | null>(null);
+interface Stats {
+  original: number;
+  minified: number;
+  savings: number;
+}
 
-  const sampleJs = `// Calculate total price with discount
+const sampleJs = `// Calculate total price with discount
 function calculateTotal(price, discountPercent = 0) {
   /* Validate inputs */
   if (price <= 0) return 0;
-  
+
   const discountAmount = price * (discountPercent / 100);
   const finalPrice = price - discountAmount;
-  
+
   console.log("Calculated final price:", finalPrice);
+
   return finalPrice;
 }
 
 const itemPrice = 150;
 const total = calculateTotal(itemPrice, 15);`;
 
-  const calculateStats = (orig: string, min: string) => {
-    const originalSize = new Blob([orig]).size;
-    const minifiedSize = new Blob([min]).size;
-    const savings = originalSize > 0 
-      ? Math.max(0, Math.round(((originalSize - minifiedSize) / originalSize) * 100)) 
-      : 0;
+export default function JsMinifier() {
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [error, setError] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const calculateStats = (original: string, minified: string) => {
+    const originalSize = new Blob([original]).size;
+    const minifiedSize = new Blob([minified]).size;
+
+    const savings =
+      originalSize > 0
+        ? Math.max(
+            0,
+            Math.round(
+              ((originalSize - minifiedSize) / originalSize) * 100
+            )
+          )
+        : 0;
 
     setStats({
       original: originalSize,
@@ -37,68 +53,129 @@ const total = calculateTotal(itemPrice, 15);`;
     });
   };
 
-  const minifyJs = () => {
+  const processJavaScript = async (
+    mode: 'minify' | 'format'
+  ) => {
     if (!input.trim()) return;
 
-    const minified = input
-      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
-      .replace(/(^|[^:])\/\/.*/g, '$1') // Safe removal of single-line comments
-      .replace(/\s+/g, ' ') // Collapse whitespace
-      .replace(/\s*([={};(),+-/*])\s*/g, '$1') // Remove spaces around operators
-      .trim();
+    setIsProcessing(true);
+    setError('');
+    setCopied(false);
 
-    setOutput(minified);
-    calculateStats(input, minified);
-  };
+    try {
+      const { minify } = await import('terser');
 
-  const formatJs = () => {
-    if (!input.trim()) return;
+      const beautify = mode === 'format';
 
-    const formatted = input
-      .replace(/\s*;\s*/g, ';\n')
-      .replace(/\s*\{\s*/g, ' {\n  ')
-      .replace(/\s*\}\s*/g, '\n}\n')
-      .replace(/\n\s*\n/g, '\n')
-      .trim();
+      const options = {
+        compress: false,
+        mangle: false,
+        format: {
+          beautify,
+          comments: beautify,
+        },
+      };
 
-    setOutput(formatted);
-    setStats(null);
+      let result;
+
+      try {
+        result = await minify(input, {
+          ...options,
+          module: false,
+        });
+      } catch {
+        result = await minify(input, {
+          ...options,
+          module: true,
+        });
+      }
+
+      if (!result.code) {
+        throw new Error('No JavaScript output was generated.');
+      }
+
+      setOutput(result.code);
+
+      if (mode === 'minify') {
+        calculateStats(input, result.code);
+      } else {
+        setStats(null);
+      }
+    } catch (err) {
+      setOutput('');
+      setStats(null);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to process this JavaScript code.'
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleCopy = async () => {
     if (!output) return;
-    await navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    try {
+      await navigator.clipboard.writeText(output);
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      setCopied(false);
+    }
   };
 
   const handleClear = () => {
     setInput('');
     setOutput('');
     setStats(null);
+    setError('');
+    setCopied(false);
   };
 
   const handleLoadSample = () => {
     setInput(sampleJs);
     setOutput('');
     setStats(null);
+    setError('');
+    setCopied(false);
   };
 
   return (
-    <div className="space-y-4 text-gray-100">
-      <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium">Input JavaScript Code</label>
-        <div className="flex gap-2 text-xs">
+    <div className="space-y-5 text-text-primary">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <label
+          htmlFor="javascript-input"
+          className="text-sm font-medium text-text-primary"
+        >
+          Input JavaScript Code
+        </label>
+
+        <div className="flex items-center gap-2 text-xs">
           <button
+            type="button"
             onClick={handleLoadSample}
-            className="text-blue-400 hover:underline"
+            className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
           >
             Load Sample
           </button>
-          <span>|</span>
+
+          <span
+            aria-hidden="true"
+            className="text-text-muted"
+          >
+            /
+          </span>
+
           <button
+            type="button"
             onClick={handleClear}
-            className="text-gray-400 hover:underline"
+            className="font-medium text-text-muted transition-colors hover:text-text-primary"
           >
             Clear
           </button>
@@ -106,56 +183,100 @@ const total = calculateTotal(itemPrice, 15);`;
       </div>
 
       <textarea
+        id="javascript-input"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Paste your JS code here..."
-        className="w-full h-44 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
+        onChange={(event) => {
+          setInput(event.target.value);
+          setError('');
+        }}
+        placeholder="Paste your JavaScript code here..."
+        spellCheck={false}
+        className="h-52 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
       />
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-3">
         <button
-          onClick={minifyJs}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+          type="button"
+          onClick={() => processJavaScript('minify')}
+          disabled={!input.trim() || isProcessing}
+          className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Minify JS
+          {isProcessing ? 'Processing…' : 'Minify JS'}
         </button>
+
         <button
-          onClick={formatJs}
-          className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition text-sm font-medium"
+          type="button"
+          onClick={() => processJavaScript('format')}
+          disabled={!input.trim() || isProcessing}
+          className="rounded-lg border border-border bg-surface-800 px-4 py-2 text-sm font-medium text-text-primary transition hover:border-brand-blue/50 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Basic Format
+          Format JS
         </button>
       </div>
 
+      {error && (
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            JavaScript error
+          </p>
+
+          <p className="mt-2 break-words text-sm leading-6 text-text-secondary">
+            {error}
+          </p>
+        </div>
+      )}
+
       {stats && (
-        <div className="grid grid-cols-3 gap-3 p-3 bg-blue-950 border border-blue-800 rounded-lg text-xs font-mono text-blue-200">
+        <div className="grid gap-3 rounded-xl border border-brand-blue/20 bg-brand-blue/5 p-4 sm:grid-cols-3">
           <div>
-            <span className="text-gray-400 block">Original Size</span>
-            <strong>{stats.original} bytes</strong>
+            <span className="block text-xs text-text-muted">
+              Original size
+            </span>
+            <strong className="mt-1 block font-mono text-sm text-text-primary">
+              {stats.original} bytes
+            </strong>
           </div>
+
           <div>
-            <span className="text-gray-400 block">Minified Size</span>
-            <strong>{stats.minified} bytes</strong>
+            <span className="block text-xs text-text-muted">
+              Minified size
+            </span>
+            <strong className="mt-1 block font-mono text-sm text-text-primary">
+              {stats.minified} bytes
+            </strong>
           </div>
+
           <div>
-            <span className="text-gray-400 block">Savings</span>
-            <strong className="text-emerald-400">{stats.savings}%</strong>
+            <span className="block text-xs text-text-muted">
+              Savings
+            </span>
+            <strong className="mt-1 block font-mono text-sm text-success">
+              {stats.savings}%
+            </strong>
           </div>
         </div>
       )}
 
       {output && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Result</label>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-medium text-text-primary">
+              Result
+            </p>
+
             <button
+              type="button"
               onClick={handleCopy}
-              className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-medium"
+              className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition hover:bg-success/15"
             >
               {copied ? 'Copied!' : 'Copy Result'}
             </button>
           </div>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all max-h-96">
+
+          <pre className="max-h-96 w-full overflow-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-success">
             {output}
           </pre>
         </div>
