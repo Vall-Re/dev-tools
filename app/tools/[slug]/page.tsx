@@ -34,6 +34,14 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+const serializeJsonLd = (
+  value: unknown
+) =>
+  JSON.stringify(value).replace(
+    /</g,
+    '\\u003c'
+  );
+
 const toolComponents = {
   'json-formatter': JsonFormatter,
   'base64-encoder-decoder': Base64Converter,
@@ -100,6 +108,8 @@ export async function generateMetadata({
     },
   };
 }
+
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   return tools.map((tool) => ({
@@ -192,6 +202,25 @@ export default async function ToolPage({ params }: Props) {
 
   return (
     <main className="min-h-screen">
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            serializeJsonLd(appSchema),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            serializeJsonLd(
+              breadcrumbSchema
+            ),
+        }}
+      />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
