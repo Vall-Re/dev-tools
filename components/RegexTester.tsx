@@ -1,199 +1,722 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import {
+  useMemo,
+  useState,
+} from 'react';
 
-type MatchDetail = {
+interface MatchDetail {
   text: string;
   index: number;
-  groups: string[];
-};
+  groups: Array<string | undefined>;
+  namedGroups: Record<
+    string,
+    string | undefined
+  >;
+}
 
-const COMMON_PRESETS = [
-  { label: 'Email', pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}', flags: 'gi' },
-  { label: 'URL', pattern: 'https?://[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(/\\S*)?', flags: 'gi' },
-  { label: 'IPv4', pattern: '\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b', flags: 'g' },
-  { label: 'Digits', pattern: '\\d+', flags: 'g' },
+interface Preset {
+  label: string;
+  pattern: string;
+  flags: string;
+}
+
+const COMMON_PRESETS: Preset[] = [
+  {
+    label: 'Email-like',
+    pattern:
+      '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}',
+    flags: 'gi',
+  },
+  {
+    label: 'HTTP URL',
+    pattern:
+      'https?://[^\\s<>"\']+',
+    flags: 'gi',
+  },
+  {
+    label: 'IPv4',
+    pattern:
+      '\\b(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\b',
+    flags: 'g',
+  },
+  {
+    label: 'Digits',
+    pattern: '\\d+',
+    flags: 'g',
+  },
 ];
 
-export default function RegexTester() {
-  const [pattern, setPattern] = useState('');
-  const [flags, setFlags] = useState('gi');
-  const [testText, setTestText] = useState('');
+const FLAG_OPTIONS = [
+  {
+    flag: 'g',
+    label: 'Global',
+  },
+  {
+    flag: 'i',
+    label: 'Ignore case',
+  },
+  {
+    flag: 'm',
+    label: 'Multiline',
+  },
+  {
+    flag: 's',
+    label: 'Dot all',
+  },
+  {
+    flag: 'u',
+    label: 'Unicode',
+  },
+] as const;
 
-  const toggleFlag = (flag: string) => {
-    setFlags((prev) =>
-      prev.includes(flag) ? prev.replace(flag, '') : prev + flag
+const sampleText = `Contact alice@example.com or admin@test.dev.
+
+Visit https://example.com/docs.
+
+Server addresses:
+192.168.1.10
+255.255.255.255
+999.999.999.999`;
+
+const advanceStringIndex = (
+  value: string,
+  index: number,
+  unicode: boolean
+) => {
+  if (!unicode) {
+    return index + 1;
+  }
+
+  if (index + 1 >= value.length) {
+    return index + 1;
+  }
+
+  const first =
+    value.charCodeAt(index);
+
+  if (
+    first < 0xd800 ||
+    first > 0xdbff
+  ) {
+    return index + 1;
+  }
+
+  const second =
+    value.charCodeAt(
+      index + 1
+    );
+
+  if (
+    second < 0xdc00 ||
+    second > 0xdfff
+  ) {
+    return index + 1;
+  }
+
+  return index + 2;
+};
+
+export default function RegexTester() {
+  const [pattern, setPattern] =
+    useState('');
+
+  const [flags, setFlags] =
+    useState('gi');
+
+  const [testText, setTestText] =
+    useState('');
+
+  const toggleFlag = (
+    flag: string
+  ) => {
+    setFlags((current) =>
+      current.includes(flag)
+        ? current.replace(
+            flag,
+            ''
+          )
+        : `${current}${flag}`
     );
   };
 
-  const { matches, error, matchDetails } = useMemo(() => {
-    if (!pattern || !testText) {
-      return { matches: [], error: '', matchDetails: [] };
+  const {
+    error,
+    matchDetails,
+  } = useMemo(() => {
+    if (!pattern) {
+      return {
+        error: '',
+        matchDetails:
+          [] as MatchDetail[],
+      };
     }
 
+    let regex: RegExp;
+
     try {
-      const activeFlags = flags.includes('g') ? flags : flags + 'g';
-      const regex = new RegExp(pattern, activeFlags);
+      regex = new RegExp(
+        pattern,
+        flags
+      );
+    } catch (err) {
+      return {
+        error:
+          err instanceof Error
+            ? err.message
+            : 'Invalid regular expression.',
+        matchDetails:
+          [] as MatchDetail[],
+      };
+    }
 
-      const matchesArray: MatchDetail[] = [];
-      let match: RegExpExecArray | null;
+    if (testText.length === 0) {
+      return {
+        error: '',
+        matchDetails:
+          [] as MatchDetail[],
+      };
+    }
 
-      while ((match = regex.exec(testText)) !== null) {
-        matchesArray.push({
+    const results: MatchDetail[] =
+      [];
+
+    try {
+      if (!regex.global) {
+        const match =
+          regex.exec(testText);
+
+        if (match) {
+          results.push({
+            text: match[0],
+            index: match.index,
+            groups:
+              match.slice(1),
+            namedGroups: {
+              ...(match.groups ??
+                {}),
+            },
+          });
+        }
+
+        return {
+          error: '',
+          matchDetails:
+            results,
+        };
+      }
+
+      let match:
+        | RegExpExecArray
+        | null;
+
+      while (
+        (match =
+          regex.exec(
+            testText
+          )) !== null
+      ) {
+        results.push({
           text: match[0],
           index: match.index,
-          groups: match.slice(1),
+          groups:
+            match.slice(1),
+          namedGroups: {
+            ...(match.groups ??
+              {}),
+          },
         });
 
-        if (match[0].length === 0) {
-          regex.lastIndex++;
+        /*
+         * Global expressions that
+         * produce an empty match do
+         * not consume input. Advance
+         * manually to avoid an
+         * infinite loop.
+         */
+        if (
+          match[0].length === 0
+        ) {
+          regex.lastIndex =
+            advanceStringIndex(
+              testText,
+              regex.lastIndex,
+              regex.unicode
+            );
         }
       }
 
       return {
-        matches: matchesArray.map((m) => m.text),
         error: '',
-        matchDetails: matchesArray,
+        matchDetails:
+          results,
       };
-    } catch (err: unknown) {
+    } catch (err) {
       return {
-        matches: [],
-        error: (err as Error).message,
-        matchDetails: [],
+        error:
+          err instanceof Error
+            ? err.message
+            : 'Unable to evaluate this regular expression.',
+        matchDetails:
+          [] as MatchDetail[],
       };
     }
-  }, [pattern, flags, testText]);
+  }, [
+    pattern,
+    flags,
+    testText,
+  ]);
 
-  const renderHighlightedText = () => {
-    if (!testText) return null;
-    if (!pattern || error || matchDetails.length === 0) return testText;
-
-    const parts = [];
-    let lastIndex = 0;
-
-    matchDetails.forEach((m, idx) => {
-      if (m.index > lastIndex) {
-        parts.push(testText.slice(lastIndex, m.index));
+  const highlightedText =
+    useMemo(() => {
+      if (
+        !testText ||
+        !pattern ||
+        error ||
+        matchDetails.length === 0
+      ) {
+        return testText;
       }
-      parts.push(
-        <mark
-          key={idx}
-          className="bg-yellow-300 text-gray-900 font-semibold rounded px-0.5"
-        >
-          {m.text}
-        </mark>
+
+      const parts:
+        React.ReactNode[] = [];
+
+      let cursor = 0;
+
+      matchDetails.forEach(
+        (match, index) => {
+          if (
+            match.index >
+            cursor
+          ) {
+            parts.push(
+              testText.slice(
+                cursor,
+                match.index
+              )
+            );
+          }
+
+          if (
+            match.text.length ===
+            0
+          ) {
+            parts.push(
+              <span
+                key={`zero-${match.index}-${index}`}
+                title={`Zero-length match at index ${match.index}`}
+                className="mx-0.5 inline-block h-4 border-l-2 border-warning align-middle"
+                aria-label={`Zero-length match at index ${match.index}`}
+              />
+            );
+
+            cursor =
+              match.index;
+
+            return;
+          }
+
+          parts.push(
+            <mark
+              key={`match-${match.index}-${index}`}
+              className="rounded bg-warning/80 px-0.5 font-semibold text-surface-950"
+            >
+              {match.text}
+            </mark>
+          );
+
+          cursor =
+            match.index +
+            match.text.length;
+        }
       );
-      lastIndex = m.index + m.text.length;
-    });
 
-    if (lastIndex < testText.length) {
-      parts.push(testText.slice(lastIndex));
-    }
+      if (
+        cursor <
+        testText.length
+      ) {
+        parts.push(
+          testText.slice(cursor)
+        );
+      }
 
-    return parts;
+      return parts;
+    }, [
+      testText,
+      pattern,
+      error,
+      matchDetails,
+    ]);
+
+  const handleLoadSample =
+    () => {
+      setPattern(
+        '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}'
+      );
+      setFlags('gi');
+      setTestText(
+        sampleText
+      );
+    };
+
+  const handleClear = () => {
+    setPattern('');
+    setFlags('gi');
+    setTestText('');
   };
 
   return (
-    <div className="space-y-6 text-gray-100">
+    <div className="space-y-6 text-text-primary">
       <div className="space-y-3">
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <label className="block text-sm font-medium">Presets</label>
-          <div className="flex gap-2 flex-wrap">
-            {COMMON_PRESETS.map((preset) => (
-              <button
-                key={preset.label}
-                onClick={() => {
-                  setPattern(preset.pattern);
-                  setFlags(preset.flags);
-                }}
-                className="text-xs px-2.5 py-1 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-200 rounded transition"
-              >
-                {preset.label}
-              </button>
-            ))}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-medium">
+            Presets
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            {COMMON_PRESETS.map(
+              (preset) => (
+                <button
+                  key={
+                    preset.label
+                  }
+                  type="button"
+                  onClick={() => {
+                    setPattern(
+                      preset.pattern
+                    );
+                    setFlags(
+                      preset.flags
+                    );
+                  }}
+                  className="rounded-lg border border-border bg-surface-900 px-3 py-1.5 text-xs font-medium text-text-secondary transition hover:border-brand-cyan/50 hover:text-text-primary"
+                >
+                  {preset.label}
+                </button>
+              )
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <div className="md:col-span-3">
-            <input
-              type="text"
-              value={pattern}
-              onChange={(e) => setPattern(e.target.value)}
-              placeholder="e.g. [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-              className="w-full p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
-            />
-          </div>
-          <div className="flex items-center gap-1 border p-1 rounded-lg border-gray-700 justify-around bg-gray-900">
-            {['g', 'i', 'm', 's'].map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => toggleFlag(f)}
-                className={`px-2.5 py-1 text-xs font-mono rounded font-bold transition ${
-                  flags.includes(f)
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-400 hover:bg-gray-800'
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap items-center justify-end gap-2 text-xs">
+          <button
+            type="button"
+            onClick={
+              handleLoadSample
+            }
+            className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
+          >
+            Load Sample
+          </button>
+
+          <span
+            aria-hidden="true"
+            className="text-text-muted"
+          >
+            /
+          </span>
+
+          <button
+            type="button"
+            onClick={handleClear}
+            className="font-medium text-text-muted transition-colors hover:text-danger"
+          >
+            Clear
+          </button>
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Test Text</label>
+      <div className="space-y-2">
+        <label
+          htmlFor="regex-pattern"
+          className="text-sm font-medium"
+        >
+          Regular Expression
+        </label>
+
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
+          <div className="flex items-center rounded-xl border border-border bg-surface-900 font-mono focus-within:border-brand-cyan focus-within:ring-2 focus-within:ring-brand-cyan/20">
+            <span className="pl-4 text-text-muted">
+              /
+            </span>
+
+            <input
+              id="regex-pattern"
+              type="text"
+              value={pattern}
+              onChange={(
+                event
+              ) =>
+                setPattern(
+                  event.target
+                    .value
+                )
+              }
+              placeholder="e.g. \d+"
+              spellCheck={false}
+              className="min-w-0 flex-1 bg-transparent px-2 py-3 font-mono text-sm text-text-primary outline-none"
+            />
+
+            <span className="pr-4 text-text-muted">
+              /{flags}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-surface-900 p-1">
+            {FLAG_OPTIONS.map(
+              ({
+                flag,
+                label,
+              }) => {
+                const active =
+                  flags.includes(
+                    flag
+                  );
+
+                return (
+                  <button
+                    key={flag}
+                    type="button"
+                    title={label}
+                    aria-label={`${label} flag`}
+                    aria-pressed={
+                      active
+                    }
+                    onClick={() =>
+                      toggleFlag(
+                        flag
+                      )
+                    }
+                    className={`rounded-lg px-3 py-2 font-mono text-xs font-semibold transition ${
+                      active
+                        ? 'bg-brand-blue text-white'
+                        : 'text-text-muted hover:bg-surface-800 hover:text-text-primary'
+                    }`}
+                  >
+                    {flag}
+                  </button>
+                );
+              }
+            )}
+          </div>
+        </div>
+
+        <p className="text-xs leading-5 text-text-muted">
+          Flags use native JavaScript
+          RegExp behavior. Without the
+          global (
+          <code className="font-mono">
+            g
+          </code>
+          ) flag, only the first match is
+          returned.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <label
+          htmlFor="regex-test-text"
+          className="text-sm font-medium"
+        >
+          Test Text
+        </label>
+
         <textarea
+          id="regex-test-text"
           value={testText}
-          onChange={(e) => setTestText(e.target.value)}
-          placeholder="Paste string here to test matches..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
+          onChange={(
+            event
+          ) =>
+            setTestText(
+              event.target.value
+            )
+          }
+          placeholder="Paste text to test the expression against..."
+          spellCheck={false}
+          className="h-40 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
         />
       </div>
 
+      <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-4">
+        <p className="text-xs leading-5 text-text-secondary">
+          This tester uses the browser&apos;s
+          native JavaScript RegExp engine.
+          Presets are practical examples,
+          not full validators for every
+          possible email address or URL.
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-text-muted">
+          Some pathological regular
+          expressions can require significant
+          processing time on long input.
+        </p>
+      </div>
+
       {error && (
-        <div className="p-3 border border-red-800 bg-red-950 text-red-300 rounded-lg text-sm font-mono">
-          <strong>RegEx Error:</strong> {error}
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            RegExp error
+          </p>
+
+          <p className="mt-2 break-words font-mono text-sm leading-6 text-text-secondary">
+            {error}
+          </p>
         </div>
       )}
 
-      {testText && !error && (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Interactive Highlighting</label>
-            <div className="p-3 border rounded-lg bg-gray-900 border-gray-700 text-gray-100 font-mono text-sm whitespace-pre-wrap break-all min-h-[5rem] overflow-y-auto">
-              {renderHighlightedText()}
-            </div>
-          </div>
+      {testText.length > 0 &&
+        !error && (
+          <div className="space-y-6">
+            <section className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-medium">
+                  Match Highlighting
+                </p>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Matches Found ({matches.length})
-            </label>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {matchDetails.map((match, index) => (
-                <div
-                  key={index}
-                  className="p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm break-all space-y-1"
-                >
-                  <div className="flex justify-between text-xs text-gray-400">
-                    <span>Match #{index + 1}</span>
-                    <span>Index: {match.index}</span>
-                  </div>
-                  <div>{match.text}</div>
-                  {match.groups.length > 0 && (
-                    <div className="text-xs text-blue-400 pt-1 border-t border-gray-800">
-                      Groups: {match.groups.map((g, gi) => `$${gi + 1}: ${g}`).join(', ')}
-                    </div>
+                <span className="font-mono text-xs text-text-muted">
+                  {
+                    matchDetails.length
+                  }{' '}
+                  {matchDetails.length ===
+                  1
+                    ? 'match'
+                    : 'matches'}
+                </span>
+              </div>
+
+              <div className="min-h-24 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary">
+                {highlightedText}
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <p className="text-sm font-medium">
+                Match Details
+              </p>
+
+              {matchDetails.length ===
+              0 ? (
+                <div className="rounded-xl border border-border bg-surface-900 p-4 text-sm text-text-muted">
+                  No matches found.
+                </div>
+              ) : (
+                <div className="max-h-80 space-y-3 overflow-y-auto">
+                  {matchDetails.map(
+                    (
+                      match,
+                      index
+                    ) => {
+                      const namedEntries =
+                        Object.entries(
+                          match.namedGroups
+                        );
+
+                      return (
+                        <article
+                          key={`${match.index}-${index}`}
+                          className="space-y-3 rounded-xl border border-border bg-surface-900 p-4"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-xs font-medium text-text-secondary">
+                              Match #
+                              {index +
+                                1}
+                            </span>
+
+                            <span className="font-mono text-xs text-text-muted">
+                              index{' '}
+                              {
+                                match.index
+                              }
+                            </span>
+                          </div>
+
+                          <code className="block break-all font-mono text-sm text-success">
+                            {match.text ||
+                              '(zero-length match)'}
+                          </code>
+
+                          {match.groups
+                            .length >
+                            0 && (
+                            <div className="border-t border-border pt-3">
+                              <p className="mb-2 text-xs text-text-muted">
+                                Capture
+                                groups
+                              </p>
+
+                              <div className="space-y-1 font-mono text-xs text-brand-cyan">
+                                {match.groups.map(
+                                  (
+                                    group,
+                                    groupIndex
+                                  ) => (
+                                    <div
+                                      key={
+                                        groupIndex
+                                      }
+                                      className="break-all"
+                                    >
+                                      $
+                                      {groupIndex +
+                                        1}
+                                      :{' '}
+                                      {group ===
+                                      undefined
+                                        ? '(unmatched)'
+                                        : group}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {namedEntries.length >
+                            0 && (
+                            <div className="border-t border-border pt-3">
+                              <p className="mb-2 text-xs text-text-muted">
+                                Named
+                                groups
+                              </p>
+
+                              <div className="space-y-1 font-mono text-xs text-brand-purple">
+                                {namedEntries.map(
+                                  ([
+                                    name,
+                                    value,
+                                  ]) => (
+                                    <div
+                                      key={
+                                        name
+                                      }
+                                      className="break-all"
+                                    >
+                                      {name}
+                                      :{' '}
+                                      {value ===
+                                      undefined
+                                        ? '(unmatched)'
+                                        : value}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </article>
+                      );
+                    }
                   )}
                 </div>
-              ))}
-            </div>
+              )}
+            </section>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }
