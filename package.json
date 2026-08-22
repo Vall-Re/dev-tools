@@ -2,11 +2,16 @@
   "name": "dev-tools",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --incremental false",
+    "check": "npm run lint && npm run typecheck && npm run build"
   },
   "dependencies": {
     "@adobe/css-tools": "^4.5.0",
@@ -27,7 +32,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/dompurify": "^3.0.5",
     "@types/js-beautify": "^1.14.3",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",
