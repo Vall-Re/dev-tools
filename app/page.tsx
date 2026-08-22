@@ -1,6 +1,24 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import ToolSearch from '@/components/ToolSearch';
 import { tools } from '@/data/tools';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/',
+  },
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: '100 DevTools Hub',
+  alternateName: '100DevToolsHub',
+  url: 'https://100devtoolshub.com/',
+  description:
+    'Fast, privacy-focused developer tools that run directly in your browser.',
+};
 
 const popularToolSlugs = [
   'json-formatter',
@@ -27,6 +45,15 @@ const categories = Array.from(new Set(tools.map((tool) => tool.category))).map(
 export default function Home() {
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            websiteSchema
+          ),
+        }}
+      />
+
       <section className="border-b border-border">
         <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
           <div className="mx-auto max-w-4xl text-center">
