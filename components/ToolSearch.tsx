@@ -20,13 +20,14 @@ export default function ToolSearch() {
       const matchesSearch =
         !normalizedQuery ||
         tool.name.toLowerCase().includes(normalizedQuery) ||
-        tool.description.toLowerCase().includes(normalizedQuery);
+        tool.description.toLowerCase().includes(normalizedQuery) ||
+        tool.category.toLowerCase().includes(normalizedQuery);
 
       const matchesCategory =
         selectedCategory === 'All' ||
-        tool.category.toLowerCase() === selectedCategory.toLowerCase();
+        tool.category === selectedCategory;
 
-      return matchesSearch && matchesCategory;
+        return matchesSearch && matchesCategory;
     });
   }, [searchQuery, selectedCategory]);
 
@@ -68,7 +69,11 @@ export default function ToolSearch() {
           />
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div
+          role="group"
+          aria-label="Filter tools by category"
+          className="mt-4 flex flex-wrap gap-2"
+        >
           {categories.map((category) => {
             const active = selectedCategory === category;
 
@@ -95,6 +100,7 @@ export default function ToolSearch() {
         <p
           className="text-sm text-text-secondary"
           aria-live="polite"
+          aria-atomic="true"
         >
           {filteredTools.length}{' '}
           {filteredTools.length === 1 ? 'tool' : 'tools'} found
