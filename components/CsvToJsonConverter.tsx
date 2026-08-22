@@ -1,6 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+} from 'react';
+
+interface ConversionMeta {
+  delimiter: string;
+  rows: number;
+  columns: number;
+}
+
+const sampleCsv = `id,name,age,is_active,city
+1,"Smith, John",30,true,"New York"
+2,"Doe, Jane",25,false,"London"
+3,"Brown, Charlie",42,true,"Paris"`;
 
 export default function CsvToJsonConverter() {
   const [csv, setCsv] = useState('');
@@ -8,98 +23,254 @@ export default function CsvToJsonConverter() {
   const [error, setError] = useState('');
   const [parseTypes, setParseTypes] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [meta, setMeta] = useState<ConversionMeta | null>(null);
 
-  const sampleCsv = `id,name,age,is_active,city
-1,"Smith, John",30,true,"New York"
-2,"Doe, Jane",25,false,"London"
-3,"Brown, Charlie",42,true,"Paris"`;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Parser handling quotes and escaped commas properly
-  const parseCsvLine = (text: string): string[] => {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
+  const castValue = (value: string): unknown => {
+    if (!parseTypes) {
+      return value;
+    }
 
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      if (char === '"' && (i === 0 || text[i - 1] !== '\\')) {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        result.push(current.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-        current = '';
-      } else {
-        current += char;
+    const trimmed = value.trim();
+
+    if (trimmed === '') {
+      return null;
+    }
+
+    if (trimmed.toLowerCase() === 'true') {
+      return true;
+    }
+
+    if (trimmed.toLowerCase() === 'false') {
+      return false;
+    }
+
+    const numberPattern =
+      /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
+
+    if (numberPattern.test(trimmed)) {
+      const numericValue = Number(trimmed);
+
+      if (
+        Number.isFinite(numericValue) &&
+        (
+          !Number.isInteger(numericValue) ||
+          Number.isSafeInteger(numericValue)
+        )
+      ) {
+        return numericValue;
       }
     }
-    result.push(current.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-    return result;
+
+    return value;
   };
 
-  const castValue = (val: string) => {
-    if (!parseTypes) return val;
-    if (val === '') return null;
-    if (val.toLowerCase() === 'true') return true;
-    if (val.toLowerCase() === 'false') return false;
-    if (!isNaN(Number(val)) && val.trim() !== '') return Number(val);
-    return val;
+  const getDelimiterLabel = (delimiter: string) => {
+    if (delimiter === ',') return 'Comma (,)';
+    if (delimiter === ';') return 'Semicolon (;)';
+    if (delimiter === '\t') return 'Tab';
+    if (delimiter === '|') return 'Pipe (|)';
+
+    return delimiter || 'Single column';
   };
 
-  const convertToJson = () => {
+  const convertToJson = async () => {
     if (!csv.trim()) return;
+
+    setIsProcessing(true);
     setError('');
+    setJson('');
+    setMeta(null);
+    setCopied(false);
 
     try {
-      const lines = csv.trim().split(/\r?\n/).filter((line) => line.trim() !== '');
-      if (lines.length < 2) {
-        setError('CSV must contain at least a header row and one data row.');
-        setJson('');
-        return;
+      const { default: Papa } = await import('papaparse');
+
+      const parsed = Papa.parse<string[]>(csv, {
+        skipEmptyLines: 'greedy',
+      });
+
+      const blockingErrors = parsed.errors.filter(
+        (parseError) =>
+          parseError.code !== 'UndetectableDelimiter'
+      );
+
+      if (blockingErrors.length > 0) {
+        const firstError = blockingErrors[0];
+
+        throw new Error(
+          firstError.message ||
+            `Unable to parse CSV data${
+              typeof firstError.row === 'number'
+                ? ` near row ${firstError.row + 1}`
+                : ''
+            }.`
+        );
       }
 
-      const headers = parseCsvLine(lines[0]);
-      const result = lines.slice(1).map((line) => {
-        const values = parseCsvLine(line);
-        const obj: Record<string, unknown> = {};
+      const rows = parsed.data;
+
+      if (rows.length < 2) {
+        throw new Error(
+          'CSV must contain a header row and at least one data row.'
+        );
+      }
+
+      const headers = rows[0].map((header, index) => {
+        const withoutBom =
+          index === 0
+            ? header.replace(/^\uFEFF/, '')
+            : header;
+
+        return withoutBom.trim();
+      });
+
+      const emptyHeaderIndex = headers.findIndex(
+        (header) => header === ''
+      );
+
+      if (emptyHeaderIndex !== -1) {
+        throw new Error(
+          `Header column ${emptyHeaderIndex + 1} is empty. Give every column a unique name before converting.`
+        );
+      }
+
+      const duplicateHeaders = headers.filter(
+        (header, index) =>
+          headers.indexOf(header) !== index
+      );
+
+      if (duplicateHeaders.length > 0) {
+        const uniqueDuplicates = [
+          ...new Set(duplicateHeaders),
+        ];
+
+        throw new Error(
+          `Duplicate header${
+            uniqueDuplicates.length > 1 ? 's' : ''
+          } found: ${uniqueDuplicates.join(
+            ', '
+          )}. Header names must be unique.`
+        );
+      }
+
+      const dataRows = rows.slice(1);
+
+      const invalidRowIndex = dataRows.findIndex(
+        (row) => row.length !== headers.length
+      );
+
+      if (invalidRowIndex !== -1) {
+        const row = dataRows[invalidRowIndex];
+
+        throw new Error(
+          `Data row ${invalidRowIndex + 1} contains ${
+            row.length
+          } column${
+            row.length === 1 ? '' : 's'
+          }, but the header defines ${
+            headers.length
+          }.`
+        );
+      }
+
+      const result = dataRows.map((row) => {
+        const record: Record<string, unknown> = {};
+
         headers.forEach((header, index) => {
-          obj[header] = values[index] !== undefined ? castValue(values[index]) : '';
+          record[header] = castValue(row[index] ?? '');
         });
-        return obj;
+
+        return record;
       });
 
       setJson(JSON.stringify(result, null, 2));
-    } catch (err: unknown) {
-      setError('Failed to parse CSV data: ' + (err as Error).message);
+
+      setMeta({
+        delimiter: parsed.meta.delimiter,
+        rows: result.length,
+        columns: headers.length,
+      });
+    } catch (err) {
       setJson('');
+      setMeta(null);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to parse this CSV data.'
+      );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileUpload = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
+
+    reader.onload = () => {
+      const content =
+        typeof reader.result === 'string'
+          ? reader.result
+          : '';
+
       setCsv(content);
+      setJson('');
+      setError('');
+      setMeta(null);
+      setCopied(false);
     };
+
+    reader.onerror = () => {
+      setError('Unable to read the selected CSV file.');
+      setJson('');
+      setMeta(null);
+    };
+
     reader.readAsText(file);
   };
 
   const handleCopy = async () => {
     if (!json) return;
-    await navigator.clipboard.writeText(json);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    try {
+      await navigator.clipboard.writeText(json);
+
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      setCopied(false);
+    }
   };
 
   const handleDownload = () => {
     if (!json) return;
-    const blob = new Blob([json], { type: 'application/json' });
+
+    const blob = new Blob([json], {
+      type: 'application/json;charset=utf-8',
+    });
+
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'converted.json';
-    a.click();
+    const anchor = document.createElement('a');
+
+    anchor.href = url;
+    anchor.download = 'converted.json';
+
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+
     URL.revokeObjectURL(url);
   };
 
@@ -107,29 +278,56 @@ export default function CsvToJsonConverter() {
     setCsv('');
     setJson('');
     setError('');
+    setMeta(null);
+    setCopied(false);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleLoadSample = () => {
     setCsv(sampleCsv);
     setJson('');
     setError('');
+    setMeta(null);
+    setCopied(false);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
-    <div className="space-y-4 text-gray-100">
-      <div className="flex justify-between items-center">
-        <label className="block text-sm font-medium">Input CSV Data</label>
-        <div className="flex gap-2 text-xs">
+    <div className="space-y-5 text-text-primary">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <label
+          htmlFor="csv-input"
+          className="text-sm font-medium text-text-primary"
+        >
+          Input CSV Data
+        </label>
+
+        <div className="flex items-center gap-2 text-xs">
           <button
+            type="button"
             onClick={handleLoadSample}
-            className="text-blue-400 hover:underline"
+            className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
           >
             Load Sample
           </button>
-          <span>|</span>
+
+          <span
+            aria-hidden="true"
+            className="text-text-muted"
+          >
+            /
+          </span>
+
           <button
+            type="button"
             onClick={handleClear}
-            className="text-gray-400 hover:underline"
+            className="font-medium text-text-muted transition-colors hover:text-text-primary"
           >
             Clear
           </button>
@@ -137,71 +335,133 @@ export default function CsvToJsonConverter() {
       </div>
 
       <textarea
+        id="csv-input"
         value={csv}
-        onChange={(e) => setCsv(e.target.value)}
-        placeholder="Paste your CSV data here..."
-        className="w-full h-40 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
+        onChange={(event) => {
+          setCsv(event.target.value);
+          setError('');
+        }}
+        placeholder="Paste CSV, TSV, semicolon-separated, or pipe-separated data here..."
+        spellCheck={false}
+        className="h-48 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <button
+            type="button"
             onClick={convertToJson}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+            disabled={!csv.trim() || isProcessing}
+            className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Convert CSV to JSON
+            {isProcessing
+              ? 'Converting…'
+              : 'Convert CSV to JSON'}
           </button>
 
-          <label className="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-2 text-xs text-text-secondary">
             <input
               type="checkbox"
               checked={parseTypes}
-              onChange={(e) => setParseTypes(e.target.checked)}
-              className="rounded bg-gray-900 border-gray-700 text-blue-600 focus:ring-blue-500"
+              onChange={(event) =>
+                setParseTypes(event.target.checked)
+              }
+              className="size-4 rounded border-border bg-surface-900 text-brand-blue focus:ring-brand-cyan"
             />
+
             Auto-parse numbers & booleans
           </label>
         </div>
 
-        <div>
-          <label className="px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-medium cursor-pointer transition border border-gray-700 text-gray-100">
-            Upload CSV File
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </label>
-        </div>
+        <label className="cursor-pointer rounded-lg border border-border bg-surface-800 px-3 py-2 text-xs font-medium text-text-primary transition hover:border-brand-blue/50">
+          Upload CSV File
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv,text/plain"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+        </label>
       </div>
 
       {error && (
-        <div className="p-3 border border-red-800 bg-red-950 text-red-300 rounded-lg text-sm font-mono">
-          <strong>Error:</strong> {error}
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            CSV error
+          </p>
+
+          <p className="mt-2 break-words text-sm leading-6 text-text-secondary">
+            {error}
+          </p>
+        </div>
+      )}
+
+      {meta && (
+        <div className="grid gap-3 rounded-xl border border-brand-blue/20 bg-brand-blue/5 p-4 sm:grid-cols-3">
+          <div>
+            <span className="block text-xs text-text-muted">
+              Detected delimiter
+            </span>
+
+            <strong className="mt-1 block font-mono text-sm text-text-primary">
+              {getDelimiterLabel(meta.delimiter)}
+            </strong>
+          </div>
+
+          <div>
+            <span className="block text-xs text-text-muted">
+              Data rows
+            </span>
+
+            <strong className="mt-1 block font-mono text-sm text-text-primary">
+              {meta.rows}
+            </strong>
+          </div>
+
+          <div>
+            <span className="block text-xs text-text-muted">
+              Columns
+            </span>
+
+            <strong className="mt-1 block font-mono text-sm text-text-primary">
+              {meta.columns}
+            </strong>
+          </div>
         </div>
       )}
 
       {json && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium">Converted JSON</label>
-            <div className="flex gap-2">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-medium text-text-primary">
+              Converted JSON
+            </p>
+
+            <div className="flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={handleCopy}
-                className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-medium"
+                className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition hover:bg-success/15"
               >
                 {copied ? 'Copied!' : 'Copy JSON'}
               </button>
+
               <button
+                type="button"
                 onClick={handleDownload}
-                className="px-3 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-600 transition font-medium"
+                className="rounded-lg border border-border bg-surface-800 px-3 py-1.5 text-xs font-medium text-text-primary transition hover:border-brand-blue/50"
               >
                 Download .json
               </button>
             </div>
           </div>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap max-h-96">
+
+          <pre className="max-h-96 w-full overflow-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-success">
             {json}
           </pre>
         </div>
