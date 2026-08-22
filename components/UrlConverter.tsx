@@ -1,170 +1,576 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import {
+  useMemo,
+  useState,
+} from 'react';
 
-type Mode = 'encodeComponent' | 'encodeURI' | 'decode';
+type Mode =
+  | 'encodeComponent'
+  | 'decodeComponent'
+  | 'encodeUri'
+  | 'decodeUri';
+
+interface QueryParam {
+  key: string;
+  value: string;
+}
+
+interface ConversionResult {
+  output: string;
+  error: string;
+  queryParams: QueryParam[];
+}
+
+interface ModeOption {
+  value: Mode;
+  label: string;
+  shortDescription: string;
+}
+
+const MODE_OPTIONS: ModeOption[] = [
+  {
+    value: 'encodeComponent',
+    label: 'Encode Component',
+    shortDescription:
+      'Encode a query value, path segment, or other URL component.',
+  },
+  {
+    value: 'decodeComponent',
+    label: 'Decode Component',
+    shortDescription:
+      'Decode percent-encoded component text.',
+  },
+  {
+    value: 'encodeUri',
+    label: 'Encode Full URL',
+    shortDescription:
+      'Encode unsafe characters while preserving URL structure.',
+  },
+  {
+    value: 'decodeUri',
+    label: 'Decode Full URL',
+    shortDescription:
+      'Decode a URL while preserving encoded reserved delimiters.',
+  },
+];
+
+const sampleUrl =
+  'https://example.com/search?q=hello world&lang=uk#results';
+
+const getQueryParams = (
+  value: string
+): QueryParam[] => {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  const collect = (
+    params: URLSearchParams
+  ) => {
+    const result: QueryParam[] = [];
+
+    params.forEach(
+      (paramValue, key) => {
+        result.push({
+          key,
+          value: paramValue,
+        });
+      }
+    );
+
+    return result;
+  };
+
+  /*
+   * Full absolute URL.
+   */
+  try {
+    const url = new URL(trimmed);
+
+    if (url.search) {
+      return collect(
+        url.searchParams
+      );
+    }
+  } catch {
+    // Continue with query-string checks.
+  }
+
+  /*
+   * Standalone query string:
+   * ?q=test&lang=en
+   */
+  if (
+    trimmed.startsWith('?')
+  ) {
+    return collect(
+      new URLSearchParams(
+        trimmed.slice(1)
+      )
+    );
+  }
+
+  /*
+   * Query-like input:
+   * q=test&lang=en
+   *
+   * Require "=" so ordinary text is
+   * not presented as a query parameter.
+   */
+  if (
+    trimmed.includes('=') &&
+    !trimmed.includes('\n') &&
+    !trimmed.includes('\r')
+  ) {
+    return collect(
+      new URLSearchParams(
+        trimmed
+      )
+    );
+  }
+
+  return [];
+};
+
+const convertValue = (
+  input: string,
+  mode: Mode
+) => {
+  switch (mode) {
+    case 'encodeComponent':
+      return encodeURIComponent(
+        input
+      );
+
+    case 'decodeComponent':
+      return decodeURIComponent(
+        input
+      );
+
+    case 'encodeUri':
+      return encodeURI(input);
+
+    case 'decodeUri':
+      return decodeURI(input);
+  }
+};
+
+const getErrorMessage = (
+  mode: Mode
+) => {
+  switch (mode) {
+    case 'decodeComponent':
+      return 'The input contains malformed or invalid percent-encoded component data.';
+
+    case 'decodeUri':
+      return 'The input contains malformed or invalid percent-encoded URL data.';
+
+    case 'encodeComponent':
+      return 'The input could not be encoded as a URL component. Check for malformed Unicode data.';
+
+    case 'encodeUri':
+      return 'The input could not be encoded as a URL. Check for malformed Unicode data.';
+  }
+};
 
 export default function UrlConverter() {
-  const [input, setInput] = useState('');
-  const [mode, setMode] = useState<Mode>('encodeComponent');
-  const [copied, setCopied] = useState(false);
+  const [input, setInput] =
+    useState('');
 
-  const { output, error, queryParams } = useMemo(() => {
-    if (!input.trim()) {
-      return { output: '', error: '', queryParams: [] };
+  const [mode, setMode] =
+    useState<Mode>(
+      'encodeComponent'
+    );
+
+  const [copied, setCopied] =
+    useState(false);
+
+  const {
+    output,
+    error,
+    queryParams,
+  } = useMemo<ConversionResult>(() => {
+    if (input.length === 0) {
+      return {
+        output: '',
+        error: '',
+        queryParams: [],
+      };
     }
 
     try {
-      let result = '';
-      if (mode === 'encodeComponent') {
-        result = encodeURIComponent(input);
-      } else if (mode === 'encodeURI') {
-        result = encodeURI(input);
-      } else {
-        result = decodeURIComponent(input);
-      }
-
-      const params: { key: string; value: string }[] = [];
-      const textToParse = mode === 'decode' ? result : input;
-
-      try {
-        const urlObj = new URL(
-          textToParse.startsWith('http') ? textToParse : `https://dummy.com/${textToParse.startsWith('?') ? '' : '?'}${textToParse}`
+      const result =
+        convertValue(
+          input,
+          mode
         );
-        urlObj.searchParams.forEach((val, key) => {
-          params.push({ key, value: val });
-        });
-      } catch {
-        // Якщо це не валідний URL з параметрами, просто ігноруємо парсинг params
-      }
 
-      return { output: result, error: '', queryParams: params };
-    } catch (err: unknown) {
+      const sourceForParams =
+        mode ===
+          'decodeComponent' ||
+        mode === 'decodeUri'
+          ? result
+          : input;
+
+      return {
+        output: result,
+        error: '',
+        queryParams:
+          getQueryParams(
+            sourceForParams
+          ),
+      };
+    } catch {
       return {
         output: '',
         error:
-          mode === 'decode'
-            ? 'Invalid URL encoding format.'
-            : 'Failed to encode: ' + (err as Error).message,
+          getErrorMessage(
+            mode
+          ),
         queryParams: [],
       };
     }
   }, [input, mode]);
 
-  const handleCopy = async () => {
+  const currentMode =
+    MODE_OPTIONS.find(
+      (item) =>
+        item.value === mode
+    );
+
+  const handleCopy =
+    async () => {
+      if (!output) return;
+
+      try {
+        await navigator.clipboard.writeText(
+          output
+        );
+
+        setCopied(true);
+
+        window.setTimeout(
+          () => {
+            setCopied(false);
+          },
+          2000
+        );
+      } catch {
+        setCopied(false);
+      }
+    };
+
+  const handleUseResult = () => {
     if (!output) return;
-    await navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    setInput(output);
+    setCopied(false);
   };
 
+  const handleClear = () => {
+    setInput('');
+    setCopied(false);
+  };
+
+  const handleLoadSample =
+    () => {
+      setInput(sampleUrl);
+      setMode('encodeUri');
+      setCopied(false);
+    };
+
   return (
-    <div className="space-y-6 text-gray-100">
+    <div className="space-y-6 text-text-primary">
       <div className="space-y-3">
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <label className="block text-sm font-medium">Input URL or Text</label>
-          {input && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label
+            htmlFor="url-converter-input"
+            className="text-sm font-medium"
+          >
+            Input URL or Text
+          </label>
+
+          <div className="flex items-center gap-2 text-xs">
             <button
-              onClick={() => setInput('')}
-              className="text-xs text-red-400 hover:underline"
+              type="button"
+              onClick={
+                handleLoadSample
+              }
+              className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
+            >
+              Load Sample
+            </button>
+
+            <span
+              aria-hidden="true"
+              className="text-text-muted"
+            >
+              /
+            </span>
+
+            <button
+              type="button"
+              onClick={handleClear}
+              className="font-medium text-text-muted transition-colors hover:text-danger"
             >
               Clear
             </button>
-          )}
+          </div>
         </div>
 
         <textarea
+          id="url-converter-input"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Paste full URL or text (e.g. https://example.com/search?q=hello world)..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
-        />
+          onChange={(event) => {
+            setInput(
+              event.target.value
+            );
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-medium text-gray-400">Mode:</span>
-          <button
-            type="button"
-            onClick={() => setMode('encodeComponent')}
-            className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-              mode === 'encodeComponent'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800'
-            }`}
-          >
-            Encode Component
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('encodeURI')}
-            className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-              mode === 'encodeURI'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800'
-            }`}
-          >
-            Encode Full URL
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('decode')}
-            className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-              mode === 'decode'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800'
-            }`}
-          >
-            Decode
-          </button>
+            setCopied(false);
+          }}
+          placeholder="Enter a full URL, URL component, or percent-encoded text..."
+          spellCheck={false}
+          className="h-40 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
+        />
+      </div>
+
+      <div className="space-y-3">
+        <p className="text-xs font-medium text-text-secondary">
+          Operation
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {MODE_OPTIONS.map(
+            (option) => {
+              const active =
+                mode ===
+                option.value;
+
+              return (
+                <button
+                  key={
+                    option.value
+                  }
+                  type="button"
+                  aria-pressed={
+                    active
+                  }
+                  onClick={() => {
+                    setMode(
+                      option.value
+                    );
+
+                    setCopied(
+                      false
+                    );
+                  }}
+                  className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
+                    active
+                      ? 'border-brand-blue bg-brand-blue text-white'
+                      : 'border-border bg-surface-900 text-text-secondary hover:border-brand-cyan/50 hover:text-text-primary'
+                  }`}
+                >
+                  {
+                    option.label
+                  }
+                </button>
+              );
+            }
+          )}
         </div>
+
+        {currentMode && (
+          <p className="text-xs leading-5 text-text-muted">
+            {
+              currentMode.shortDescription
+            }
+          </p>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-brand-cyan/20 bg-brand-cyan/5 p-4">
+        <p className="text-xs leading-5 text-text-secondary">
+          Component mode applies
+          JavaScript&apos;s{' '}
+          <code className="font-mono text-brand-cyan">
+            encodeURIComponent
+          </code>{' '}
+          or{' '}
+          <code className="font-mono text-brand-cyan">
+            decodeURIComponent
+          </code>
+          .
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-text-secondary">
+          Full URL mode uses{' '}
+          <code className="font-mono text-brand-cyan">
+            encodeURI
+          </code>{' '}
+          or{' '}
+          <code className="font-mono text-brand-cyan">
+            decodeURI
+          </code>{' '}
+          so URL delimiters such as{' '}
+          <code className="font-mono">
+            :
+          </code>
+          ,{' '}
+          <code className="font-mono">
+            /
+          </code>
+          ,{' '}
+          <code className="font-mono">
+            ?
+          </code>{' '}
+          and{' '}
+          <code className="font-mono">
+            #
+          </code>{' '}
+          are treated differently from
+          component data.
+        </p>
+
+        <p className="mt-2 text-xs leading-5 text-text-muted">
+          Percent-encoding is not URL
+          validation and does not make an
+          untrusted URL safe to visit.
+        </p>
       </div>
 
       {error && (
-        <div className="p-3 border border-red-800 bg-red-950/50 text-red-300 rounded-lg text-sm font-mono">
-          <strong>Error:</strong> {error}
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/10 p-4"
+        >
+          <p className="font-mono text-xs uppercase tracking-wide text-danger">
+            URL encoding error
+          </p>
+
+          <p className="mt-2 text-sm leading-6 text-text-secondary">
+            {error}
+          </p>
         </div>
       )}
 
       {output && (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-medium">Result</label>
-              <button
-                onClick={handleCopy}
-                className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-medium"
-              >
-                {copied ? 'Copied!' : 'Copy Result'}
-              </button>
+        <div className="space-y-6">
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium">
+                  Result
+                </p>
+
+                <p className="mt-1 text-xs text-text-muted">
+                  {
+                    currentMode?.label
+                  }
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={
+                    handleUseResult
+                  }
+                  className="rounded-lg border border-border bg-surface-800 px-3 py-1.5 text-xs font-medium transition hover:border-brand-cyan/50"
+                >
+                  Use as Input
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
+                    handleCopy
+                  }
+                  className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition hover:bg-success/15"
+                >
+                  {copied
+                    ? 'Copied!'
+                    : 'Copy Result'}
+                </button>
+              </div>
             </div>
-            <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all select-all">
+
+            <pre className="max-h-96 w-full overflow-auto whitespace-pre-wrap break-all rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-success">
               {output}
             </pre>
-          </div>
+          </section>
 
-          {queryParams.length > 0 && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">
-                Detected Query Parameters ({queryParams.length})
-              </label>
-              <div className="border rounded-lg overflow-hidden border-gray-700 bg-gray-900">
-                <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-gray-800 border-b border-gray-700 text-gray-400">
+          {queryParams.length >
+            0 && (
+            <section className="space-y-3">
+              <div>
+                <p className="text-sm font-medium">
+                  Detected Query
+                  Parameters
+                </p>
+
+                <p className="mt-1 text-xs text-text-muted">
+                  {
+                    queryParams.length
+                  }{' '}
+                  parameter
+                  {queryParams.length ===
+                  1
+                    ? ''
+                    : 's'}
+                  , including repeated
+                  keys.
+                </p>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-border bg-surface-900">
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-border bg-surface-800 text-text-muted">
                     <tr>
-                      <th className="p-2.5">Parameter</th>
-                      <th className="p-2.5">Value</th>
+                      <th
+                        scope="col"
+                        className="p-3 font-medium"
+                      >
+                        Parameter
+                      </th>
+
+                      <th
+                        scope="col"
+                        className="p-3 font-medium"
+                      >
+                        Value
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700">
-                    {queryParams.map((param, index) => (
-                      <tr key={index} className="hover:bg-gray-800/50">
-                        <td className="p-2.5 font-bold text-blue-400">{param.key}</td>
-                        <td className="p-2.5 text-gray-200 break-all">{param.value}</td>
-                      </tr>
-                    ))}
+
+                  <tbody className="divide-y divide-border font-mono">
+                    {queryParams.map(
+                      (
+                        param,
+                        index
+                      ) => (
+                        <tr
+                          key={`${param.key}-${index}`}
+                        >
+                          <td className="p-3 break-all text-brand-cyan">
+                            {
+                              param.key
+                            }
+                          </td>
+
+                          <td className="p-3 break-all text-text-secondary">
+                            {param.value ||
+                              '(empty)'}
+                          </td>
+                        </tr>
+                      )
+                    )}
                   </tbody>
                 </table>
               </div>
-            </div>
+            </section>
           )}
         </div>
       )}
