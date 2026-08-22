@@ -132,14 +132,14 @@ RFC 3986 distinguishes unreserved characters from reserved characters such as ?,
 
 This URL Encoder and Decoder helps inspect or prepare URL components and query values in the browser. Encode individual data values before inserting them into a URL, and avoid repeatedly encoding or decoding an already processed value.`,
     howToUse: [
-      'Select your desired mode: click "Encode" to convert special characters into percent-encoded format or "Decode" to convert encoded strings back to plain text.',
-      'Paste or type your URL, path, or query string into the input text area.',
-      'View the real-time converted output instantly generated in the result section.',
-      'Click the "Copy" button to save the processed text directly to your clipboard.',
+      'Choose one of four operations: Encode Component, Decode Component, Encode Full URL, or Decode Full URL.',
+      'Paste or type the full URL, URL component, path text, or percent-encoded value into the input area.',
+      'Review the result and use the detected query-parameter table when the input contains a query string.',
+      'Copy the result or use it as the next input when you need to continue a conversion workflow.',
     ],
     features: [
-      'Bi-Directional Conversion: Effortlessly switch between encoding plain text into valid URLs and decoding percent-encoded strings.',
-      'Percent-Encoding Workflow: Uses standard browser URI encoding and decoding behavior for URL components and text values.',
+      'Four Explicit Operations: Separates full-URL handling from individual component encoding and decoding.',
+      'Browser URI Semantics: Uses encodeURI/decodeURI for full URLs and encodeURIComponent/decodeURIComponent for component data.',
       'Local Browser Processing: Encoding and decoding run in the browser without requiring the input value to be uploaded for processing.',
       'Full Unicode & UTF-8 Support: Correctly converts non-ASCII characters, emojis, and multi-language scripts.',
       'Instant Clipboard Access: Copy or clear results with a single click to streamline your development workflow.',
@@ -230,18 +230,18 @@ This HTML Entity Encoder and Decoder converts characters to HTML character refer
 
 UUIDs are common in database design, distributed systems, APIs, and event-driven applications. They allow developers to create identifiers across independent systems without coordinating a central sequential counter. A UUID is an identifier, not automatically an authentication secret or access token.
 
-Our Free Online UUID / GUID Generator produces cryptographically secure Version-4 UUIDs directly inside your browser. Version-4 UUIDs rely on pseudo-random number generators utilizing 122 bits of pure randomness, yielding 5.3 x 10^36 possible variations. Whether you need a single unique identifier for testing or a batch of UUIDs for database seeding, this client-side utility generates instant, collision-resistant identifiers safely without any network latency.`,
+Our Free Online UUID / GUID Generator produces Version-4 UUIDs directly inside your browser using cryptographically strong browser randomness. A UUID v4 contains 122 random bits after the version and variant bits are set, giving an extremely large identifier space. The tool can generate one or many identifiers for testing, database seeding, request correlation, and similar development workflows.`,
     howToUse: [
       'Select the quantity of UUIDs you wish to generate at once.',
-      'Choose optional formatting preferences such as uppercase or lowercase lettering and hyphen inclusion.',
-      'Click "Generate UUIDs" to generate a fresh batch of Version-4 unique identifiers.',
-      'Click the "Copy" button to instantly save your generated UUID list to the clipboard.',
+      'Choose optional representation settings such as uppercase output or removing hyphens.',
+      'Click "Generate New" to create a fresh batch of Version-4 identifiers.',
+      'Copy an individual UUID, copy the complete batch, or download the results as TXT or JSON.',
     ],
     features: [
-      'Cryptographically Secure Randomness: Utilizes secure browser APIs (crypto.getRandomValues) for high-entropy Version-4 generation.',
+      'Cryptographically Strong Browser Randomness: Uses crypto.randomUUID when available, with crypto.getRandomValues as a Version-4 fallback.',
       'Bulk Generation Support: Produce single or multiple UUIDs simultaneously for rapid development testing.',
       'Customizable Formatting: Toggle between uppercase, lowercase, standard hyphenated, or compact unhyphenated string outputs.',
-      'Local Browser Processing: All UUIDs are generated locally in your web browser and are never transmitted to external logging servers.',
+      'Local Browser Generation: UUID creation itself runs in the browser and does not require sending generated identifiers to our application server.',
       'One-Click Clipboard Export: Instantly copy individual identifiers or entire batch lists with dedicated controls.',
     ],
     useCases: [
@@ -266,7 +266,7 @@ Our Free Online UUID / GUID Generator produces cryptographically secure Version-
       },
       {
         question: 'Are generated UUIDs logged or stored on your backend servers?',
-        answer: 'No. All UUID generation algorithms run completely within your web browser using client-side JavaScript. No identifiers are transmitted, logged, or recorded on remote servers.',
+        answer: 'UUID generation itself runs in your browser and does not require sending the generated identifiers to our application server. Site-level analytics and advertising are described separately in the Privacy Policy.',
       },
     ],
   },
@@ -304,7 +304,7 @@ Our Free Online CSS Minifier & Formatter offers a dual-mode workflow for front-e
     faqs: [
       {
         question: 'How does CSS minification improve website performance?',
-        answer: 'CSS files are render-blocking resources that browsers must download and parse before displaying a web page. Minification reduces file size, which decreases network transmission time and enables faster page rendering.',
+        answer: 'Minification can reduce the number of source characters a stylesheet contains. That may reduce transfer size, but the practical performance effect depends on compression, caching, stylesheet size, and how CSS is loaded by the page.',
       },
       {
         question: 'Will CSS minification break my website styling?',
@@ -316,7 +316,7 @@ Our Free Online CSS Minifier & Formatter offers a dual-mode workflow for front-e
       },
       {
         question: 'Is my CSS code uploaded or logged on remote servers?',
-        answer: 'No. All minification and formatting routines run locally within your web browser. Your styling code remains entirely private and never leaves your local device.',
+        answer: 'The CSS minification and formatting operation runs in your browser and does not require uploading the stylesheet to our application server for processing.',
       },
     ],
   },
@@ -330,7 +330,7 @@ Our Free Online CSS Minifier & Formatter offers a dual-mode workflow for front-e
 
 Developed by Ronald Rivest, MD5 is deterministic: identical input bytes produce the same 128-bit digest, while small input changes usually produce a very different output. MD5 was once widely used for cryptographic integrity, but practical collision attacks mean it should not be used where collision resistance or modern security is required. Common or low-entropy inputs can also be guessed using dictionaries or precomputed tables.
 
-Our Free Online MD5 Hash Generator enables developers, database administrators, and QA engineers to quickly compute MD5 checksums in real time. Whether you are generating checksums for file integrity checks, constructing legacy database keys, or creating Gravatar email hash parameters, this client-side utility provides fast and private processing directly inside your browser.`,
+Our Free Online MD5 Hash Generator enables developers, database administrators, and QA engineers to quickly compute MD5 checksums in real time. Whether you are generating checksums for file integrity checks, constructing legacy database keys, or creating Gravatar email hash parameters, this client-side utility computes the digest directly inside your browser without requiring a server-side hashing request.`,
     howToUse: [
       'Enter or paste your text or raw string data into the input field.',
       'The tool automatically processes your input and computes the 128-bit MD5 hash in real time.',
@@ -366,7 +366,7 @@ Our Free Online MD5 Hash Generator enables developers, database administrators, 
       },
       {
         question: 'Is my input string transmitted to external servers when generating a hash?',
-        answer: 'No. The cryptographic hashing logic executes entirely inside your browser via local JavaScript. No input data, credentials, or strings are sent to or stored on remote servers.',
+        answer: 'The MD5 calculation runs in your browser and does not require uploading the input text to our application server for hashing. Site-level analytics and advertising are covered separately in the Privacy Policy.',
       },
     ],
   },
@@ -418,7 +418,7 @@ The tool processes the supplied source in the browser without requiring a server
       },
       {
         question: 'Is my proprietary JavaScript code safe when using this tool?',
-        answer: 'Yes. All parsing, minification, and formatting happen locally inside your browser via client-side JavaScript execution. Your source code is never transmitted to, processed by, or saved on any remote server.',
+        answer: 'The JavaScript parsing, minification, and formatting operation runs in your browser and does not require uploading the source code to our application server for processing. Avoid pasting secrets into any web page unless your workflow permits it.',
       },
     ],
   },
@@ -430,19 +430,19 @@ The tool processes the supplied source in the browser without requiring a server
     description: 'Decode and inspect JSON Web Token (JWT) headers, claims, and payload data instantly inside your browser.',
     aboutText: `JSON Web Token (JWT), defined by RFC 7519, is a compact URL-safe format for representing claims between parties. JWTs can be carried inside signed JWS structures, encrypted JWE structures, or in limited cases be unsecured. They are widely used in authentication and authorization systems, but the format itself does not guarantee confidentiality or validity.
 
-A standard JWT consists of three distinct parts separated by dots (.): the Header, the Payload, and the Signature. The Header specifies the signing algorithm and token type. The Payload contains claims—statements about an entity (typically the authenticated user) and additional metadata like issue time (iat) and expiration time (exp). In a common signed JWT, the header and payload are Base64URL-encoded and can be decoded by anyone who has the token. A signature can protect integrity when it is actually verified, but decoding alone does not verify the signature and does not prove that the token should be trusted.
+A common signed JWT carried as a compact JWS has three dot-separated parts: Header, Payload, and Signature. The Header specifies metadata such as the signing algorithm and token type, while the Payload contains claims such as subject, issue time (iat), and expiration time (exp). The header and payload are Base64URL-encoded and can be decoded by anyone who has the token. Encrypted compact JWE structures use five parts instead. A signature can protect integrity only when it is actually verified, and decoding alone does not prove that a token should be trusted.
 
 Our JWT Decoder helps developers inspect token structure, header values, claims, and time-based fields in the browser. It can show whether an exp timestamp is already in the past, but that is not the same as validating a token.
 
 The decoder does not verify cryptographic signatures or authorization rules. Use test or redacted tokens whenever possible, especially because production JWTs may function as bearer credentials.`,
     howToUse: [
       'Paste your encoded JSON Web Token (JWT) string into the input text area.',
-      'The tool automatically splits the token components and decodes the Base64URL-encoded Header and Payload JSON structures in real time.',
+      'Paste a three-part compact signed JWT; the tool decodes the Base64URL-encoded Header and Payload JSON structures in real time.',
       'Inspect decoded claim properties, user details, scopes, and expiration timestamps.',
       'Click the "Copy" buttons to easily copy the decoded Header or Payload JSON directly to your clipboard.',
     ],
     features: [
-      'Instant Auto-Decoding: Automatically parses and formats token header and payload claims as soon as you paste.',
+      'Strict Compact-JWT Decoding: Parses three-part signed JWT input and reports encrypted five-part JWE input separately instead of pretending it can decode the encrypted payload.',
       'Local Browser Decoding: Header and payload parsing runs in the browser without requiring the token to be uploaded for decoding.',
       'Human-Readable Timestamps: Converts standard Unix claim timestamps (exp, iat, nbf) into clear, readable dates.',
       'Formatted JSON Output: Displays claims in beautified, color-coded, and easy-to-read JSON blocks.',
@@ -522,7 +522,7 @@ A plain SHA-256 digest is not an HMAC, digital signature, encryption method, or 
       },
       {
         question: 'Is my input string saved or logged when generating a hash?',
-        answer: 'No. All processing is executed locally inside your web browser using JavaScript. No input strings, secret keys, or payloads are uploaded or stored on remote servers.',
+        answer: 'SHA-256 calculation runs in your browser and does not require uploading the input text to our application server for hashing. This tool computes a plain digest and does not accept a secret key.',
       },
     ],
   },
@@ -536,7 +536,7 @@ A plain SHA-256 digest is not an HMAC, digital signature, encryption method, or 
 
 Crafting regular expressions can be challenging because small syntax mistakes or overlooked edge cases can produce unexpected matches or poor performance. Common tasks include searching structured text, extracting identifiers, checking simple input formats, and testing find-and-replace patterns.
 
-Our Free Online Regex Tester provides web developers, software engineers, and QA analysts with an interactive environment to test and debug JavaScript regular expressions instantly. With real-time visual highlighting, customizable regex flags (global, case-insensitive, multiline), and client-side processing, you can confidently validate your pattern matching rules without any network delay or data exposure.`,
+Our Free Online Regex Tester provides web developers, software engineers, and QA analysts with an interactive environment to test and debug JavaScript regular expressions instantly. With real-time visual highlighting, JavaScript regex flags, capture-group inspection, and client-side evaluation, you can test pattern behavior directly in the browser. Complex expressions can still have performance risks, so patterns intended for untrusted input should be reviewed carefully.`,
     howToUse: [
       'Enter your regular expression pattern into the Regex field.',
       'Select active flags such as global search (g), case-insensitive (i), or multiline (m).',
@@ -581,23 +581,23 @@ Our Free Online Regex Tester provides web developers, software engineers, and QA
     name: 'SQL Formatter',
     slug: 'sql-formatter',
     category: 'Formatters',
-    description: 'Format, beautify, and clean up messy SQL queries into readable, structured code with uppercase keywords and standardized indentation.',
+    description: 'Format and beautify SQL using selectable dialect, keyword casing, and indentation options for easier reading and review.',
     aboutText: `SQL (Structured Query Language) is the foundation of database management and data manipulation across backend services, analytics platforms, and enterprise applications. As queries grow in complexity with multiple JOINs, subqueries, conditional logic, and aggregations, unformatted or single-line SQL strings become extremely difficult to read, debug, and maintain.
 
-Our Free Online SQL Formatter converts messy, raw, or inline SQL statements into clean, beautifully structured code. It automatically capitalizes standard SQL keywords (such as SELECT, FROM, WHERE, GROUP BY, and HAVING), aligns major clauses, and applies consistent block indentation to subqueries and conditional statements.
+Our Free Online SQL Formatter converts messy, raw, or inline SQL statements into consistently structured code. You can choose Basic SQL, MySQL, PostgreSQL, SQLite, Transact-SQL, or PL/SQL formatting, select upper- or lowercase keywords, and choose the available indentation width.
 
-Whether you are working with MySQL, PostgreSQL, SQLite, Microsoft SQL Server, or Oracle, this client-side utility helps database administrators, data engineers, and software developers improve query readability. Formatting runs locally in your web browser, so your SQL text does not need to be uploaded to our server.`,
+The formatter is a source-formatting utility rather than a database engine or semantic validator. It can report formatter parse errors, but it does not verify table names, schema objects, permissions, data types, or whether a statement will execute successfully on a live database. Formatting runs locally in your browser.`,
     howToUse: [
       'Paste your raw, unformatted, or minified SQL query into the input text area.',
-      'The tool automatically parses the syntax, formats clauses, and capitalizes core SQL keywords in real time.',
-      'Adjust formatting preferences if needed, such as indentation style or keyword casing.',
+      'Choose the SQL dialect that best matches the query: Basic SQL, MySQL, PostgreSQL, SQLite, Transact-SQL, or PL/SQL.',
+      'Choose uppercase or lowercase keywords and the available indentation width, then review the formatted result.',
       'Click the "Copy" button to instantly save the beautified SQL query to your clipboard.',
     ],
     features: [
-      'Automatic Keyword Capitalization: Converts reserved SQL words (SELECT, INSERT, UPDATE, DELETE, JOIN, WHERE) to uppercase for industry-standard readability.',
-      'Smart Clause Alignment: Places major query clauses on new lines with consistent indentation for nested subqueries.',
-      'Local Browser Processing: All parsing and formatting occur locally within your web browser JS engine; database queries are never sent to external servers.',
-      'General SQL Formatting: Works with common SQL syntax; dialect-specific extensions may format differently and should be reviewed.',
+      'Selectable SQL Dialects: Provides formatting modes for Basic SQL, MySQL, PostgreSQL, SQLite, Transact-SQL, and PL/SQL.',
+      'Keyword & Indentation Controls: Choose upper- or lowercase keywords and the available indentation width.',
+      'Local Browser Processing: SQL formatting runs in the browser without requiring a server-side query upload.',
+      'Formatting, Not Execution: Improves source layout but does not connect to a database or validate schema-level semantics.',
       'One-Click Clipboard Export: Easily copy formatted SQL code directly into your IDE, database client, or documentation.',
     ],
     useCases: [
@@ -610,7 +610,7 @@ Whether you are working with MySQL, PostgreSQL, SQLite, Microsoft SQL Server, or
     faqs: [
       {
         question: 'Does this SQL Formatter support my specific database dialect?',
-        answer: 'The formatter works best with common SQL syntax. Many queries from popular database systems will format well, but vendor-specific functions, procedural extensions, quoting rules, or unusual dialect syntax may require manual review.',
+        answer: 'The tool provides Basic SQL, MySQL, PostgreSQL, SQLite, Transact-SQL, and PL/SQL modes. Dialect-specific extensions can still exceed what the formatter understands, so review unusual vendor syntax and procedural SQL carefully.',
       },
       {
         question: 'Is my SQL query or database schema information sent to a server?',
@@ -646,7 +646,7 @@ Whether you are preparing seed data, transforming spreadsheet exports, or conver
     features: [
       'Instant Real-Time Parsing: Automatically converts CSV text into valid JSON objects as you type or paste.',
       'Header-Based Mapping: Uses the first row as property names and maps subsequent rows into JSON objects.',
-      'Local Browser Processing: All parsing occurs locally in your browser JS engine; raw spreadsheet data is never uploaded to remote servers.',
+      'Local Browser Processing: CSV parsing runs in your browser and does not require uploading the working CSV data to our application server.',
       'Structured JSON Output: Produces a readable array of key-value objects for downstream application or API work.',
       'One-Click Clipboard Export: Easily copy beautified JSON arrays for direct use in codebases or API calls.',
     ],
@@ -668,7 +668,7 @@ Whether you are preparing seed data, transforming spreadsheet exports, or conver
       },
       {
         question: 'Is my spreadsheet data uploaded or stored on your servers?',
-        answer: 'No. All conversion algorithms run locally inside your browser via client-side JavaScript. Your confidential business data, financial sheets, or email lists are never sent across the internet.',
+        answer: 'CSV conversion runs in your browser and does not require uploading the working spreadsheet data to our application server. Treat sensitive business data according to your organisation’s security requirements.',
       },
       {
         question: 'What happens if a CSV row has empty fields?',
@@ -696,7 +696,7 @@ Whether you are exporting API responses for reporting or preparing flat data for
     features: [
       'Real-Time Processing: Converts valid JSON arrays into structured CSV format instantly as you paste.',
       'Smart Header Generation: Automatically extracts object key names from the JSON payload to build accurate column headers.',
-      'Local Browser Processing: All parsing occurs locally inside your browser via JavaScript; sensitive API data is never sent to remote servers.',
+      'Local Browser Processing: JSON-to-CSV conversion runs in your browser without requiring the working JSON payload to be uploaded to our application server.',
       'CSV Cell Escaping: Handles common delimiter and quote cases so text values can be represented in a tabular CSV output.',
       'One-Click Clipboard & Export: Easily copy the output table or download it directly for immediate spreadsheet use.',
     ],
@@ -734,7 +734,7 @@ Whether you are exporting API responses for reporting or preparing flat data for
     description: 'Convert raw Markdown syntax into clean, semantic HTML markup instantly with a real-time side-by-side preview in your browser.',
     aboutText: `Markdown is the universal lightweight markup language used across content management systems, GitHub repositories, documentation portals, and static site generators. While Markdown makes writing structured content fast and human-readable, web browsers require standard HTML (HyperText Markup Language) to render web pages, blog posts, and email templates.
 
-Our Free Online Markdown to HTML Converter seamlessly transforms headings, lists, links, images, tables, code blocks, and inline formatting into semantic, clean HTML code. It features a real-time rendered preview alongside the raw HTML output, allowing you to visually verify how your content will look on a live web page before publishing.
+Our Free Online Markdown to HTML Converter transforms headings, lists, links, images, tables, code blocks, and inline formatting into HTML and shows a real-time rendered preview. The generated HTML is sanitized before it is displayed or returned so potentially unsafe markup is removed rather than executed in the preview.
 
 Whether you are preparing documentation for a website, converting GitHub README files into HTML snippets, or formatting rich content for web frameworks and newsletter engines, this client-side utility delivers instant conversion. All parsing is executed locally inside your web browser, keeping your drafts, technical notes, and code snippets processed locally in the browser.`,
     howToUse: [
@@ -746,8 +746,8 @@ Whether you are preparing documentation for a website, converting GitHub README 
     features: [
       'Real-Time HTML Generation: Automatically converts Markdown elements into standard semantic HTML tags as you type.',
       'Live Visual Preview: Provides an instant side-by-side rendered HTML view alongside the output source code.',
-      'Comprehensive Syntax Support: Handles headers, lists, blockquotes, code blocks, tables, images, links, and bold or italic formatting.',
-      'Local Browser Processing: Everything runs locally within your browser JS engine without transmitting content to external servers.',
+      'GFM-Oriented Markdown Support: Handles headings, lists, blockquotes, fenced code, tables, links, images, strikethrough, and other supported Markdown constructs.',
+      'Sanitized HTML Output: Sanitizes generated markup before previewing or returning it, reducing the risk of executing unsafe HTML supplied through Markdown.',
       'One-Click Clipboard Copy: Instantly export formatted HTML snippets into your codebase, CMS, or email publisher.',
     ],
     useCases: [
@@ -781,23 +781,23 @@ Whether you are preparing documentation for a website, converting GitHub README 
     name: 'URL Parser',
     slug: 'url-parser',
     category: 'Utilities',
-    description: 'Parse and dissect complex web addresses into individual protocol, hostname, path, port, hash, and formatted query string parameter components.',
+    description: 'Parse URLs into normalized protocol, origin, hostname, port, path, fragment, and decoded query-parameter components in your browser.',
     aboutText: `Uniform Resource Locators (URLs) serve as the fundamental address system for locating resources on the World Wide Web. Modern web addresses often contain complex layer structures, including protocols, subdomains, port numbers, multi-segment paths, hash fragments, and lengthy query string parameters used for user sessions, tracking tags, and API arguments.
 
 Manually reading or extracting individual parameters from long, percent-encoded URLs can be tedious and prone to errors. Understanding how a browser or server interprets each segment is essential during API integration, web routing setup, and marketing campaign debugging.
 
-Our Free Online URL Parser breaks down any valid web address into its structural components using standard browser URL parsing engines. It isolates the scheme protocol, hostname, origin, path sequence, port number, hash fragment, and automatically converts query string parameters into an organized key-value table. Everything runs locally in your web browser for instant speed and local browser processing.`,
+Our Free Online URL Parser uses the browser URL API to break an address into its normalized URL, protocol, hostname, origin, port, pathname, fragment, path segments, and query parameters. If an input such as example.com or localhost:3000 has no explicit scheme, the tool assumes HTTPS; protocol-relative URLs are also interpreted as HTTPS. A relative path by itself is rejected because its host cannot be determined without a base URL.`,
     howToUse: [
-      'Paste your full URL into the input address field.',
-      'The tool automatically validates and parses the address structure in real time.',
-      'Inspect individual URL components like protocol, hostname, port, pathname, and hash in the structured overview.',
-      'View extracted query parameters displayed neatly as decoded key-value pairs.',
-      'Click the "Copy" button to save specific parameter values or parsed structures directly to your clipboard.',
+      'Paste a full URL, protocol-relative URL, hostname, or hostname with a port into the input field.',
+      'Review the normalized URL and the notice when HTTPS had to be assumed.',
+      'Inspect protocol, origin, hostname, effective port, pathname, fragment, username, and masked password information.',
+      'Review raw and decoded path segments plus decoded query-parameter key-value pairs.',
+      'Copy individual parsed values as needed.',
     ],
     features: [
       'Instant Real-Time Dissection: Automatically decomposes URLs into clear, organized component segments as you type.',
       'Detailed Query String Table: Decodes and lists all URL query parameters as human-readable key-value pairs.',
-      'Local Browser Processing: Leverages the native browser URL API locally; web addresses, auth tokens, and tracking params are never uploaded to remote servers.',
+      'Local Browser Processing: Uses the native browser URL API and does not require uploading the working URL to our application server for parsing.',
       'Query Parameter Inspection: Displays URL query parameters in a readable key-value form using browser URL parsing APIs.',
       'One-Click Parameter Copy: Effortlessly copy extracted hostnames, paths, or individual query parameter values.',
     ],
@@ -811,7 +811,7 @@ Our Free Online URL Parser breaks down any valid web address into its structural
     faqs: [
       {
         question: 'Do I need to include http:// or https:// in the input field?',
-        answer: 'Yes. The URL parser relies on standard web standards that require a full absolute URL containing a protocol schema (such as https://, http://, or ftp://) to accurately determine origin and path boundaries.',
+        answer: 'No. If you enter a hostname such as example.com or localhost:3000 without a scheme, the tool assumes HTTPS and clearly marks that assumption. A relative path such as /docs/page is rejected because a base URL is required to determine its origin.',
       },
       {
         question: 'How does the parser handle encoded characters in query string parameters?',
@@ -819,7 +819,7 @@ Our Free Online URL Parser breaks down any valid web address into its structural
       },
       {
         question: 'Is my input URL or tracking parameter sent to an external server?',
-        answer: 'No. All URL parsing algorithms execute entirely within your local browser JavaScript engine. No web addresses, tokens, or query strings are recorded or transmitted to external servers.',
+        answer: 'The URL parsing operation runs in your browser and does not require uploading the working URL to our application server. Signed URLs, bearer tokens, and credentials can still be sensitive, so use test or redacted values when appropriate.',
       },
       {
         question: 'What is the difference between hostname and origin in a URL?',
@@ -887,7 +887,7 @@ Our Free Online Color Code Converter enables UI designers, web developers, and g
 
 Manually retyping or editing casing word-by-word is inefficient and increases the risk of subtle syntax bugs. Our Free Online Text Case Converter offers an instant multi-format transformation engine that converts raw strings, code snippets, or lengthy paragraphs into your desired casing format with a single click.
 
-Featuring real-time string manipulation, character counters, and one-click copy buttons, this client-side utility simplifies formatting workflows for developers, technical writers, and content creators. Every string operation is executed locally inside your web browser JavaScript runtime to ensure maximum execution speed and absolute data privacy.`,
+Featuring Unicode-aware string handling and one-click copy controls, this client-side utility simplifies formatting workflows for developers, technical writers, and content creators. The case-conversion operation runs locally in your browser.`,
     howToUse: [
       'Paste or type your input string or paragraph into the main text area.',
       'Click on any target casing button such as UPPERCASE, Title Case, camelCase, snake_case, or kebab-case.',
@@ -898,7 +898,7 @@ Featuring real-time string manipulation, character counters, and one-click copy 
       'Comprehensive Case Support: Converts text into UPPERCASE, lowercase, Title Case, Sentence case, camelCase, PascalCase, snake_case, and kebab-case.',
       'Instant Real-Time Transformation: Processes input strings dynamically as you type or click formatting options.',
       'Developer Naming Conventions: Quickly produce camelCase, PascalCase, snake_case, and kebab-case identifiers from ordinary text.',
-      'Local Browser Processing: All string parsing operates entirely within your browser JS engine without sending text data to external servers.',
+      'Local Browser Processing: Case conversion runs in the browser without requiring the working text to be uploaded to our application server.',
       'One-Click Clipboard Export: Easily copy formatted variable names, titles, or code identifiers into your editor.',
     ],
     useCases: [
@@ -932,23 +932,23 @@ Featuring real-time string manipulation, character counters, and one-click copy 
     name: 'HTML Formatter',
     slug: 'html-formatter',
     category: 'Formatters',
-    description: 'Format, beautify, and clean up messy or minified HTML code with proper indentation and structure.',
+    description: 'Format or minify HTML source for easier inspection, cleaner indentation, or more compact markup output.',
     aboutText: `Writing clean, well-structured HTML code is essential for maintainability, readable project architecture, and seamless collaboration among web development teams. Over time, nested DOM structures, auto-generated markup, and minified HTML files become cluttered, making debugging and editing difficult.
 
-Our Free Online HTML Formatter automatically reorganizes messy or compressed HTML code into beautifully structured markup. It formats nested DOM trees, aligns attributes, enforces consistent tab or space indentation, and handles void HTML5 tags gracefully.
+Our Free Online HTML Formatter provides syntax-aware HTML beautification and minification. Formatting applies consistent indentation for easier inspection, while minification creates a more compact representation for source-size reduction. Both operations should be reviewed when working with unusual templating syntax or malformed markup.
 
 Whether you are debugging complex web app templates, beautifying scraped source code, or tidying up legacy HTML files, this tool delivers instant results. All formatting calculations execute locally inside your browser JavaScript runtime, ensuring maximum processing speed and local browser processing.`,
     howToUse: [
       'Paste your raw, messy, or minified HTML code into the input editor panel.',
       'Configure preferred indentation settings such as 2 spaces, 4 spaces, or tab characters.',
-      'Click the "Format HTML" button to automatically beautify and align the markup structure.',
-      'Use the live syntax editor to inspect elements, check nesting, or click "Copy" to save the formatted HTML.',
+      'Choose Format to beautify the markup or Minify to create a compact HTML representation.',
+      'Review the result and use Copy or the available output actions to move the processed markup into your workflow.',
     ],
     features: [
-      'Automated DOM Indentation: Intelligently aligns parent, child, and sibling HTML elements for optimal visual structure.',
+      'HTML Beautification: Applies consistent indentation and layout to make nested markup easier to inspect.',
       'HTML5 Void Tag Support: Correctly processes void tags like img, input, br, meta, and hr without adding unnecessary closing tags.',
       'Customizable Indentation Options: Select between 2-space, 4-space, or tab-based code formatting.',
-      'Local Browser Processing: Execution happens entirely inside your browser JS engine without sending code to external servers.',
+      'Local Browser Processing: Formatting and minification run in the browser without requiring a server-side source-code upload.',
       'One-Click Clipboard Copy: Instantly grab cleaned-up HTML markup to paste into your code editor or repository.',
     ],
     useCases: [
@@ -969,7 +969,7 @@ Whether you are debugging complex web app templates, beautifying scraped source 
       },
       {
         question: 'Is my source code uploaded or stored on an external server?',
-        answer: 'No. All code formatting operates entirely within your browser client JavaScript engine, keeping your source code, templates, and proprietary markup private.',
+        answer: 'HTML formatting and minification run in your browser and do not require uploading the working markup to our application server for processing.',
       },
       {
         question: 'Can I format HTML snippets that contain inline CSS styles or JavaScript scripts?',
@@ -1020,11 +1020,11 @@ Whether you are debugging API responses, formatting configuration files, or insp
       },
       {
         question: 'Is my XML payload uploaded to external servers for processing?',
-        answer: 'No. The formatting engine utilizes native browser DOMParser JavaScript APIs locally, ensuring confidential data and system logs remain strictly private.',
+        answer: 'The XML parsing and formatting operation uses browser APIs and does not require uploading the working XML document to our application server for processing.',
       },
       {
         question: 'Can this tool format large XML files efficiently?',
-        answer: 'Because processing runs directly in your local browser JavaScript engine, performance scales with system memory without encountering server-side timeout restrictions.',
+        answer: 'Performance depends on document size, nesting depth, browser implementation, available memory, and device speed. Very large XML documents may be better handled with dedicated desktop or command-line tooling.',
       },
     ],
   },
@@ -1036,21 +1036,21 @@ Whether you are debugging API responses, formatting configuration files, or insp
     description: 'Convert article titles, product names, and plain text into clean, human-readable, SEO-friendly URL slugs.',
     aboutText: `A URL slug is the readable path segment used to identify a page, article, product, or other resource. Clear, descriptive slugs can make URLs easier for people to understand and share, and they give search engines another contextual signal about the page.
 
-Creating proper slugs manually requires removing special characters, stripping out accents, converting text to lowercase, and replacing spaces with consistent hyphens. Doing this repeatedly for blog posts, e-commerce products, or content management systems can lead to typos, double hyphens, or broken route parameters.
+Creating slugs manually often means normalizing punctuation and spacing, deciding how to handle non-ASCII text, and joining words with a stable separator. Doing this repeatedly for blog posts, e-commerce products, or content management systems can lead to inconsistent route values.
 
-Our URL Slug Generator converts titles and ordinary text into lowercase, hyphen-separated strings suitable for common web routes. The result is a convenience output rather than an SEO guarantee, so review the slug for meaning, language, and routing requirements before publishing.
+Our URL Slug Generator converts titles and ordinary text into hyphen-separated route text, includes transliteration support for common Cyrillic/Ukrainian input, and lets you control lowercase output. The result is a convenience output rather than an SEO guarantee, so review the slug for meaning, language, and routing requirements before publishing.
 
 Slug generation runs locally in the browser.`,
     howToUse: [
       'Type or paste your page title, article headline, or text string into the input field.',
-      'The generator automatically converts the text into a lowercase, hyphenated URL slug in real time.',
+      'Choose the lowercase preference and let the generator normalize, transliterate where supported, and join the text with hyphens.',
       'Review the generated slug and edit the source text if you want a shorter or more descriptive result.',
       'Click the "Copy" button to instantly save the clean URL slug to your system clipboard.',
     ],
     features: [
-      'Instant Slug Creation: Automatically converts text to clean, lowercase, hyphen-separated strings as you type.',
-      'Normalized Output: Converts ordinary text into a consistent lowercase, separator-based slug format.',
-      'Special Character Stripping: Automatically removes punctuation, symbols, and non-URL-safe characters.',
+      'Instant Slug Creation: Converts text into a clean, hyphen-separated route value as you type.',
+      'Lowercase Control: Lets you choose whether alphabetic output is forced to lowercase.',
+      'Transliteration & Normalization: Simplifies punctuation and supports transliteration for common Ukrainian/Cyrillic text before producing the slug.',
       'Readable Route Output: Produces concise path text that can be reviewed before use in a CMS or application route.',
       'Local Browser Processing: Runs entirely inside your local browser JavaScript runtime without network calls.',
     ],
@@ -1064,7 +1064,7 @@ Slug generation runs locally in the browser.`,
     faqs: [
       {
         question: 'What characters are removed during URL slug generation?',
-        answer: 'The generator normalizes ordinary text into a lowercase, hyphen-separated path segment and removes or simplifies characters that do not fit that output format. Review non-ASCII names, punctuation, and language-specific text before publishing the final slug.',
+        answer: 'The generator normalizes separators and punctuation, transliterates supported Ukrainian/Cyrillic characters, and produces a hyphen-separated path segment. Lowercasing depends on the selected option, so review language-specific names before publishing the final slug.',
       },
       {
         question: 'Why are clean URL slugs important for SEO?',
@@ -1085,24 +1085,23 @@ Slug generation runs locally in the browser.`,
     name: 'Lorem Ipsum Generator',
     slug: 'lorem-ipsum-generator',
     category: 'Generators',
-    description: 'Generate standard, customizable dummy placeholder text by paragraphs, sentences, or words for UI mockups and design layouts.',
+    description: 'Generate customizable Lorem Ipsum by paragraphs, sentences, words, or lists, with plain-text and HTML-oriented output options.',
     aboutText: `Lorem Ipsum has served as the printing and typesetting industry's standard dummy text since the 1500s. Web designers, UI/UX developers, and graphic artists rely on pseudo-Latin text to fill layout spaces before content is finalized. Using realistic placeholder text ensures that visual layouts focus on visual hierarchy, typography, and structure rather than being distracted by readable content.
 
 Generating exact lengths of dummy text manually can slow down prototyping workflows. Standard copy-pasted blocks often fail to fit targeted UI containers like cards, tooltips, or long-form article templates.
 
-Our Free Online Lorem Ipsum Generator creates custom lengths of dummy text instantly. You can generate text by paragraph count, sentence count, or exact word count, with options to start with the classic "Lorem ipsum dolor sit amet" introduction. Everything operates locally within your browser for instant performance and offline reliability.`,
+Our Free Online Lorem Ipsum Generator creates custom placeholder content by paragraph count, sentence count, exact word count, or list items. It can start with the classic "Lorem ipsum dolor sit amet" introduction and can produce output suitable for plain-text or HTML-oriented mockups. Generation runs locally in the browser.`,
     howToUse: [
-      'Select your generation unit preference: paragraphs, sentences, or exact word count.',
-      'Enter the desired quantity of units using the numeric input slider or input field.',
-      'Toggle the option to start with the traditional "Lorem ipsum dolor sit amet..." prefix if required.',
-      'Click the "Generate" button to instantly render fresh placeholder copy.',
-      'Click the "Copy" button to save the generated text block directly to your clipboard.',
+      'Choose the generation mode: paragraphs, sentences, exact words, or list items.',
+      'Enter the desired quantity and adjust the available output options, including the classic opening when needed.',
+      'Generate a fresh placeholder sample and choose the plain-text or HTML-oriented representation required by your mockup.',
+      'Copy the generated result for use in your design, content, or development workflow.',
     ],
     features: [
-      'Flexible Generation Options: Instantly create dummy text by paragraphs, sentences, or exact word count.',
-      'Classic Syntax Support: Toggle the standard "Lorem ipsum dolor sit amet" opening phrase on or off.',
-      'Flexible Placeholder Lengths: Generate content sized for paragraphs, sentences, or word-count based mockups.',
-      'Local Browser Generation: Executes locally inside your browser JavaScript engine with zero server requests.',
+      'Flexible Generation Modes: Create placeholder content by paragraphs, sentences, exact words, or list items.',
+      'Classic Opening Option: Include the familiar "Lorem ipsum dolor sit amet" opening when desired.',
+      'Text & HTML-Oriented Output: Generate representations suitable for ordinary copy or markup-based mockups.',
+      'Local Browser Generation: Placeholder generation itself runs locally in the browser.',
       'One-Click Copy: Quickly transfer clean placeholder text directly to your code editor or design software.',
     ],
     useCases: [
@@ -1115,7 +1114,7 @@ Our Free Online Lorem Ipsum Generator creates custom lengths of dummy text insta
     faqs: [
       {
         question: 'Can I generate text by exact word count instead of full paragraphs?',
-        answer: 'Yes. You can toggle generation mode between paragraphs, sentences, or a precise word count to fit specific UI components like button labels, card descriptions, or headlines.',
+        answer: 'Yes. You can generate an exact word count as well as paragraph, sentence, or list-based placeholder content for different UI and layout needs.',
       },
       {
         question: 'What is the origin of Lorem Ipsum dummy text?',
@@ -1123,7 +1122,7 @@ Our Free Online Lorem Ipsum Generator creates custom lengths of dummy text insta
       },
       {
         question: 'Is any generated text sent to or recorded by an external server?',
-        answer: 'No. The generation algorithm runs entirely inside your local browser JavaScript engine. No data, queries, or generated text strings leave your browser.',
+        answer: 'Lorem Ipsum generation itself runs locally in your browser and does not require sending the generated placeholder text to our application server.',
       },
       {
         question: 'Can I generate another placeholder sample with the same settings?',
@@ -1154,7 +1153,7 @@ Our String Length & Word Counter updates text metrics as you type or paste conte
       'UTF-8 Byte Size Calculation: Accurately computes exact byte footprint considering multi-byte Unicode and emoji characters.',
       'Space-Sensitive Metrics: Displays character totals both including and excluding spaces for strict submission guidelines.',
       'Reading & Speaking Time Estimates: Calculates estimated reading and speaking durations based on average human pace.',
-      'Local Browser Processing: All string processing remains strictly inside your browser with no remote server uploads.',
+      'Local Browser Processing: Text-statistics calculation runs in the browser without requiring the working text to be uploaded to our application server.',
     ],
     useCases: [
       'Checking approximate title, description, form-field, or interface text lengths before publishing.',
@@ -1174,11 +1173,11 @@ Our String Length & Word Counter updates text metrics as you type or paste conte
       },
       {
         question: 'Is my pasted text saved or uploaded to any remote server?',
-        answer: 'No. All string calculations run entirely within your web browser using client-side JavaScript. Your text and sensitive content never leave your device.',
+        answer: 'The counting and text-statistics operation runs in your browser and does not require uploading the working text to our application server for analysis.',
       },
       {
         question: 'What counts as a word in this tool?',
-        answer: 'A word is defined as any sequence of characters separated by whitespace or standard punctuation marks.',
+        answer: 'Where supported, the tool uses the browser’s Intl.Segmenter word segmentation so word-like units work better across Unicode and languages that do not rely only on spaces. A fallback is used when that browser API is unavailable.',
       },
     ],
   },
@@ -1242,7 +1241,7 @@ This multi-hash tool computes plain message digests with browser Web Crypto APIs
 
 Minifying JSON removes insignificant formatting whitespace to produce a compact representation. This can reduce the number of transmitted characters, although the real network benefit depends on payload size, transport compression, caching, and surrounding protocol overhead.
 
-Our JSON Minifier parses valid JSON and outputs a compact representation without formatting whitespace outside string values. Because it parses the input first, malformed JSON is reported instead of being blindly compacted.
+Our JSON Minifier validates strict JSON and then removes insignificant whitespace from the token stream without round-tripping values through JavaScript JSON.parse/JSON.stringify. This preserves lexical details such as large integer literals, exponent notation, escape spellings, key order, and duplicate object keys while still rejecting malformed JSON.
 
 The minification operation runs in the browser without requiring a server-side upload of the JSON payload.`,
     howToUse: [
@@ -1253,8 +1252,8 @@ The minification operation runs in the browser without requiring a server-side u
     ],
     features: [
       'Instant Payload Compression: Strips all structural whitespaces, newlines, and indentation in milliseconds.',
-      'Built-in Syntax Validation: Automatically checks for invalid JSON syntax and reports exact parse errors before minifying.',
-      'Parsed-Value Preservation: Keeps the parsed JSON structure and values while removing insignificant formatting whitespace.',
+      'Strict Syntax Validation: Rejects malformed JSON before returning a minified result.',
+      'Lexical Preservation: Removes insignificant whitespace while preserving original JSON token spellings such as large numbers, exponent notation, escape sequences, key order, and duplicate keys.',
       'Local Browser Processing: JSON parsing and minification run in the browser without requiring a server-side payload upload.',
       'One-Click Copy: Quickly export compressed JSON strings straight into your source code or database configurations.',
     ],
@@ -1272,7 +1271,7 @@ The minification operation runs in the browser without requiring a server-side u
       },
       {
         question: 'Does this minifier validate my JSON code before compressing?',
-        answer: 'Yes. The tool runs native JSON parsing validation first. If there are missing commas, trailing commas, or quote mismatches, it reports the syntax error instead of minifying broken data.',
+        answer: 'Yes. The tool performs strict JSON validation before returning a compact result. It uses token-aware scanning and validation rather than converting the document through JavaScript JSON.parse/JSON.stringify, which helps preserve the original JSON lexemes.',
       },
       {
         question: 'Is my confidential JSON data uploaded to an external server?',
