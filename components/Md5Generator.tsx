@@ -1,207 +1,199 @@
 'use client';
 
 import { useState } from 'react';
+import SparkMD5 from 'spark-md5';
 
-function md5(string: string) {
-  function rotateLeft(lValue: number, iShiftBits: number) {
-    return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
-  }
-
-  function addUnsigned(lX: number, lY: number) {
-    const lX4 = lX & 0x40000000;
-    const lY4 = lY & 0x40000000;
-    const lX8 = lX & 0x80000000;
-    const lY8 = lY & 0x80000000;
-    const lResult = (lX & 0x3fffffff) + (lY & 0x3fffffff);
-    if (lX4 & lY4) return lResult ^ 0x80000000 ^ lX8 ^ lY8;
-    if (lX4 | lY4) {
-      if (lResult & 0x40000000) return lResult ^ 0xc0000000 ^ lX8 ^ lY8;
-      return lResult ^ 0x40000000 ^ lX8 ^ lY8;
-    }
-    return lResult ^ lX8 ^ lY8;
-  }
-
-  function F(x: number, y: number, z: number) { return (x & y) | (~x & z); }
-  function G(x: number, y: number, z: number) { return (x & z) | (y & ~z); }
-  function H(x: number, y: number, z: number) { return x ^ y ^ z; }
-  function I(x: number, y: number, z: number) { return y ^ (x | ~z); }
-
-  function FF(a: number, b: number, c: number, d: number, x: number, s: number, ac: number) {
-    a = addUnsigned(a, addUnsigned(addUnsigned(F(b, c, d), x), ac));
-    return addUnsigned(rotateLeft(a, s), b);
-  }
-
-  function GG(a: number, b: number, c: number, d: number, x: number, s: number, ac: number) {
-    a = addUnsigned(a, addUnsigned(addUnsigned(G(b, c, d), x), ac));
-    return addUnsigned(rotateLeft(a, s), b);
-  }
-
-  function HH(a: number, b: number, c: number, d: number, x: number, s: number, ac: number) {
-    a = addUnsigned(a, addUnsigned(addUnsigned(H(b, c, d), x), ac));
-    return addUnsigned(rotateLeft(a, s), b);
-  }
-
-  function II(a: number, b: number, c: number, d: number, x: number, s: number, ac: number) {
-    a = addUnsigned(a, addUnsigned(addUnsigned(I(b, c, d), x), ac));
-    return addUnsigned(rotateLeft(a, s), b);
-  }
-
-  function convertToWordArray(string: string) {
-    const lMessageLength = string.length;
-    const lNumberOfWords_temp1 = lMessageLength + 8;
-    const lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
-    const lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
-    const lWordArray = Array(lNumberOfWords - 1);
-    let lBytePosition = 0;
-    let lByteCount = 0;
-    while (lByteCount < lMessageLength) {
-      const lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
-      lBytePosition = (lByteCount % 4) * 8;
-      lWordArray[lWordIndex] = (lWordArray[lWordIndex] | (string.charCodeAt(lByteCount) << lBytePosition));
-      lByteCount++;
-    }
-    const lWordIndex = (lByteCount - (lByteCount % 4)) / 4;
-    lBytePosition = (lByteCount % 4) * 8;
-    lWordArray[lWordIndex] = lWordArray[lWordIndex] | (0x80 << lBytePosition);
-    lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
-    lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
-    return lWordArray;
-  }
-
-  function wordToHex(lValue: number) {
-    let WordToHexValue = '', WordToHexValue_temp = '', lByte, lCount;
-    for (lCount = 0; lCount <= 3; lCount++) {
-      lByte = (lValue >>> (lCount * 8)) & 255;
-      WordToHexValue_temp = '0' + lByte.toString(16);
-      WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2, 2);
-    }
-    return WordToHexValue;
-  }
-
-  let x: number[] = [];
-  let k, AA, BB, CC, DD, a, b, c, d;
-  const S11=7, S12=12, S13=17, S14=22;
-  const S21=5, S22=9, S23=14, S24=20;
-  const S31=4, S32=11, S33=16, S34=23;
-  const S41=6, S42=10, S43=15, S44=21;
-
-  x = convertToWordArray(string);
-  a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
-
-  for (k = 0; k < x.length; k += 16) {
-    AA = a; BB = b; CC = c; DD = d;
-    a = FF(a, b, c, d, x[k+0], S11, 0xD76AA478);
-    d = FF(d, a, b, c, x[k+1], S12, 0xE8C7B756);
-    c = FF(c, d, a, b, x[k+2], S13, 0x242070DB);
-    b = FF(b, c, d, a, x[k+3], S14, 0xC1BDCEEE);
-    a = FF(a, b, c, d, x[k+4], S11, 0xF57C0FAF);
-    d = FF(d, a, b, c, x[k+5], S12, 0x4787C62A);
-    c = FF(c, d, a, b, x[k+6], S13, 0xA8304613);
-    b = FF(b, c, d, a, x[k+7], S14, 0xFD469501);
-    a = FF(a, b, c, d, x[k+8], S11, 0x698098D8);
-    d = FF(d, a, b, c, x[k+9], S12, 0x8B44F7AF);
-    c = FF(c, d, a, b, x[k+10], S13, 0xFFFF5BB1);
-    b = FF(b, c, d, a, x[k+11], S14, 0x895CD7BE);
-    a = FF(a, b, c, d, x[k+12], S11, 0x6B901122);
-    d = FF(d, a, b, c, x[k+13], S12, 0xFD987193);
-    c = FF(c, d, a, b, x[k+14], S13, 0xA679438E);
-    b = FF(b, c, d, a, x[k+15], S14, 0x49B40821);
-
-    a = GG(a, b, c, d, x[k+1], S21, 0xF61E2562);
-    d = GG(d, a, b, c, x[k+6], S22, 0xC040B340);
-    c = GG(c, d, a, b, x[k+11], S23, 0x265E5A51);
-    b = GG(b, c, d, a, x[k+0], S24, 0xE9B6C7AA);
-    a = GG(a, b, c, d, x[k+5], S21, 0xD62F105D);
-    d = GG(d, a, b, c, x[k+10], S22, 0x2441453);
-    c = GG(c, d, a, b, x[k+15], S23, 0xD8A1E681);
-    b = GG(b, c, d, a, x[k+4], S24, 0xE7D3FBC8);
-    a = GG(a, b, c, d, x[k+9], S21, 0x21E1CDE6);
-    d = GG(d, a, b, c, x[k+14], S22, 0xC33707D6);
-    c = GG(c, d, a, b, x[k+3], S23, 0xF4D50D87);
-    b = GG(b, c, d, a, x[k+8], S24, 0x455A14ED);
-    a = GG(a, b, c, d, x[k+13], S21, 0xA9E3E905);
-    d = GG(d, a, b, c, x[k+2], S22, 0xFCEFA3F8);
-    c = GG(c, d, a, b, x[k+7], S23, 0x676F02D9);
-    b = GG(b, c, d, a, x[k+12], S24, 0x8D2A4C8A);
-
-    a = HH(a, b, c, d, x[k+5], S31, 0xFFFA3942);
-    d = HH(d, a, b, c, x[k+8], S32, 0x8771F681);
-    c = HH(c, d, a, b, x[k+11], S33, 0x6D9D6122);
-    b = HH(b, c, d, a, x[k+14], S34, 0xFDE5380C);
-    a = HH(a, b, c, d, x[k+1], S31, 0xA4BEEA44);
-    d = HH(d, a, b, c, x[k+4], S32, 0x4BDECFA9);
-    c = HH(c, d, a, b, x[k+7], S33, 0xF6BB4B60);
-    b = HH(b, c, d, a, x[k+10], S34, 0xBEBFBC70);
-    a = HH(a, b, c, d, x[k+13], S31, 0x289B7EC6);
-    d = HH(d, a, b, c, x[k+0], S32, 0xEAA127FA);
-    c = HH(c, d, a, b, x[k+3], S33, 0xD4EF3085);
-    b = HH(b, c, d, a, x[k+6], S34, 0x4881D05);
-    a = HH(a, b, c, d, x[k+9], S31, 0xD9D4D039);
-    d = HH(d, a, b, c, x[k+12], S32, 0xE6DB99E5);
-    c = HH(c, d, a, b, x[k+15], S33, 0x1FA27CF8);
-    b = HH(b, c, d, a, x[k+2], S34, 0xC4AC5665);
-
-    a = II(a, b, c, d, x[k+0], S41, 0xF4292244);
-    d = II(d, a, b, c, x[k+7], S42, 0x432AFF97);
-    c = II(c, d, a, b, x[k+14], S43, 0xAB9423A7);
-    b = II(b, c, d, a, x[k+5], S44, 0xFC93A039);
-    a = II(a, b, c, d, x[k+12], S41, 0x655B59C3);
-    d = II(d, a, b, c, x[k+3], S42, 0x8F0CCC92);
-    c = II(c, d, a, b, x[k+10], S43, 0xFFEFF47D);
-    b = II(b, c, d, a, x[k+1], S44, 0x85845DD1);
-    a = II(a, b, c, d, x[k+8], S41, 0x6FA87E4F);
-    d = II(d, a, b, c, x[k+15], S42, 0xFE2CE6E0);
-    c = II(c, d, a, b, x[k+6], S43, 0xA3014314);
-    b = II(b, c, d, a, x[k+13], S44, 0x4E0811A1);
-    a = II(a, b, c, d, x[k+4], S41, 0xF7537E82);
-    d = II(d, a, b, c, x[k+11], S42, 0xBD3AF235);
-    c = II(c, d, a, b, x[k+2], S43, 0x2AD7D2BB);
-    b = II(b, c, d, a, x[k+9], S44, 0xEB86D391);
-
-    a = addUnsigned(a, AA);
-    b = addUnsigned(b, BB);
-    c = addUnsigned(c, CC);
-    d = addUnsigned(d, DD);
-  }
-
-  return (wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d)).toLowerCase();
-}
+const sampleText =
+  'Hello World! Привіт 🚀';
 
 export default function Md5Generator() {
-  const [input, setInput] = useState('');
-  const [hash, setHash] = useState('');
+  const [input, setInput] =
+    useState('');
+
+  const [hash, setHash] =
+    useState<string | null>(null);
+
+  const [copied, setCopied] =
+    useState(false);
 
   const generateHash = () => {
-    if (!input) return;
-    setHash(md5(input));
+    /*
+     * Empty string is a valid MD5 input,
+     * so intentionally do not reject it.
+     */
+    const result =
+      SparkMD5.hash(input);
+
+    setHash(result);
+    setCopied(false);
   };
 
+  const handleCopy = async () => {
+    if (hash === null) return;
+
+    try {
+      await navigator.clipboard.writeText(
+        hash
+      );
+
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const handleLoadSample = () => {
+    setInput(sampleText);
+    setHash(null);
+    setCopied(false);
+  };
+
+  const handleClear = () => {
+    setInput('');
+    setHash(null);
+    setCopied(false);
+  };
+
+  const inputBytes =
+    new TextEncoder().encode(
+      input
+    ).length;
+
   return (
-    <div className="space-y-4 text-gray-100">
-      <div>
-        <label className="block text-sm font-medium mb-2">Input String</label>
+    <div className="space-y-6 text-text-primary">
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label
+            htmlFor="md5-input"
+            className="text-sm font-medium"
+          >
+            Input Text
+          </label>
+
+          <div className="flex items-center gap-2 text-xs">
+            <button
+              type="button"
+              onClick={handleLoadSample}
+              className="font-medium text-brand-cyan transition-colors hover:text-text-primary"
+            >
+              Load Sample
+            </button>
+
+            <span
+              aria-hidden="true"
+              className="text-text-muted"
+            >
+              /
+            </span>
+
+            <button
+              type="button"
+              onClick={handleClear}
+              className="font-medium text-text-muted transition-colors hover:text-danger"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
         <textarea
+          id="md5-input"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Enter text to generate MD5 hash..."
-          className="w-full h-32 p-3 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 border-gray-700 text-gray-100"
+          onChange={(event) => {
+            setInput(
+              event.target.value
+            );
+
+            setHash(null);
+            setCopied(false);
+          }}
+          placeholder="Enter text to generate an MD5 digest..."
+          spellCheck={false}
+          className="h-40 w-full resize-y rounded-xl border border-border bg-surface-900 p-4 font-mono text-sm leading-6 text-text-primary outline-none transition focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
         />
+
+        <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-text-muted">
+          <span>
+            {Array.from(
+              input
+            ).length.toLocaleString()}{' '}
+            characters
+          </span>
+
+          <span aria-hidden="true">
+            •
+          </span>
+
+          <span>
+            {inputBytes.toLocaleString()}{' '}
+            UTF-8 bytes
+          </span>
+        </div>
       </div>
 
       <button
+        type="button"
         onClick={generateHash}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        className="rounded-lg bg-brand-blue px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
       >
         Generate MD5 Hash
       </button>
 
-      {hash && (
-        <div>
-          <label className="block text-sm font-medium mb-2">MD5 Hash</label>
-          <pre className="w-full p-3 border rounded-lg bg-gray-900 border-gray-700 text-green-400 font-mono text-sm overflow-x-auto whitespace-pre-wrap break-all">
-            {hash}
-          </pre>
-        </div>
+      <div className="rounded-xl border border-warning/30 bg-warning/10 p-4">
+        <p className="text-sm font-medium text-warning">
+          MD5 is not secure for
+          cryptographic use
+        </p>
+
+        <p className="mt-1 text-xs leading-5 text-text-secondary">
+          MD5 is a legacy hash algorithm
+          with known collision weaknesses.
+          Use it only for compatibility,
+          legacy checksums, or comparing
+          non-security-sensitive data.
+          Do not use MD5 for passwords,
+          digital signatures, certificates,
+          or security-sensitive integrity
+          checks.
+        </p>
+      </div>
+
+      {hash !== null && (
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">
+                MD5 Digest
+              </p>
+
+              <p className="mt-1 text-xs text-text-muted">
+                128-bit digest shown as
+                32 lowercase hexadecimal
+                characters.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success transition hover:bg-success/15"
+            >
+              {copied
+                ? 'Copied!'
+                : 'Copy Hash'}
+            </button>
+          </div>
+
+          <div className="rounded-xl border border-border bg-surface-900 p-4">
+            <code className="break-all font-mono text-sm text-success">
+              {hash}
+            </code>
+          </div>
+        </section>
       )}
     </div>
   );
